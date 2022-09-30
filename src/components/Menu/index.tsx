@@ -40,7 +40,7 @@ export function MenuDropDwon({ children, subMenus }: IMenu) {
       </MenuButton>
       {subMenus && (
         <MenuList
-          boxShadow="xl"
+          boxShadow="xs"
           minW="300px"
           onMouseEnter={onOpen}
           onMouseLeave={onClose}
