@@ -2,6 +2,7 @@ import { Box, Flex, SimpleGrid, TabPanel, Text } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import React from 'react';
 import { CardValue, ContainerTransaction, Layout } from '~/components';
+import { MenuDropDwon } from '~/components/Menu';
 
 export default function Home() {
   return (
@@ -41,12 +42,15 @@ export default function Home() {
             />
             <Text ml="5px">TODOS EXTRATOS</Text>
           </Flex>
-          <ContainerTransaction tabName={['entrada', 'Saída']}>
+          <ContainerTransaction tabName={['todos', 'entrada', 'Saída']}>
             <TabPanel>
-              <p>Dados de Entrada!</p>
+              <p>Dados de Todos!</p>
             </TabPanel>
             <TabPanel>
-              <p>Dados de Saida!</p>
+              <p>Dados de Pix entrada</p>
+            </TabPanel>
+            <TabPanel>
+              <p>Dados de Pix saida</p>
             </TabPanel>
           </ContainerTransaction>
         </Box>
