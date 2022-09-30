@@ -1,14 +1,24 @@
 import { Box, Flex, SimpleGrid, TabPanel, Text } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import { CardValue, ContainerTransaction, ExtractTable, Layout } from '~/components';
 import { MenuDropDwon } from '~/components/Menu';
 import { GetAllStatementsOperation } from '~/services/hooks/useStatements';
+import { IPixAndTEDStatementsData } from '~/types/statements.types';
 
 export default function Home() {
 
-  
+  const { data, isLoading } = useQuery(
+    'pix',
+    GetAllStatementsOperation,
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
+
+  console.log(data)
+
   return (
     <Box h="full">
       <Layout>
@@ -47,8 +57,8 @@ export default function Home() {
           </Flex>
           <ContainerTransaction tabName={['todos', 'entrada', 'Saída']}>
             <TabPanel >
-              <ExtractTable isLoading={false} />
-             </TabPanel>
+              <ExtractTable isLoading={isLoading} items={data} />
+            </TabPanel>
             <TabPanel>
               <p>Dados de Pix entrada</p>
             </TabPanel>
