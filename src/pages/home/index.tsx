@@ -1,4 +1,5 @@
 import { Box, Flex, SimpleGrid, Text } from '@chakra-ui/react';
+import { Icon } from '@iconify/react';
 import React from 'react';
 import { CardValue, Layout } from '~/components';
 
@@ -23,7 +24,7 @@ export default function Home() {
             />
           ))}
         </SimpleGrid>
-        <Flex
+        <Box
           bg="#FFFFFF"
           w="full"
           h="648px"
@@ -31,8 +32,16 @@ export default function Home() {
           borderRadius="6px"
           p="50px"
         >
-          <Text>TODOS EXTRATOS</Text>
-        </Flex>
+          <Flex>
+            <Icon
+              width="25px"
+              cursor="pointer"
+              color="#21C6DE"
+              icon="akar-icons:eye"
+            />
+            <Text ml="5px">TODOS EXTRATOS</Text>
+          </Flex>
+        </Box>
       </Layout>
     </Box>
   );
