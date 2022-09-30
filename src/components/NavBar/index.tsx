@@ -11,6 +11,7 @@ import { Icon } from '@iconify/react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Header } from '~/components';
+import { MenuDropDwon } from '../Menu';
 
 export function NavBar() {
   const { asPath, query } = useRouter();
@@ -68,26 +69,28 @@ export function NavBar() {
         >
           {routes.map((item, idx) => {
             return (
-              <Link href={item.path} key={idx}>
-                <Center
-                  cursor="pointer"
-                  borderWidth=" 0px  0px 3.5px 0px"
-                  borderColor={
-                    item.path.includes(asPath) ? '#00102A' : '#FFFFFF'
-                  }
-                  mb="7px"
-                >
-                  {item.icon}
-                  <Text
-                    ml="10px"
-                    color={!item.path ? '#ccc' : '#00102A'}
-                    size="1rem"
-                    fontWeight="700"
+              <MenuDropDwon key={idx}>
+                <Link href={item.path} style={{ marginBottom: '10px' }}>
+                  <Center
+                    cursor="pointer"
+                    borderWidth=" 0px  0px 3.5px 0px"
+                    borderColor={
+                      item.path.includes(asPath) ? '#00102A' : '#FFFFFF'
+                    }
+                    mb="7px"
                   >
-                    {item.name}
-                  </Text>
-                </Center>
-              </Link>
+                    {item.icon}
+                    <Text
+                      ml="10px"
+                      color={!item.path ? '#ccc' : '#00102A'}
+                      size="1rem"
+                      fontWeight="700"
+                    >
+                      {item.name}
+                    </Text>
+                  </Center>
+                </Link>
+              </MenuDropDwon>
             );
           })}
         </Flex>
