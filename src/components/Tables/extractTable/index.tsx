@@ -30,7 +30,6 @@ export const ExtractTable = ({ items, isLoading }: tableProps) => {
   ) : (
     <>
       <Table w="100%" overflowX="hidden" mt="30px" h="30px" overflowY="scroll" >
-
         <Thead>
           <Tr bg="#F0F0F3">
             <Th colSpan={6} fontWeight="600"
