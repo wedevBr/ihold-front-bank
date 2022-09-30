@@ -1,16 +1,21 @@
+export interface StatementData {
+  data: IPixAndTEDStatementsData[]
+}
+
 export interface IPixAndTEDStatementsData {
-  id: number;
-  txid: string;
-  transaction: string;
-  amount: string;
-  amount_cents: number;
-  description: string;
-  operation: string;
-  due_date: Date | null;
-  process_at: Date;
-  completed_at: Date;
-  metadata?: IMetadataPixAndTED;
-  transaction_type: ITransactionType;
+  id: number,
+  txid: string,
+  transaction: string,
+  amount: string,
+  amount_cents: number,
+  description: string,
+  operation: string,
+  due_date: Date | null,
+  process_at: Date,
+  completed_at: Date,
+  metadata?: IMetadataPixAndTED,
+  transaction_type?: ITransactionType,
+
 }
 
 export interface ITransferStatementsData {
