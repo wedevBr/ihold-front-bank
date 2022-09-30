@@ -20,6 +20,28 @@ export function NavBar() {
     {
       name: 'HOME ',
       path: '/home',
+      subMenu: [
+        {
+          name: 'Extrato',
+          path: '/home/all-statements',
+        },
+        {
+          name: 'Pix',
+          path: '/home/pix',
+        },
+        {
+          name: 'TED',
+          path: '/home/ted',
+        },
+        {
+          name: 'Boleto',
+          path: '/home/ticket',
+        },
+        {
+          name: 'Cartões',
+          path: '/home/cards',
+        },
+      ],
       icon: <Icon icon="akar-icons:home" color="#21C6DE" width={25} />,
     },
     {
@@ -69,28 +91,34 @@ export function NavBar() {
         >
           {routes.map((item, idx) => {
             return (
-              <MenuDropDwon key={idx}>
-                <Link href={item.path} style={{ marginBottom: '10px' }}>
-                  <Center
-                    cursor="pointer"
-                    borderWidth=" 0px  0px 3.5px 0px"
-                    borderColor={
-                      item.path.includes(asPath) ? '#00102A' : '#FFFFFF'
-                    }
-                    mb="7px"
-                  >
-                    {item.icon}
-                    <Text
-                      ml="10px"
-                      color={!item.path ? '#ccc' : '#00102A'}
-                      size="1rem"
-                      fontWeight="700"
-                    >
-                      {item.name}
-                    </Text>
-                  </Center>
-                </Link>
-              </MenuDropDwon>
+              <Link
+                href={item.path}
+                style={{ marginBottom: '10px', border: '1px solid #000' }}
+                key={idx}
+              >
+                <Center
+                  cursor="pointer"
+                  mb="7px"
+                  borderWidth=" 0px  0px 3.5px 0px"
+                  borderColor={
+                    item.path.includes(asPath) ? '#00102A' : '#FFFFFF'
+                  }
+                >
+                  <MenuDropDwon subMenus={item?.subMenu}>
+                    <Flex>
+                      {item.icon}
+                      <Text
+                        ml="10px"
+                        color={!item.path ? '#ccc' : '#00102A'}
+                        size="1rem"
+                        fontWeight="700"
+                      >
+                        {item.name}
+                      </Text>
+                    </Flex>
+                  </MenuDropDwon>
+                </Center>
+              </Link>
             );
           })}
         </Flex>
