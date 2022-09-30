@@ -8,6 +8,7 @@ import { Textarea } from './TextArea';
 import { Modal } from './Modal';
 import { Pagination } from './pagination';
 import { CardValue } from './Cards/CardValues';
+import { ContainerTransaction } from './ContainerTransaction';
 
 export {
   Button,
@@ -20,4 +21,5 @@ export {
   Modal,
   Pagination,
   CardValue,
+  ContainerTransaction,
 };
