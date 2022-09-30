@@ -35,28 +35,27 @@ export const ExtractTable = ({ items, isLoading }: tableProps) => {
         <Text paddingLeft="5px">Compras à vista</Text>
       </Flex>
       <Box h="550px" overflowY="scroll">
-        <Table w="100%">
+        <Table>
           <Thead>
             <Tr bg="#F0F0F3"></Tr>
           </Thead>
-          <Tbody overflowX="hidden">
+          <Tbody>
             {items &&
               items.data.map((item, key) => (
                 <Tr
                   bg="#fff"
                   borderBottom="1px solid #CBD3E0"
-                  overflowX="hidden"
                   borderColor="gray.100"
                   key={key}
                 >
                   <Td
                     p="5px"
-                    width="1.75rem"
+                    // width="1.75rem"
                     // height="1.75rem"
                   >
                     <Box
                       borderRadius="5px"
-                      p="15px"
+                      p="8px"
                       background={
                         item.operation === 'cash-in' ? '#27ae6033' : '#ff313b33'
                       }
@@ -76,7 +75,7 @@ export const ExtractTable = ({ items, isLoading }: tableProps) => {
                       )}
                     </Box>
                   </Td>
-                  <Td>
+                  <Td minW="300px">
                     {item.operation === 'cash-out'
                       ? item.metadata?.recipient?.name
                       : item.metadata?.sender?.name}
