@@ -1,7 +1,12 @@
 import { Box, Flex, SimpleGrid, TabPanel, Text } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import React from 'react';
-import { CardValue, ContainerTransaction, ExtractTable, Layout } from '~/components';
+import {
+  CardValue,
+  ContainerTransaction,
+  ExtractTable,
+  Layout,
+} from '~/components';
 import { MenuDropDwon } from '~/components/Menu';
 
 export default function Home() {
@@ -25,13 +30,7 @@ export default function Home() {
             />
           ))}
         </SimpleGrid>
-        <Box
-          bg="#FFFFFF"
-          w="full"
-          mt="30px"
-          borderRadius="6px"
-          p="50px"
-        >
+        <Box bg="#FFFFFF" w="full" mt="30px" borderRadius="6px" p="50px">
           <Flex mb="30px">
             <Icon
               width="25px"
@@ -42,11 +41,11 @@ export default function Home() {
             <Text ml="5px">TODOS EXTRATOS</Text>
           </Flex>
           <ContainerTransaction tabName={['todos', 'entrada', 'Saída']}>
-            <TabPanel >
-              <ExtractTable isLoading={false} />
-             </TabPanel>
             <TabPanel>
-              <p>Dados de Pix entrada</p>
+              <ExtractTable isLoading={false} />
+            </TabPanel>
+            <TabPanel>
+              <p>Dados de Pix HOME</p>
             </TabPanel>
             <TabPanel>
               <p>Dados de Pix saida</p>
