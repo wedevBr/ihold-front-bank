@@ -9,6 +9,9 @@ import { Modal } from './Modal';
 import { Pagination } from './pagination';
 import { CardValue } from './Cards/CardValues';
 import { ContainerTransaction } from './ContainerTransaction';
+import { Loading } from './Loading';
+import { ExtractTable } from './Tables/extractTable';
+import { CardTransaction } from './Cards/CardTransaction';
 
 export {
   Button,
@@ -22,4 +25,7 @@ export {
   Pagination,
   CardValue,
   ContainerTransaction,
+  Loading,
+  ExtractTable,
+  CardTransaction,
 };

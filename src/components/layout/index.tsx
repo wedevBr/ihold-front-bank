@@ -11,6 +11,7 @@ export function Layout({ children }: layoutProps) {
     <Box w="100%" bg="#F0F0F3" minH="100vh">
       <NavBar />
       <Box
+        pb="100px"
         h="full"
         maxW="1200px"
         px={{ base: '10px', md: '20px' }}
