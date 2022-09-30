@@ -115,6 +115,7 @@ export default function TwoFactor() {
               <Center w="380px">
                 <HStack>
                   <PinInput
+                    autoFocus
                     type="number"
                     errorBorderColor="red"
                     size="lg"

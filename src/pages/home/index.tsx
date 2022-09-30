@@ -1,7 +1,7 @@
-import { Box, Flex, SimpleGrid, Text } from '@chakra-ui/react';
+import { Box, Flex, SimpleGrid, TabPanel, Text } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import React from 'react';
-import { CardValue, Layout } from '~/components';
+import { CardValue, ContainerTransaction, Layout } from '~/components';
 
 export default function Home() {
   return (
@@ -32,7 +32,7 @@ export default function Home() {
           borderRadius="6px"
           p="50px"
         >
-          <Flex>
+          <Flex mb="30px">
             <Icon
               width="25px"
               cursor="pointer"
@@ -41,6 +41,14 @@ export default function Home() {
             />
             <Text ml="5px">TODOS EXTRATOS</Text>
           </Flex>
+          <ContainerTransaction tabName={['entrada', 'Saída']}>
+            <TabPanel>
+              <p>Dados de Entrada!</p>
+            </TabPanel>
+            <TabPanel>
+              <p>Dados de Saida!</p>
+            </TabPanel>
+          </ContainerTransaction>
         </Box>
       </Layout>
     </Box>
