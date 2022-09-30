@@ -11,6 +11,7 @@ import { CardValue } from './Cards/CardValues';
 import { ContainerTransaction } from './ContainerTransaction';
 import { Loading } from './Loading';
 import { ExtractTable } from './Tables/extractTable';
+import { CardTransaction } from './Cards/CardTransaction';
 
 export {
   Button,
@@ -26,4 +27,5 @@ export {
   ContainerTransaction,
   Loading,
   ExtractTable,
+  CardTransaction,
 };
