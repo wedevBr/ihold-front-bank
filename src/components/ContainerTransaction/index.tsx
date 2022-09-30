@@ -21,7 +21,7 @@ export function ContainerTransaction({ children, tabName }: IContainer) {
       <Tabs variant="soft-rounded" defaultIndex={0}>
         <TabList
           bg="#F0F0F3"
-          w="-webkit-fit-content"
+          w="min-content"
           borderRadius="20px"
           h="35px"
         >

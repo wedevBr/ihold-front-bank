@@ -1,10 +1,14 @@
 import { Box, Flex, SimpleGrid, TabPanel, Text } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import React from 'react';
+import { useQuery } from 'react-query';
 import { CardValue, ContainerTransaction, ExtractTable, Layout } from '~/components';
 import { MenuDropDwon } from '~/components/Menu';
+import { GetAllStatementsOperation } from '~/services/hooks/useStatements';
 
 export default function Home() {
+
+  
   return (
     <Box h="full">
       <Layout>

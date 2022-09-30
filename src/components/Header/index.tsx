@@ -9,7 +9,6 @@ import {
   SkeletonText,
   Text,
 } from '@chakra-ui/react';
-import { FiLogOut } from 'react-icons/fi';
 import Image from 'next/image';
 import { useAuthContext } from '~/context/AuthContext';
 import { useEffect, useState } from 'react';
@@ -135,7 +134,7 @@ export function Header({ name, avatar }: HeaderProps) {
               Sair
             </Text>
             <Box>
-              <FiLogOut size={24} color="#21C6DE" />
+              <Icon icon="ic:baseline-logout" color="#21C6DE" width={24} />
             </Box>
           </Flex>
         </Box>
