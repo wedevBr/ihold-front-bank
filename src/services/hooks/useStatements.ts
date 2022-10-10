@@ -4,10 +4,22 @@ import { api } from '../api';
 
 
 export async function GetAllStatementsOperation(
-  type?: ITransaction_type)  {
+  statementId: number) {
   try {
-    const { data } = await api.get<StatementData>(`/statements?include[]=payload&sort[]=completed_at${type ? `&filter[transaction_type_id]=2` : ""
-      }`);
+    const { data } = await api.get<StatementData>(`/statements?include[]=payload&sort[]=completed_at${statementId !== 0 ? `&filter[transaction_type_id]=${statementId}` : ``}`);
+    return data;
+  } catch (error: any) {
+    throw error;
+  }
+}
+
+export async function GetStatementsOperation(
+  statementOperation: string,
+  statementId: number
+) {
+  try {
+    const { data } = await api.get<StatementData>(
+      `/statements?include[]=payload&sort[]=completed_at&filter[operation]=${statementOperation}${statementId !== 0 ? `&filter[transaction_type_id]=${statementId}` : ``} `);
     return data;
   } catch (error: any) {
     throw error;

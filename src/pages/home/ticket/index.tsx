@@ -6,21 +6,18 @@ import {
   CardTransaction,
   CardValue,
   ContainerTransaction,
-  ExtractPixAndTedTable,
   Layout,
+  TicketTable,
 } from '~/components';
 import { GetAllStatementsOperation, GetStatementsOperation } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
 
-export default function Pix() {
-  const { data, isLoading } = useQuery([2], () => GetAllStatementsOperation(2), {
+export default function Ticket() {
+  const { data, isLoading } = useQuery([3], () => GetAllStatementsOperation(3), {
     staleTime: 1000 * 60, // 1 minute
   });
-  const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 2], () => GetStatementsOperation('cash-in', 2), {
-    staleTime: 1000 * 60, // 1 minute
-  });
-  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 2], () => GetStatementsOperation('cash-out', 2), {
+  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 3], () => GetStatementsOperation('cash-out', 3), {
     staleTime: 1000 * 60, // 1 minute
   });
 
@@ -64,17 +61,14 @@ export default function Pix() {
               color="#21C6DE"
               icon="akar-icons:eye"
             />
-            <Text ml="5px">EXTRATO PIX</Text>
+            <Text ml="5px">EXTRATO TICKET</Text>
           </Flex>
-          <ContainerTransaction tabName={['todos', 'entrada', 'Saída']}>
+          <ContainerTransaction tabName={['todos', 'Saída']}>
             <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoading} items={data} />
+              <TicketTable isLoading={isLoading} items={data} />
             </TabPanel>
             <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoadingCahsIn} items={dataCashIn} />
-            </TabPanel>
-            <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoadingCashOut} items={dataCashOut} />
+              <TicketTable isLoading={isLoadingCashOut} items={dataCashOut} />
             </TabPanel>
           </ContainerTransaction>
         </Box>

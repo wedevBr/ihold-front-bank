@@ -1,12 +1,4 @@
 import { Box, Center, Flex, SimpleGrid, Text } from '@chakra-ui/react';
-import { MdOutlineDashboard } from 'react-icons/md';
-import {
-  BsPeople,
-  BsGraphUp,
-  BsShieldCheck,
-  BsCreditCard,
-} from 'react-icons/bs';
-import { RiSendPlane2Line } from 'react-icons/ri';
 import { Icon } from '@iconify/react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -37,10 +29,10 @@ export function NavBar() {
           name: 'Boleto',
           path: '/home/ticket',
         },
-        {
-          name: 'Cartões',
-          path: '/home/cards',
-        },
+        // {
+        //   name: 'Cartões',
+        //   path: '/home/cards',
+        // },
       ],
       icon: <Icon icon="akar-icons:home" color="#21C6DE" width={25} />,
     },

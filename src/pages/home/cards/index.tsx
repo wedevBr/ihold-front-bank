@@ -14,13 +14,13 @@ import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
 
 export default function Pix() {
-  const { data, isLoading } = useQuery([2], () => GetAllStatementsOperation(2), {
+  const { data, isLoading } = useQuery([4], () => GetAllStatementsOperation(4), {
     staleTime: 1000 * 60, // 1 minute
   });
-  const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 2], () => GetStatementsOperation('cash-in', 2), {
+  const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 4], () => GetStatementsOperation('cash-in', 4), {
     staleTime: 1000 * 60, // 1 minute
   });
-  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 2], () => GetStatementsOperation('cash-out', 2), {
+  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 4], () => GetStatementsOperation('cash-out', 4), {
     staleTime: 1000 * 60, // 1 minute
   });
 

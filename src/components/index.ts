@@ -10,8 +10,13 @@ import { Pagination } from './pagination';
 import { CardValue } from './Cards/CardValues';
 import { ContainerTransaction } from './ContainerTransaction';
 import { Loading } from './Loading';
-import { ExtractTable } from './Tables/extractTable';
+import { ExtractPixAndTedTable } from './Tables/extractPixAndTedTable';
 import { CardTransaction } from './Cards/CardTransaction';
+import { TicketTable } from './Tables/extractTicketTable';
+import { ExtractAllTable } from './Tables/extractAllTable';
+import { ExtractHomeTable } from './Tables/extractHomeTable';
+import { BatchPaymentTable } from './Tables/batchPaymentTable';
+import { ModalUploadPayment } from './Modal/ModalUploadPayment';
 
 export {
   Button,
@@ -26,6 +31,11 @@ export {
   CardValue,
   ContainerTransaction,
   Loading,
-  ExtractTable,
+  ExtractPixAndTedTable,
   CardTransaction,
+  TicketTable,
+  ExtractAllTable,
+  ExtractHomeTable,
+  BatchPaymentTable,
+  ModalUploadPayment,
 };

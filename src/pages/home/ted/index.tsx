@@ -13,14 +13,14 @@ import { GetAllStatementsOperation, GetStatementsOperation } from '~/services/ho
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
 
-export default function Pix() {
-  const { data, isLoading } = useQuery([2], () => GetAllStatementsOperation(2), {
+export default function Ted() {
+  const { data, isLoading } = useQuery([1], () => GetAllStatementsOperation(1), {
     staleTime: 1000 * 60, // 1 minute
   });
-  const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 2], () => GetStatementsOperation('cash-in', 2), {
+  const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 1], () => GetStatementsOperation('cash-in', 1), {
     staleTime: 1000 * 60, // 1 minute
   });
-  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 2], () => GetStatementsOperation('cash-out', 2), {
+  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 1], () => GetStatementsOperation('cash-out', 1), {
     staleTime: 1000 * 60, // 1 minute
   });
 
@@ -64,7 +64,7 @@ export default function Pix() {
               color="#21C6DE"
               icon="akar-icons:eye"
             />
-            <Text ml="5px">EXTRATO PIX</Text>
+            <Text ml="5px">EXTRATO TED</Text>
           </Flex>
           <ContainerTransaction tabName={['todos', 'entrada', 'Saída']}>
             <TabPanel>
