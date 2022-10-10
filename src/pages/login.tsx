@@ -7,6 +7,7 @@ import {
   Box,
   useToast,
   Button,
+  Link,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -72,7 +73,7 @@ export default function Login() {
             objectFit="contain"
           />
         </Flex>
-        <Box pt="120px" w="60%" as="form" onSubmit={handleSubmit(handleSignIn)}>
+        <Box pt="60px" w="90%" as="form" onSubmit={handleSubmit(handleSignIn)}>
           <Box pb="60px">
             <Text
               color="#00102A"
@@ -121,7 +122,29 @@ export default function Login() {
               error={formState?.errors?.password}
             />
           </Box>
-          <Box mt="35px">
+          <Box pt="5px">
+            <Text
+              color="#7F8B9F"
+              fontSize="14px"
+              fontWeight="400"
+              lineHeight="17px"
+              textAlign="right"
+            >
+              <Link color="#2E4EFF">Esqueci minha senha.</Link>
+            </Text>
+          </Box>
+          <Box pt="40px">
+            <Text
+              color="#7F8B9F"
+              fontSize="14px"
+              fontWeight="400"
+              lineHeight="17px"
+            >
+              Clicando em Entrar, você concorda com nossa{' '}
+              <Link color="#2E4EFF">Política de Privacidade.</Link>
+            </Text>
+          </Box>
+          <Box mt="18px">
             <Button
               ref={ref}
               isLoading={loading}
@@ -130,8 +153,21 @@ export default function Login() {
               color="#070A0E"
               w="100%"
               type="submit"
+              borderRadius="40px"
+              _hover={{ background: '#2E4EFF', color: '#FFF' }}
             >
-              Entrar
+              ENTRAR
+            </Button>
+            <Box mt="18px"></Box>
+            <Button
+              bg="#FFF"
+              border="1px"
+              borderColor="#2E4EFF"
+              color="#2E4EFF"
+              w="100%"
+              borderRadius="40px"
+            >
+              ABRIR CONTA
             </Button>
           </Box>
         </Box>

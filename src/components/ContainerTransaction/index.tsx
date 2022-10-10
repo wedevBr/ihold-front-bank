@@ -17,8 +17,8 @@ interface IContainer {
 
 export function ContainerTransaction({ children, tabName }: IContainer) {
   return (
-    <Box w="full" h="150px">
-      <Tabs variant="soft-rounded" defaultIndex={0} h="150px">
+    <Box w="full" >
+      <Tabs variant="soft-rounded" defaultIndex={0} >
         <TabList bg="#F0F0F3" w="min-content" borderRadius="20px" h="35px">
           {tabName &&
             tabName.map((item, idx) => (

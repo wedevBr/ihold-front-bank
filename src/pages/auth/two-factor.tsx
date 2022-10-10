@@ -100,19 +100,24 @@ export default function TwoFactor() {
             />
           </Flex>
         </Box>
-        <Box px="165px">
-          <Box pt="50px">
-            <Text pt="70px" fontWeight="bold" color="00102A" fontSize="18px">
+        <Box pl="165px">
+          <Box pt="60px" width="90%">
+            <Text
+              fontSize="18px"
+              color="#00102A"
+              fontWeight="600"
+              lineHeight="22px"
+            >
               AUTENTICAÇÃO EM DUAS ETAPAS
             </Text>
-            <Text pt="20px" color="#7C7C7C">
-              Insira abaixo o código de 6 dígitos que enviamos para
+            <Text pt="60px" color="#7C7C7C" textAlign="center">
+              INSIRA ABAIXO O CÓDIGO DE 6 DIGITOS QUE ENVIAMOS
             </Text>
-            <Text pb="40px" color="#00102A">
+            <Text pb="40px" color="#00102A" textAlign="center">
               {authTwoFactor}
             </Text>
             <FormControl isInvalid={!!error}>
-              <Center w="380px">
+              <Center w="100%">
                 <HStack>
                   <PinInput
                     autoFocus
@@ -132,24 +137,33 @@ export default function TwoFactor() {
                 <FormErrorMessage>{error.message}</FormErrorMessage>
               )}
             </FormControl>
-            <Text>
+            <Text
+              pt="10px"
+              color="#7F8B9F"
+              fontWeight=" 400"
+              fontSize="14px"
+              textAlign="center"
+              lineHeight="17px"
+            >
               Código enviado há{' '}
               {counter === 10 ? counter : `0${counter}` || '00'} segundos
             </Text>
-            <Box pt="30px">
+            <Box pt="80px">
               <Button
                 ref={ref}
                 isLoading={loading}
-                bg="#2E4EFF"
                 border="0"
-                color="#FFFFFF"
-                w="380px"
+                bg="#CBD3E0"
+                color="#070A0E"
+                w="100%"
                 type="submit"
+                borderRadius="40px"
+                _hover={{ background: '#2E4EFF', color: '#FFF' }}
                 onClick={handleAuthTwoFactors}
               >
-                Entrar
+                ENTRAR
               </Button>
-              <Box width="380px" pt="30px">
+              <Box width="100%" pt="30px">
                 <Text
                   onClick={ResendCodeAuthFactor}
                   color="#2E4EFF"
@@ -159,7 +173,7 @@ export default function TwoFactor() {
                   lineHeight="22px"
                   cursor="pointer"
                 >
-                  Reenviar código
+                  REENVIAR CÓDIGO
                 </Text>
               </Box>
             </Box>
