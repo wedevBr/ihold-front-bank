@@ -19,9 +19,7 @@ export const createPaymentFormSchema = yup.object().shape({
 export const ModalUploadPayment = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [fileSrc, setFileSrc] = useState<File | any>();
-
   const [uploadFile, setUploadFile] = useState<File | any>();
-  const [transaction_type, setTransaction_type] = useState("")
   const toast = useToast()
 
   const file = useRef<HTMLInputElement | null>(null);
@@ -32,9 +30,6 @@ export const ModalUploadPayment = () => {
   const openUpload = () => {
     file.current && file.current.click();
   };
-
-
-
 
   const handleUpload = async (files: FileList | null) => {
     if (files) {
@@ -110,11 +105,9 @@ export const ModalUploadPayment = () => {
       <input
         {...register("file")}
         type="file"
-        hidden
+        hidden 
         ref={file}
         onChange={(event) => handleUpload(event.target.files)}
-
-
       />
       <Flex>
         {errors.file && (
