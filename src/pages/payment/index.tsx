@@ -5,7 +5,7 @@ import { BatchPaymentTable, CardValue, ContainerTransaction, Layout, Modal, Moda
 import { MenuDropDwon } from '~/components/Menu';
 
 export default function Payment() {
-  const { isOpen:isOpenUpload, onOpen:onOpenUpload, onClose:onCloseUpload } = useDisclosure()
+  const { isOpen: isOpenUpload, onOpen: onOpenUpload, onClose: onCloseUpload } = useDisclosure()
   return (
     <Box h="full">
       <Layout>
@@ -94,7 +94,7 @@ export default function Payment() {
                     </Flex>
                   </Flex>
                 </Box>
-
+                <BatchPaymentTable />
               </Box>
             </Box>
           </Box>
