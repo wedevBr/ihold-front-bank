@@ -1,11 +1,48 @@
-import { Box, Flex, Button, SimpleGrid, TabPanel, Image, Text, Center, Spacer, useDisclosure } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Button,
+  SimpleGrid,
+  TabPanel,
+  Image,
+  Text,
+  Center,
+  Spacer,
+  useDisclosure,
+} from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import React from 'react';
-import { BatchPaymentTable, CardValue, ContainerTransaction, Layout, Modal, ModalUploadPayment } from '~/components';
+import {
+  BatchPaymentTable,
+  CardValue,
+  ContainerTransaction,
+  Layout,
+  Modal,
+  ModalUploadPayment,
+} from '~/components';
 import { MenuDropDwon } from '~/components/Menu';
+import {
+  DeleteScheduleTransactions,
+  useScheduleTransactions,
+} from '~/services/hooks/usePaymentsSchedule';
 
 export default function Payment() {
-  const { isOpen:isOpenUpload, onOpen:onOpenUpload, onClose:onCloseUpload } = useDisclosure()
+  const {
+    isOpen: isOpenUpload,
+    onOpen: onOpenUpload,
+    onClose: onCloseUpload,
+  } = useDisclosure();
+  const { data, refetch } = useScheduleTransactions();
+
+  async function deletScheduleTrasanction(checkIDS: number[]) {
+    if (!checkIDS.length) {
+      return;
+    }
+    return Promise.all(
+      checkIDS.map((id: any) => DeleteScheduleTransactions(id))
+    ).then(() => refetch());
+  }
+
   return (
     <Box h="full">
       <Layout>
@@ -18,13 +55,13 @@ export default function Payment() {
               boxShadow="base"
               p="20px"
             >
-              <Flex >
+              <Flex>
                 <Box paddingLeft="70px" py="10px">
                   <Image
-                    boxSize='150px'
-                    objectFit='cover'
-                    src='/assets/batchPayment.svg'
-                    alt='Image'
+                    boxSize="150px"
+                    objectFit="cover"
+                    src="/assets/batchPayment.svg"
+                    alt="Image"
                   />
                 </Box>
                 <Center paddingLeft="40px" py="10px" w="75%">
@@ -32,8 +69,10 @@ export default function Payment() {
                     <Text fontWeight="700" fontSize="1.5rem">
                       PAGAMENTO EM LOTE
                     </Text>
-                    <Text fontWeight="400" fontSize="1rem" >
-                      Aqui você pode importar seus pagamentos de acordo com a categoria selecionada e acompanhar todas as transações realizadas em massa.
+                    <Text fontWeight="400" fontSize="1rem">
+                      Aqui você pode importar seus pagamentos de acordo com a
+                      categoria selecionada e acompanhar todas as transações
+                      realizadas em massa.
                     </Text>
                   </Box>
                 </Center>
@@ -48,19 +87,16 @@ export default function Payment() {
               mt="30px"
             >
               <Box>
-                <Box w="100%" >
+                <Box w="100%">
                   <Text fontWeight="700" fontSize="1.25rem">
                     EXTRATO DE PAGAMENTOS
                   </Text>
                   <Flex pt="50px" justify="space-between" w="95%">
                     <Box>
                       <ContainerTransaction tabName={['PIX', 'TED', 'BOLETO']}>
-                        <TabPanel>
-                        </TabPanel>
-                        <TabPanel>
-                        </TabPanel>
-                        <TabPanel>
-                        </TabPanel>
+                        <TabPanel></TabPanel>
+                        <TabPanel></TabPanel>
+                        <TabPanel></TabPanel>
                       </ContainerTransaction>
                     </Box>
                     <Flex>
@@ -69,7 +105,8 @@ export default function Payment() {
                         color="#fff"
                         w="100%"
                         fontSize="0.875rem"
-                        borderRadius="20px" h="35px"
+                        borderRadius="20px"
+                        h="35px"
                         textTransform="uppercase"
                         fontWeight="600"
                         padding="8px 1.25rem"
@@ -84,7 +121,8 @@ export default function Payment() {
                         borderColor="#2E4EFF"
                         w="100%"
                         fontSize="0.875rem"
-                        borderRadius="20px" h="35px"
+                        borderRadius="20px"
+                        h="35px"
                         textTransform="uppercase"
                         fontWeight="600"
                         padding="8px 1.25rem"
@@ -92,15 +130,38 @@ export default function Payment() {
                         BAIXAR TEMPLATE
                       </Button>
                     </Flex>
+                    <Button
+                      bg="#fff"
+                      color="#2E4EFF"
+                      border="1px"
+                      borderColor="#2E4EFF"
+                      fontSize="0.875rem"
+                      borderRadius="20px"
+                      h="35px"
+                      textTransform="uppercase"
+                      fontWeight="600"
+                      padding="8px 1.25rem"
+                      onClick={() => deletScheduleTrasanction([234])}
+                    >
+                      Apagar
+                    </Button>
                   </Flex>
                 </Box>
-
               </Box>
             </Box>
           </Box>
         </Flex>
+        {data?.data?.map((item, key) => (
+          <Text key={key}>{item?.payload?.nif_number}</Text>
+        ))}
       </Layout>
-      <Modal isOpen={isOpenUpload} onClose={onCloseUpload} title="IMPORTAR DADOS" ><ModalUploadPayment /></Modal>
+      <Modal
+        isOpen={isOpenUpload}
+        onClose={onCloseUpload}
+        title="IMPORTAR DADOS"
+      >
+        <ModalUploadPayment refetch={refetch} />
+      </Modal>
     </Box>
   );
 }
