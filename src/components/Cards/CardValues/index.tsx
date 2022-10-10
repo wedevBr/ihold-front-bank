@@ -11,14 +11,16 @@ import { formatCalcValue } from '~/utils/formatValue';
 
 interface ICardValue {
   type: 'cash-in' | 'cash-out' | 'prevision' | 'default';
-  value: string | number;
+  value?: string | number;
   percentage: number;
+  result?: number
 }
 
 export function CardValue({
   type = 'default',
   value,
   percentage = 0,
+  result = 0,
 }: ICardValue) {
   function handleType({ type }: Omit<ICardValue, 'value' | 'percentage'>) {
     switch (type) {
@@ -87,8 +89,8 @@ export function CardValue({
           fontWeight="700"
           fontSize="30px"
           color={handleType({ type }).color}
-        >
-          {`R$ ${formatCalcValue(value.toString())}`}
+        >{value ? result < 0 ? `-R$ ${formatCalcValue(value.toString())}` : `R$ ${formatCalcValue(value.toString())}` : ""}
+
         </Text>
         <Text
           fontFamily="Lato"

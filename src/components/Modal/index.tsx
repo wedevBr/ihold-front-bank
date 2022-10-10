@@ -9,16 +9,25 @@ import {
   Modal as ChakraModal,
   ModalProps as ModalChakraModal,
 } from '@chakra-ui/react';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from 'react-query';
 
 interface ModalProps extends ModalChakraModal {
   title?: string;
   padding?: string;
+  refetch?: (
+    options?: RefetchOptions & RefetchQueryFilters
+  ) => Promise<QueryObserverResult>;
 }
 
 export function Modal({
   children,
   title,
   isOpen,
+  refetch,
   onClose,
   padding,
   ...rest

@@ -6,26 +6,28 @@ import {
   CardTransaction,
   CardValue,
   ContainerTransaction,
-  ExtractPixAndTedTable,
+  ExtractAllTable,
   Layout,
 } from '~/components';
 import { GetAllStatementsOperation, GetStatementsOperation } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
 
-export default function Pix() {
-  const { data, isLoading } = useQuery([2], () => GetAllStatementsOperation(2), {
+export default function AllStatements() {
+
+  const { data, isLoading } = useQuery([0], () => GetAllStatementsOperation(0), {
     staleTime: 1000 * 60, // 1 minute
   });
-  const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 2], () => GetStatementsOperation('cash-in', 2), {
-    staleTime: 1000 * 60, // 1 minute
-  });
-  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 2], () => GetStatementsOperation('cash-out', 2), {
+  // const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 0], () => GetStatementsOperation('cash-in', 0), {
+  //   staleTime: 1000 * 120, // 1 minute
+  // });
+  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 0], () => GetStatementsOperation('cash-out', 0), {
     staleTime: 1000 * 60, // 1 minute
   });
 
   const outAmount = data?.summary?.cash_out?.amount || "";
   const InAmount = data?.summary?.cash_in?.amount || "";
+
 
   const handleCalcValue = (val: string) => parseInt(val?.replace(/[\D]+/g, ""));
   const result = handleCalcValue(InAmount) - handleCalcValue(outAmount);
@@ -64,21 +66,20 @@ export default function Pix() {
               color="#21C6DE"
               icon="akar-icons:eye"
             />
-            <Text ml="5px">EXTRATO PIX</Text>
+            <Text ml="5px">TODOS OS EXTRATOS</Text>
           </Flex>
-          <ContainerTransaction tabName={['todos', 'entrada', 'Saída']}>
+          <ContainerTransaction tabName={['todos']}>
             <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoading} items={data} />
+              <ExtractAllTable isLoading={isLoading} items={data} />
+            </TabPanel>
+            {/* <TabPanel>
+              <ExtractAllTable isLoading={isLoadingCahsIn} items={dataCashIn} />
             </TabPanel>
             <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoadingCahsIn} items={dataCashIn} />
-            </TabPanel>
-            <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoadingCashOut} items={dataCashOut} />
-            </TabPanel>
+              <ExtractAllTable isLoading={isLoadingCashOut} items={dataCashOut} />
+            </TabPanel> */}
           </ContainerTransaction>
         </Box>
-
       </Box>
       <Box bg="#FFFFFF" p="50px" mt="30px" borderRadius="10px">
         <Text>MAIS ACESSADOS</Text>

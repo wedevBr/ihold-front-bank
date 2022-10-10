@@ -1,5 +1,6 @@
 export interface StatementData {
-  data: IPixAndTEDStatementsData[]
+  data?: IPixAndTEDStatementsData[]
+  summary?: ISummary
 }
 
 export interface IPixAndTEDStatementsData {
@@ -54,6 +55,7 @@ interface IMetadataPixAndTED {
   recipient: IRecipient;
   payload: Payload;
   recipient_name: string;
+  assignor?:string
 }
 
 interface Payload {
