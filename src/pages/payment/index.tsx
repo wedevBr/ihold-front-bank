@@ -9,6 +9,10 @@ import {
   Center,
   Spacer,
   useDisclosure,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
 } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import React, { useState } from 'react';
@@ -81,27 +85,38 @@ export default function Payment() {
                 </Center>
               </Flex>
             </Box>
-            <Box
-              bg="#FFFFFF"
-              mr="20px"
-              borderRadius="10px"
-              boxShadow="base"
-              p="20px"
-              mt="30px"
-            >
-              <Box>
-                <Box w="100%">
+            <Box>
+              <Tabs variant="soft-rounded" defaultIndex={0}>
+                <Box
+                  bg="#FFFFFF"
+                  mr="20px"
+                  borderRadius="10px"
+                  boxShadow="base"
+                  p="20px"
+                  mt="30px"
+                >
                   <Text fontWeight="700" fontSize="1.25rem">
                     EXTRATO DE PAGAMENTOS
                   </Text>
                   <Flex pt="50px" justify="space-between" w="95%">
-                    <Box>
-                      <ContainerTransaction tabName={['PIX', 'TED', 'BOLETO']}>
-                        <TabPanel></TabPanel>
-                        <TabPanel></TabPanel>
-                        <TabPanel></TabPanel>
-                      </ContainerTransaction>
-                    </Box>
+                    <TabList
+                      bg="#F0F0F3"
+                      w="min-content"
+                      borderRadius="20px"
+                      h="35px"
+                    >
+                      {['PIX', 'TED', 'BOLETO'].map((item, idx) => (
+                        <Tab
+                          key={idx}
+                          px="30px"
+                          _selected={{ color: '#fff', bg: '#2E4EFF' }}
+                          color="#7F8B9F"
+                          textTransform="uppercase"
+                        >
+                          {item}
+                        </Tab>
+                      ))}
+                    </TabList>
                     <Flex>
                       <Button
                         bg="#2E4EFF"
@@ -135,40 +150,46 @@ export default function Payment() {
                     </Flex>
                   </Flex>
                 </Box>
-              </Box>
+                <Box
+                  mt="30px"
+                  bg="#FFFFFF"
+                  mr="20px"
+                  borderRadius="10px"
+                  boxShadow="base"
+                  py="20px"
+                >
+                  <TabPanels>
+                    <TabPanel>
+                      <Flex w="full" justify="right" p="20px">
+                        <Button
+                          bg="#fff"
+                          color="#2E4EFF"
+                          border="1px"
+                          borderColor="#2E4EFF"
+                          fontSize="0.875rem"
+                          borderRadius="20px"
+                          h="35px"
+                          textTransform="uppercase"
+                          fontWeight="600"
+                          padding="8px 1.25rem"
+                          onClick={() => deletScheduleTrasanction(scheduleID)}
+                        >
+                          Excluir
+                        </Button>
+                      </Flex>
+                      <BatchPaymentTable
+                        items={data?.data}
+                        getScheduleIDS={(ids) => setScheduleID(ids)}
+                      />
+                    </TabPanel>
+                    <TabPanel></TabPanel>
+                    <TabPanel></TabPanel>
+                  </TabPanels>
+                </Box>
+              </Tabs>
             </Box>
           </Box>
         </Flex>
-        <Box
-          mt="30px"
-          bg="#FFFFFF"
-          mr="20px"
-          borderRadius="10px"
-          boxShadow="base"
-          py="20px"
-        >
-          <Flex w="full" justify="right" p="20px">
-            <Button
-              bg="#fff"
-              color="#2E4EFF"
-              border="1px"
-              borderColor="#2E4EFF"
-              fontSize="0.875rem"
-              borderRadius="20px"
-              h="35px"
-              textTransform="uppercase"
-              fontWeight="600"
-              padding="8px 1.25rem"
-              onClick={() => deletScheduleTrasanction(scheduleID)}
-            >
-              Excluir
-            </Button>
-          </Flex>
-          <BatchPaymentTable
-            items={data?.data}
-            getScheduleIDS={(ids) => setScheduleID(ids)}
-          />
-        </Box>
       </Layout>
       <Modal
         isOpen={isOpenUpload}

@@ -20,6 +20,8 @@ import moment from 'moment';
 import { truncate } from '~/utils/truncate';
 import { IDataPIX } from '~/types/scheduledTransactions';
 import { formatCalcValue } from '~/utils/formatValue';
+import { phonesFormat } from '~/utils/phonesFormat';
+import { nifFormat } from '~/utils/nifFormat';
 // import { dateFnsFormatDate } from '~/utils/fotmat';
 
 type tableProps = {
@@ -125,13 +127,12 @@ export const BatchPaymentTable = ({
           <Tbody>
             {items &&
               items?.map((item, index) => (
-                <Tr key={index}>
+                <Tr key={index} fontSize="15px">
                   <Td
                     overflow="hidden"
                     bg="#ffffff"
                     textAlign="center"
                     borderColor="gray.100"
-                    fontSize="14px"
                     whiteSpace="nowrap"
                     minWidth="40px"
                     maxWidth="40px"
@@ -148,12 +149,18 @@ export const BatchPaymentTable = ({
                     />
                   </Td>
                   <Td>{item?.payload?.key_type}</Td>
-                  <Td>{item?.payload.key}</Td>
-                  <Td>{item.payload?.nif_number}</Td>
-                  <Td>{item?.scheduled_date}</Td>
+                  <Td minW="200px">{phonesFormat(item?.payload.key)}</Td>
+                  <Td minW="200px">
+                    {nifFormat(item.payload?.nif_number, 'cpf')}
+                  </Td>
+                  <Td>
+                    {moment(item?.scheduled_date).format('DD/MMM, HH:mm')}
+                  </Td>
                   <Td>{item?.payload?.email}</Td>
-                  <Td>{item.payload?.description}</Td>
-                  <Td>{formatCalcValue(item.payload?.amount)}</Td>
+                  <Td minW="180px">{item.payload?.description}</Td>
+                  <Td minW="180px">{`R$ ${formatCalcValue(
+                    item.payload?.amount
+                  )}`}</Td>
                   <Td>{item.status.name}</Td>
                   <Td>Botão de Dowloand</Td>
                   <Td>Botão de pagamento</Td>
