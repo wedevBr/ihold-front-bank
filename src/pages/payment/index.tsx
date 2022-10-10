@@ -11,7 +11,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BatchPaymentTable,
   CardValue,
@@ -27,6 +27,7 @@ import {
 } from '~/services/hooks/usePaymentsSchedule';
 
 export default function Payment() {
+  const [scheduleID, setScheduleID] = useState<number[]>([]);
   const {
     isOpen: isOpenUpload,
     onOpen: onOpenUpload,
@@ -40,7 +41,9 @@ export default function Payment() {
     }
     return Promise.all(
       checkIDS.map((id: any) => DeleteScheduleTransactions(id))
-    ).then(() => refetch());
+    ).then(() => {
+      refetch();
+    });
   }
 
   return (
@@ -130,30 +133,42 @@ export default function Payment() {
                         BAIXAR TEMPLATE
                       </Button>
                     </Flex>
-                    <Button
-                      bg="#fff"
-                      color="#2E4EFF"
-                      border="1px"
-                      borderColor="#2E4EFF"
-                      fontSize="0.875rem"
-                      borderRadius="20px"
-                      h="35px"
-                      textTransform="uppercase"
-                      fontWeight="600"
-                      padding="8px 1.25rem"
-                      onClick={() => deletScheduleTrasanction([234])}
-                    >
-                      Apagar
-                    </Button>
                   </Flex>
                 </Box>
               </Box>
             </Box>
           </Box>
         </Flex>
-        {data?.data?.map((item, key) => (
-          <Text key={key}>{item?.payload?.nif_number}</Text>
-        ))}
+        <Box
+          mt="30px"
+          bg="#FFFFFF"
+          mr="20px"
+          borderRadius="10px"
+          boxShadow="base"
+          py="20px"
+        >
+          <Flex w="full" justify="right" p="20px">
+            <Button
+              bg="#fff"
+              color="#2E4EFF"
+              border="1px"
+              borderColor="#2E4EFF"
+              fontSize="0.875rem"
+              borderRadius="20px"
+              h="35px"
+              textTransform="uppercase"
+              fontWeight="600"
+              padding="8px 1.25rem"
+              onClick={() => deletScheduleTrasanction(scheduleID)}
+            >
+              Excluir
+            </Button>
+          </Flex>
+          <BatchPaymentTable
+            items={data?.data}
+            getScheduleIDS={(ids) => setScheduleID(ids)}
+          />
+        </Box>
       </Layout>
       <Modal
         isOpen={isOpenUpload}
