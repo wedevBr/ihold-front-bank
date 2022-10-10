@@ -1,6 +1,4 @@
-import { Box, Button, Flex, Radio, Image, RadioGroup, Text, useDisclosure, Center, Select, useToast } from "@chakra-ui/react"
-import { Modal } from ".."
-import router from "next/router";
+import { Box, Button, Flex, Text, Center, Select, useToast } from "@chakra-ui/react"
 import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -18,11 +16,10 @@ export const createPaymentFormSchema = yup.object().shape({
   file: yup.mixed().required()
 });
 
-
 export const ModalUploadPayment = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [fileSrc, setFileSrc] = useState<File | any>();
-  
+
   const [uploadFile, setUploadFile] = useState<File | any>();
   const [transaction_type, setTransaction_type] = useState("")
   const toast = useToast()
@@ -31,29 +28,40 @@ export const ModalUploadPayment = () => {
   const { register, handleSubmit, setValue, watch, getValues, trigger, formState: { errors, isSubmitting }, control } = useForm<RegisterPayment>({
     resolver: yupResolver(createPaymentFormSchema),
   });
- 
+
   const openUpload = () => {
     file.current && file.current.click();
   };
 
-  function handleInputFileChange(e: ChangeEvent<File | any>) {
-    setUploadFile(e.target.files[0]);
-  }
+
+
+
+  const handleUpload = async (files: FileList | null) => {
+    if (files) {
+      const objectURL: string = window.URL.createObjectURL(files[0]);
+      let file = files[0];
+      let type = files[0]?.type;
+      setFileSrc({ preview: objectURL, file, type });
+      setValue("file", file);
+      await trigger(["file"]);
+    }
+    file.current && (file.current.value = "");
+  };
 
   const formData = new FormData();
 
-  formData.append("transaction_type", transaction_type);
+  formData.append("transaction_type", fileSrc);
   formData.append("file", uploadFile);
 
   const handleSendPayment: SubmitHandler<RegisterPayment> = async (data) => {
-   
     const formData = new FormData();
 
-    formData.append("transaction_type", transaction_type);
-    formData.append("file", uploadFile);
+    formData.append("transaction_type", data.transaction_type);
+    formData.append("file", data.file);
+    console.log(data)
     setIsLoading(true)
     try {
-      const response = await registerPayment(data)
+      const response = await registerPayment(formData)
       setIsLoading(false)
       toast({
         title: response.message,
@@ -88,29 +96,32 @@ export const ModalUploadPayment = () => {
         cursor="pointer"
         py="40px"
       >
-        {uploadFile ? "1 arquivo carregado" :
-          <Box >
-            <Center>
-              <Icon icon="fa6-solid:cloud-arrow-up" color="#cbd3e0" fontSize={50} />
-            </Center >
+        <Box >
+          <Center>
+            <Icon icon="fa6-solid:cloud-arrow-up" color="#cbd3e0" fontSize={50} />
+          </Center >
+          {uploadFile ? <Text color="#cbd3e0">1 arquivo carregado</Text> :
+
             <Text color="#cbd3e0">Procurar Arquivo para Carregar</Text>
-          </Box>
-        }
+          }
+        </Box>
+
       </Center>
       <input
+        {...register("file")}
         type="file"
         hidden
-        required
-        name="file"
         ref={file}
-        onChange={handleInputFileChange}
+        onChange={(event) => handleUpload(event.target.files)}
+
+
       />
       <Flex>
         {errors.file && (
           <Text color="primary.600">{errors.file.message}</Text>
         )}
       </Flex>
-      <Button type="submit" onClick={() => console.log(watch("transaction_type"))}>
+      <Button type="submit" onClick={() => console.log(watch("file"))}>
         ENVIAR
       </Button>
     </Box >
