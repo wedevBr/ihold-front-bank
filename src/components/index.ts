@@ -5,7 +5,7 @@ import { Select } from '~/components/select';
 import { Layout } from '~/components/layout';
 import { NavBar } from '~/components/NavBar';
 import { Textarea } from './TextArea';
-import { Modal } from './Modal';
+import { Modal } from './Modals';
 import { Pagination } from './pagination';
 import { CardValue } from './Cards/CardValues';
 import { ContainerTransaction } from './ContainerTransaction';
@@ -16,7 +16,7 @@ import { TicketTable } from './Tables/extractTicketTable';
 import { ExtractAllTable } from './Tables/extractAllTable';
 import { ExtractHomeTable } from './Tables/extractHomeTable';
 import { BatchPaymentTable } from './Tables/batchPaymentTable';
-import { ModalUploadPayment } from './Modal/ModalUploadPayment';
+import { ModalUploadPayment } from './Modals/ModalUploadPayment';
 
 export {
   Button,

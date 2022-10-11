@@ -9,6 +9,10 @@ import {
   Center,
   Spacer,
   useDisclosure,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
 } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import React, { useState } from 'react';
@@ -28,20 +32,23 @@ import {
 
 export default function Payment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
+  const [type, setType] = useState('pix');
   const {
     isOpen: isOpenUpload,
     onOpen: onOpenUpload,
     onClose: onCloseUpload,
   } = useDisclosure();
-  const { data, refetch } = useScheduleTransactions();
+  const [page, setPage] = useState(1);
+  const { data, refetch, isLoading, isFetching } =
+    useScheduleTransactions(page);
 
   async function deletScheduleTrasanction(checkIDS: number[]) {
     if (!checkIDS.length) {
       return;
     }
-    return Promise.all(
+    return await Promise.all(
       checkIDS.map((id: any) => DeleteScheduleTransactions(id))
-    ).then(() => {
+    ).finally(() => {
       refetch();
     });
   }
@@ -81,28 +88,78 @@ export default function Payment() {
                 </Center>
               </Flex>
             </Box>
-            <Box
-              bg="#FFFFFF"
-              mr="20px"
-              borderRadius="10px"
-              boxShadow="base"
-              p="20px"
-              mt="30px"
-            >
-              <Box>
-                <Box w="100%">
+            <Box>
+              <Tabs
+                variant="soft-rounded"
+                defaultIndex={0}
+                onChange={(idx) =>
+                  setType(
+                    idx === 0 ? 'pix' : idx === 1 ? 'transfer' : 'bill-payment'
+                  )
+                }
+              >
+                <Box
+                  bg="#FFFFFF"
+                  mr="20px"
+                  borderRadius="10px"
+                  boxShadow="base"
+                  p="20px"
+                  mt="30px"
+                >
                   <Text fontWeight="700" fontSize="1.25rem">
                     EXTRATO DE PAGAMENTOS
                   </Text>
-                  <Flex pt="50px" justify="space-between" w="95%">
-                    <Box>
-                      <ContainerTransaction tabName={['PIX', 'TED', 'BOLETO']}>
-                        <TabPanel></TabPanel>
-                        <TabPanel></TabPanel>
-                        <TabPanel></TabPanel>
-                      </ContainerTransaction>
-                    </Box>
+                  <Flex pt="50px" justify="space-between" w="full">
+                    <TabList
+                      bg="#F0F0F3"
+                      w="min-content"
+                      borderRadius="20px"
+                      h="35px"
+                    >
+                      {['PIX', 'TED', 'BOLETO'].map((item, idx) => (
+                        <Tab
+                          key={idx}
+                          px="30px"
+                          _selected={{ color: '#fff', bg: '#2E4EFF' }}
+                          color="#7F8B9F"
+                          textTransform="uppercase"
+                        >
+                          {item}
+                        </Tab>
+                      ))}
+                    </TabList>
                     <Flex>
+                      <a
+                        href={
+                          type === 'pix'
+                            ? '/templates/Planilha Padrao Chave Pix.xlsx'
+                            : type === 'transfer'
+                            ? '/templates/Planilha Padrao TED.xlsx'
+                            : '/templates/Planilha Padrao Boletos.xlsx'
+                        }
+                        style={{ marginRight: 10 }}
+                      >
+                        <Button
+                          bg="#fff"
+                          color="#2E4EFF"
+                          border="1px"
+                          borderColor="#2E4EFF"
+                          w="100%"
+                          fontSize="0.875rem"
+                          borderRadius="20px"
+                          h="35px"
+                          textTransform="uppercase"
+                          fontWeight="600"
+                          padding="8px 1.25rem"
+                        >
+                          <Icon
+                            icon="bx:download"
+                            width={20}
+                            style={{ marginRight: 5 }}
+                          />
+                          BAIXAR TEMPLATE
+                        </Button>
+                      </a>
                       <Button
                         bg="#2E4EFF"
                         color="#fff"
@@ -115,67 +172,71 @@ export default function Payment() {
                         padding="8px 1.25rem"
                         onClick={onOpenUpload}
                       >
+                        <Icon
+                          icon="clarity:import-line"
+                          width={20}
+                          style={{ marginRight: 5 }}
+                        />
                         IMPORTAR DADOS
-                      </Button>
-                      <Button
-                        bg="#fff"
-                        color="#2E4EFF"
-                        border="1px"
-                        borderColor="#2E4EFF"
-                        w="100%"
-                        fontSize="0.875rem"
-                        borderRadius="20px"
-                        h="35px"
-                        textTransform="uppercase"
-                        fontWeight="600"
-                        padding="8px 1.25rem"
-                      >
-                        BAIXAR TEMPLATE
                       </Button>
                     </Flex>
                   </Flex>
                 </Box>
-              </Box>
+                <Box
+                  mt="30px"
+                  bg="#FFFFFF"
+                  mr="20px"
+                  borderRadius="10px"
+                  boxShadow="base"
+                  py="20px"
+                >
+                  <TabPanels>
+                    <TabPanel>
+                      <Flex w="full" justify="right" pb="20px">
+                        <Button
+                          bg="#F03D3E"
+                          color="#fff"
+                          fontSize="0.875rem"
+                          borderRadius="20px"
+                          h="38px"
+                          w="205px"
+                          textTransform="uppercase"
+                          fontWeight="600"
+                          padding="8px 1.25rem"
+                          onClick={() => deletScheduleTrasanction(scheduleID)}
+                          isLoading={isFetching}
+                        >
+                          <Icon
+                            icon="ep:delete"
+                            width={17}
+                            style={{ marginRight: 5 }}
+                          />{' '}
+                          {isFetching ? 'Excluindo' : 'Excluir'}
+                        </Button>
+                      </Flex>
+                      <BatchPaymentTable
+                        refetch={refetch}
+                        setPage={setPage}
+                        isLoading={isFetching}
+                        items={data}
+                        getScheduleIDS={(ids) => setScheduleID(ids)}
+                      />
+                    </TabPanel>
+                    <TabPanel></TabPanel>
+                    <TabPanel></TabPanel>
+                  </TabPanels>
+                </Box>
+              </Tabs>
             </Box>
           </Box>
         </Flex>
-        <Box
-          mt="30px"
-          bg="#FFFFFF"
-          mr="20px"
-          borderRadius="10px"
-          boxShadow="base"
-          py="20px"
-        >
-          <Flex w="full" justify="right" p="20px">
-            <Button
-              bg="#fff"
-              color="#2E4EFF"
-              border="1px"
-              borderColor="#2E4EFF"
-              fontSize="0.875rem"
-              borderRadius="20px"
-              h="35px"
-              textTransform="uppercase"
-              fontWeight="600"
-              padding="8px 1.25rem"
-              onClick={() => deletScheduleTrasanction(scheduleID)}
-            >
-              Excluir
-            </Button>
-          </Flex>
-          <BatchPaymentTable
-            items={data?.data}
-            getScheduleIDS={(ids) => setScheduleID(ids)}
-          />
-        </Box>
       </Layout>
       <Modal
         isOpen={isOpenUpload}
         onClose={onCloseUpload}
         title="IMPORTAR DADOS"
       >
-        <ModalUploadPayment refetch={refetch} />
+        <ModalUploadPayment refetch={refetch} type={type} />
       </Modal>
     </Box>
   );

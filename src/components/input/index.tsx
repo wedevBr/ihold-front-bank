@@ -73,7 +73,12 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
           }
         />
         {rest.type === 'password' && (
-          <Flex position="absolute" right="10px" top={error ? '53%' : '60%'}>
+          <Flex
+            position="absolute"
+            right="10px"
+            top={error ? '53%' : label ? '60%' : '35%'}
+            mb="25px"
+          >
             <Icon
               width="20px"
               cursor="pointer"

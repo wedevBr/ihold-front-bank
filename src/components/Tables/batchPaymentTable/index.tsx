@@ -12,20 +12,38 @@ import {
   Flex,
   Box,
   Checkbox,
+  Badge,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from '@chakra-ui/react';
-import { Loading } from '~/components';
+import { Loading, Pagination } from '~/components';
 import { StatementData } from '~/types/statements.types';
 import { Icon } from '@iconify/react';
 import moment from 'moment';
 import { truncate } from '~/utils/truncate';
 import { IDataPIX } from '~/types/scheduledTransactions';
 import { formatCalcValue } from '~/utils/formatValue';
+import { phonesFormat } from '~/utils/phonesFormat';
+import { nifFormat } from '~/utils/nifFormat';
+import { IPaginationData } from '~/types/pagination';
+import {
+  QueryObserverBaseResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from 'react-query';
 // import { dateFnsFormatDate } from '~/utils/fotmat';
 
 type tableProps = {
-  items?: IDataPIX[];
+  items?: IPaginationData<IDataPIX>;
   isLoading?: boolean;
   getScheduleIDS?: (ids: number[]) => void;
+  page?: number;
+  setPage?: (numberPage: number) => void;
+  refetch?: (
+    options?: RefetchOptions & RefetchQueryFilters
+  ) => Promise<QueryObserverBaseResult>;
 };
 
 interface checkBoxsSelected {
@@ -36,6 +54,8 @@ export const BatchPaymentTable = ({
   items,
   isLoading,
   getScheduleIDS,
+  setPage,
+  refetch,
 }: tableProps) => {
   const [allChecked, setAllChecked] = useState(false);
   const [checked, setChecked] = useState<checkBoxsSelected[]>([]);
@@ -50,7 +70,7 @@ export const BatchPaymentTable = ({
 
   const totalCheck = (all: any) => {
     setChecked(
-      all.map((item: any) => {
+      all?.map((item: any) => {
         return {
           id: item.id,
           value: true,
@@ -60,7 +80,7 @@ export const BatchPaymentTable = ({
     setAllChecked(!allChecked);
     if (items) {
       setChecked(
-        items?.map((item: any) => {
+        items?.data?.map((item: any) => {
           return {
             id: item.id,
             value: true,
@@ -80,9 +100,10 @@ export const BatchPaymentTable = ({
   }, [checked]);
 
   useEffect(() => {
-    if (!items?.length) {
+    if (!items?.data?.length) {
       setAllChecked(false);
       setChecked([]);
+      refetch && refetch();
     }
   }, [items]);
 
@@ -92,7 +113,7 @@ export const BatchPaymentTable = ({
     </Center>
   ) : (
     <>
-      <Box overflowX="auto">
+      <Box overflowX="auto" maxH="600px">
         <Table>
           <Thead width="100%" color="#FFF">
             <Tr bg="#7F8B9F" fontSize="1rem" whiteSpace="nowrap">
@@ -106,7 +127,7 @@ export const BatchPaymentTable = ({
                       setChecked([]);
                       return;
                     }
-                    totalCheck(items || []);
+                    totalCheck(items?.data || []);
                   }}
                 />
               </Th>
@@ -124,14 +145,13 @@ export const BatchPaymentTable = ({
           </Thead>
           <Tbody>
             {items &&
-              items?.map((item, index) => (
-                <Tr key={index}>
+              items?.data?.map((item, index) => (
+                <Tr key={index} fontSize="15px">
                   <Td
                     overflow="hidden"
                     bg="#ffffff"
                     textAlign="center"
                     borderColor="gray.100"
-                    fontSize="14px"
                     whiteSpace="nowrap"
                     minWidth="40px"
                     maxWidth="40px"
@@ -148,19 +168,53 @@ export const BatchPaymentTable = ({
                     />
                   </Td>
                   <Td>{item?.payload?.key_type}</Td>
-                  <Td>{item?.payload.key}</Td>
-                  <Td>{item.payload?.nif_number}</Td>
-                  <Td>{item?.scheduled_date}</Td>
+                  <Td minW="200px">{phonesFormat(item?.payload.key)}</Td>
+                  <Td minW="200px">
+                    {nifFormat(item.payload?.nif_number, 'cpf')}
+                  </Td>
+                  <Td>
+                    {moment(item?.scheduled_date).format('DD/MMM, HH:mm')}
+                  </Td>
                   <Td>{item?.payload?.email}</Td>
-                  <Td>{item.payload?.description}</Td>
-                  <Td>{formatCalcValue(item.payload?.amount)}</Td>
-                  <Td>{item.status.name}</Td>
-                  <Td>Botão de Dowloand</Td>
-                  <Td>Botão de pagamento</Td>
+                  <Td minW="180px">{item.payload?.description}</Td>
+                  <Td minW="180px">{`R$ ${formatCalcValue(
+                    item.payload?.amount
+                  )}`}</Td>
+                  <Td>
+                    <Badge variant="solid" colorScheme="green">
+                      {item.status.name}
+                    </Badge>
+                  </Td>
+                  <Td minW="20px">
+                    <Flex align="center" justifyContent="center">
+                      <Box bg="#dde2eb" p="6px" borderRadius="50px">
+                        <Icon icon="bx:download" width={20} />
+                      </Box>
+                    </Flex>
+                  </Td>
+                  <Td>
+                    <Menu>
+                      <MenuButton>
+                        <Icon icon="carbon:settings" width={20} />
+                      </MenuButton>
+                      <MenuList>
+                        <MenuItem>Pagamento</MenuItem>
+                      </MenuList>
+                    </Menu>
+                  </Td>
                 </Tr>
               ))}
           </Tbody>
         </Table>
+        <Pagination
+          refetch={refetch}
+          setPage={setPage}
+          next={items?.links?.next}
+          prev={items?.links?.prev}
+          last={items?.meta.last_page}
+          total={items?.meta?.last_page}
+          current={items?.meta?.current_page}
+        />
       </Box>
     </>
   );
