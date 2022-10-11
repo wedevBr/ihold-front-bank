@@ -48,7 +48,7 @@ export function NavBar() {
     },
     {
       name: 'PAGAMENTOS',
-      path: '/payment',
+      path: ['/payment', '/payment/review'],
       icon: <Icon icon="mdi:qrcode-scan" color="#21C6DE" width={25} />,
     },
     {
@@ -82,9 +82,10 @@ export function NavBar() {
           px={{ base: '10px', md: '20px' }}
         >
           {routes.map((item, idx) => {
+            const route = item.name === 'PAGAMENTOS' ? item.path[0] : item.path;
             return (
               <Link
-                href={item.path}
+                href={route as string}
                 style={{ marginBottom: '10px', border: '1px solid #000' }}
                 key={idx}
               >
