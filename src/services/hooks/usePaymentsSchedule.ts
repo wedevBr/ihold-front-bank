@@ -14,12 +14,18 @@ export async function registerPayment(transactionData: FormData) {
     throw err;
   }
 }
-export const getValidateScheduleTransaction = async (): Promise<
-  IPaginationData<IDataPIX>
-> => {
+export const getValidateScheduleTransaction = async (
+  page?: number
+): Promise<IPaginationData<IDataPIX>> => {
   try {
     const { data } = await api.get(
-      '/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&sort[]=-created_at&filter[transaction_type_id]=2'
+      '/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&filter[transaction_type_id]=2',
+      {
+        params: {
+          'page[size]': 3,
+          'page[number]': page || 1,
+        },
+      }
     );
     return {
       data: data?.data,
@@ -31,12 +37,12 @@ export const getValidateScheduleTransaction = async (): Promise<
   }
 };
 
-export function useScheduleTransactions() {
+export function useScheduleTransactions(page?: number) {
   return useQuery(
-    ['getScheduleTransactions'],
-    () => getValidateScheduleTransaction(),
+    ['getScheduleTransactions', page],
+    () => getValidateScheduleTransaction(page),
     {
-      staleTime: 1000 * 5,
+      keepPreviousData: true,
     }
   );
 }
