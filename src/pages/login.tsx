@@ -130,9 +130,7 @@ export default function Login() {
               lineHeight="17px"
               textAlign="right"
             >
-              <Link color="#2E4EFF">
-                Esqueci minha senha.
-              </Link>
+              <Link color="#2E4EFF">Esqueci minha senha.</Link>
             </Text>
           </Box>
           <Box pt="40px">
@@ -142,8 +140,8 @@ export default function Login() {
               fontWeight="400"
               lineHeight="17px"
             >
-              Clicando em Entrar, você concorda com nossa <Link color="#2E4EFF"
-              >Política de Privacidade.</Link>
+              Clicando em Entrar, você concorda com nossa{' '}
+              <Link color="#2E4EFF">Política de Privacidade.</Link>
             </Text>
           </Box>
           <Box mt="18px">
@@ -156,12 +154,11 @@ export default function Login() {
               w="100%"
               type="submit"
               borderRadius="40px"
-              _hover={{ background: "#2E4EFF", color: "#FFF" }}
+              _hover={{ background: '#2E4EFF', color: '#FFF' }}
             >
               ENTRAR
             </Button>
-            <Box mt="18px">
-            </Box>
+            <Box mt="18px"></Box>
             <Button
               bg="#FFF"
               border="1px"

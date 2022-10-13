@@ -101,17 +101,17 @@ export default function TwoFactor() {
           </Flex>
         </Box>
         <Box pl="165px">
-          <Box pt="60px" width="90%" >
+          <Box pt="60px" width="90%">
             <Text
               fontSize="18px"
               color="#00102A"
               fontWeight="600"
-              lineHeight="22px">
+              lineHeight="22px"
+            >
               AUTENTICAÇÃO EM DUAS ETAPAS
             </Text>
             <Text pt="60px" color="#7C7C7C" textAlign="center">
               INSIRA ABAIXO O CÓDIGO DE 6 DIGITOS QUE ENVIAMOS
-
             </Text>
             <Text pb="40px" color="#00102A" textAlign="center">
               {authTwoFactor}
@@ -137,12 +137,14 @@ export default function TwoFactor() {
                 <FormErrorMessage>{error.message}</FormErrorMessage>
               )}
             </FormControl>
-            <Text pt="10px"
+            <Text
+              pt="10px"
               color="#7F8B9F"
               fontWeight=" 400"
               fontSize="14px"
               textAlign="center"
-              lineHeight="17px">
+              lineHeight="17px"
+            >
               Código enviado há{' '}
               {counter === 10 ? counter : `0${counter}` || '00'} segundos
             </Text>
@@ -156,7 +158,7 @@ export default function TwoFactor() {
                 w="100%"
                 type="submit"
                 borderRadius="40px"
-                _hover={{ background: "#2E4EFF", color: "#FFF" }}
+                _hover={{ background: '#2E4EFF', color: '#FFF' }}
                 onClick={handleAuthTwoFactors}
               >
                 ENTRAR

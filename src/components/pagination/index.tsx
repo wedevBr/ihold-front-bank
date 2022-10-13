@@ -1,105 +1,63 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import axios from 'axios';
 import { parseCookies } from 'nookies';
 import React from 'react';
+import {
+  InfiniteQueryObserverBaseResult,
+  QueryObserverBaseResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+} from 'react-query';
 import { createPagination } from '~/hooks/createPagination';
 import { api } from '~/services/api';
+import {
+  getValidateScheduleTransaction,
+  useScheduleTransactions,
+} from '~/services/hooks/usePaymentsSchedule';
 
 interface INavigation {
   current?: number;
   next?: string | null;
   prev?: string | null;
-  setState: (item: any) => void;
-  setAll: (item: any) => void;
-  loading: (state: boolean) => void;
+  last?: number;
+  setPage?: (numberPage: number) => void;
+  refetch?: (
+    options?: RefetchOptions & RefetchQueryFilters
+  ) => Promise<QueryObserverBaseResult>;
   total?: number;
 }
 
 export function Pagination({
   current = 1,
   next,
+  last = 10,
   prev,
-  setState,
-  setAll,
-  loading,
   total = 1,
+  setPage,
+  refetch,
 }: INavigation) {
   const { pagination } = createPagination(5, total, current);
 
-  const { ['@iHoldAdminAccess_token']: access } = parseCookies();
+  function handleClick(page: number) {
+    console.log('Page');
+    setPage && setPage(page);
+    refetch && refetch();
+  }
 
-  const formatURL = async (pageURL: string) => {
-    const url = decodeURIComponent(pageURL);
-    const newURL = url.replace(/http/g, 'https');
-    const { data } = await axios({
-      url: newURL,
-      method: 'get',
-      headers: {
-        'Content-type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        Authorization: `Bearer ${access}`,
-      },
-    });
-    return data;
-  };
-
-  const include = [
-    'addresses',
-    'phones',
-    'bankAccount',
-    'user',
-    'status',
-    'payload',
-  ];
-  async function handleClick(page: number) {
-    loading(true);
-    try {
-      const { data } = await api.get('/accounts', {
-        params: {
-          'page[number]': page,
-          'page[size]': 10,
-          include: include?.toString(),
-          sort: ['register_name'],
-        },
-      });
-      setState(data);
-      setAll(data.data);
-      console.log({ data });
-    } catch (error) {
-      console.log();
-    } finally {
-      loading(false);
+  function handleNext() {
+    if (next) {
+      setPage && setPage(current + 1 >= last ? last : current + 1);
+      refetch && refetch();
     }
   }
 
-  async function handleNext() {
-    loading(true);
-    try {
-      if (next) {
-        const data = await formatURL(next);
-        setState(data);
-        setAll(data.data);
-      }
-    } catch (error) {
-      console.log();
-    } finally {
-      loading(false);
-    }
-  }
-
-  async function handlePrev() {
-    loading(true);
-    try {
-      if (prev) {
-        const data = await formatURL(prev);
-        setState(data);
-        setAll(data.data);
-      }
-    } catch (error) {
-      console.log();
-    } finally {
-      loading(false);
+  function handlePrev() {
+    if (prev) {
+      setPage && setPage(current - 1 <= 1 ? 1 : current - 1);
+      refetch && refetch();
     }
   }
 
