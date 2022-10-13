@@ -15,14 +15,15 @@ export async function registerPayment(transactionData: FormData) {
   }
 }
 export const getValidateScheduleTransaction = async (
-  page?: number
+  page?: number,
+  per_page?: number
 ): Promise<IPaginationData<IDataPIX>> => {
   try {
     const { data } = await api.get(
       '/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&filter[transaction_type_id]=2',
       {
         params: {
-          'page[size]': 3,
+          'page[size]': 10,
           'page[number]': page || 1,
         },
       }
@@ -52,5 +53,23 @@ export async function DeleteScheduleTransactions(transactionId: number) {
     api.delete(`/schedule_transactions/${transactionId}`);
   } catch (err: any) {
     throw new HandleError(err.response);
+  }
+}
+export async function GetScheduleAllTransactionDataApproved(
+  transactionId: number,
+  secretPassword: string
+) {
+  try {
+    const { data } = await api.get(
+      `/schedule_transactions/approve/${transactionId}`,
+      {
+        headers: {
+          'Secret-Password': `${secretPassword}`,
+        },
+      }
+    );
+    return data;
+  } catch (error) {
+    console.log();
   }
 }

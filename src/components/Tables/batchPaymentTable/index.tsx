@@ -33,14 +33,17 @@ import {
   RefetchOptions,
   RefetchQueryFilters,
 } from 'react-query';
+import { getLocalStorage, setLocalStorage } from '~/utils/localStorageFormat';
 // import { dateFnsFormatDate } from '~/utils/fotmat';
 
 type tableProps = {
   items?: IPaginationData<IDataPIX>;
   isLoading?: boolean;
+  loading: (state: boolean) => void;
   getScheduleIDS?: (ids: number[]) => void;
   page?: number;
-  setPage?: (numberPage: number) => void;
+  setPage: (numberPage: number) => void;
+  setState: (item: any) => void;
   refetch?: (
     options?: RefetchOptions & RefetchQueryFilters
   ) => Promise<QueryObserverBaseResult>;
@@ -54,7 +57,9 @@ export const BatchPaymentTable = ({
   items,
   isLoading,
   getScheduleIDS,
+  loading,
   setPage,
+  setState,
   refetch,
 }: tableProps) => {
   const [allChecked, setAllChecked] = useState(false);
@@ -91,6 +96,15 @@ export const BatchPaymentTable = ({
   };
 
   useEffect(() => {
+    if (checked.length === 10) {
+      const pagePrev = JSON.parse(
+        getLocalStorage('currentPage-prev') as string
+      );
+      if (pagePrev === 1) {
+        return;
+      }
+      setLocalStorage('currentPage-prev', pagePrev - 1);
+    }
     const format = () => {
       const data_IDs: number[] = [];
       checked.length ? checked.map((item) => data_IDs.push(item.id)) : null;
@@ -113,7 +127,7 @@ export const BatchPaymentTable = ({
     </Center>
   ) : (
     <>
-      <Box overflowX="auto" maxH="600px">
+      <Box overflowX="auto" maxH="1400px">
         <Table>
           <Thead width="100%" color="#FFF">
             <Tr bg="#7F8B9F" fontSize="1rem" whiteSpace="nowrap">
@@ -207,11 +221,11 @@ export const BatchPaymentTable = ({
           </Tbody>
         </Table>
         <Pagination
-          refetch={refetch}
           setPage={setPage}
+          loading={loading}
+          setState={setState}
           next={items?.links?.next}
           prev={items?.links?.prev}
-          last={items?.meta.last_page}
           total={items?.meta?.last_page}
           current={items?.meta?.current_page}
         />
