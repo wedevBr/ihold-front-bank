@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Flex,
@@ -13,30 +13,95 @@ import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import {
   DeleteScheduleTransactions,
+  GetScheduleAllTransactionDataApproved,
+  getValidateScheduleTransaction,
   useScheduleTransactions,
 } from '~/services/hooks/usePaymentsSchedule';
+import { IDataPIX } from '~/types/scheduledTransactions';
+import { IPaginationData } from '~/types/pagination';
+import { ModalStatus } from '~/components/Modals/ModalStatus';
+import { ModalAuth } from '~/components/Modals/ModalAuth';
 
 export default function ReviewPayment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
+  const [items, setItems] = useState<IPaginationData<IDataPIX>>();
+  const [loading, setLoading] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const { data, refetch, isLoading, isFetching } =
-    useScheduleTransactions(page);
+  const [deletSchedule, setDeletSchedule] = useState(false);
+  const [password, setPassword] = useState('');
   const {
-    isOpen: isOpenUpload,
-    onOpen: onOpenUpload,
-    onClose: onCloseUpload,
+    isOpen: isOpenAuth,
+    onOpen: onOpenAuth,
+    onClose: onCloseAuth,
   } = useDisclosure();
+
+  const {
+    isOpen: isOpenDelet,
+    onOpen: onPenDelet,
+    onClose: onCloseDelet,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenSuccess,
+    onOpen: onPenSuccess,
+    onClose: onCloseSuccess,
+  } = useDisclosure();
+
+  async function handleConfirmationPayment(secretPassword: string) {
+    if (items && secretPassword) {
+      setPaymentLoading(true);
+      return await Promise.all(
+        items?.data?.map(async (pix) => {
+          return await GetScheduleAllTransactionDataApproved(
+            pix.id,
+            secretPassword
+          )
+            .then((_) => {
+              onCloseAuth();
+              onPenSuccess();
+            })
+            .finally(() => setPaymentLoading(false));
+        })
+      );
+    }
+  }
+
+  async function getScheduleTransaction() {
+    setLoading(true);
+    try {
+      const response = await getValidateScheduleTransaction();
+      setItems(response);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function deletScheduleTrasanction(checkIDS: number[]) {
     if (!checkIDS.length) {
       return;
     }
+
     return await Promise.all(
       checkIDS.map((id: any) => DeleteScheduleTransactions(id))
-    ).finally(() => {
-      refetch();
-    });
+    )
+      .then(() => {
+        setDeletSchedule(true);
+        setLoading(true);
+      })
+      .finally(() => {
+        setDeletSchedule(false);
+        setLoading(false);
+      });
   }
+
+  useEffect(() => {
+    getScheduleTransaction();
+  }, [deletSchedule]);
+
+  console.log({ page });
+
   return (
     <Box h="full" w="full">
       <Layout>
@@ -85,7 +150,7 @@ export default function ReviewPayment() {
                 textTransform="uppercase"
                 fontWeight="600"
                 padding="8px 1.25rem"
-                onClick={() => onOpenUpload()}
+                onClick={() => onOpenAuth()}
               >
                 <Icon
                   icon="bx:check-shield"
@@ -104,7 +169,7 @@ export default function ReviewPayment() {
                 textTransform="uppercase"
                 fontWeight="600"
                 padding="8px 1.25rem"
-                onClick={() => deletScheduleTrasanction(scheduleID)}
+                onClick={onPenDelet}
               >
                 <Icon icon="ep:delete" width={17} style={{ marginRight: 5 }} />
                 Excluir
@@ -121,15 +186,39 @@ export default function ReviewPayment() {
           mt="30px"
         >
           <BatchPaymentTable
-            refetch={refetch}
+            loading={setLoading}
+            setState={setItems}
             setPage={setPage}
-            isLoading={isFetching}
-            items={data}
+            isLoading={loading}
+            items={items}
             getScheduleIDS={(ids) => setScheduleID(ids)}
           />
         </Box>
       </Layout>
-      <Modal isOpen={isOpenUpload} onClose={onCloseUpload}>
+      <ModalStatus
+        variant="success"
+        title="PAGAMENTO AUTORIZADO"
+        route="/home/all-statements"
+        description="Seu pagamento em lote foi autorizado com sucesso! Acompanhe o status de pagamento pelo extrato."
+        titleButton="Ver extrato"
+        isOpen={isOpenSuccess}
+        onClose={onCloseSuccess}
+      />
+      <ModalStatus
+        variant="alert"
+        handleClick={() => deletScheduleTrasanction(scheduleID)}
+        titleButton="excluir"
+        isOpen={isOpenDelet}
+        onClose={onCloseDelet}
+      />
+      <ModalAuth
+        handlePassword={(pass) => setPassword(pass)}
+        loading={paymentLoading}
+        isOpen={isOpenAuth}
+        onClose={onCloseAuth}
+        handleClick={() => handleConfirmationPayment(password)}
+      />
+      {/* <Modal>
         <Box>
           <Text>AUTORIZAR PAGAMENTO</Text>
           <Text>
@@ -154,10 +243,13 @@ export default function ReviewPayment() {
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             // {...register('password')}
             // error={formState?.errors?.password}
           />
           <Button
+            onClick={() => handleConfirmationPayment(password)}
             mt="25px"
             mb="30px"
             w="full"
@@ -168,7 +260,7 @@ export default function ReviewPayment() {
             CONFIRMAR
           </Button>
         </Box>
-      </Modal>
+      </Modal> */}
     </Box>
   );
 }
