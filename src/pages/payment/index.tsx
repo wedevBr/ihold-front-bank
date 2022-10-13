@@ -2,56 +2,175 @@ import {
   Box,
   Flex,
   Button,
-  SimpleGrid,
   TabPanel,
   Image,
   Text,
   Center,
-  Spacer,
   useDisclosure,
   Tabs,
   TabList,
   Tab,
   TabPanels,
+  useToast,
 } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
-import React, { useState } from 'react';
-import {
-  BatchPaymentTable,
-  CardValue,
-  ContainerTransaction,
-  Layout,
-  Modal,
-  ModalUploadPayment,
-} from '~/components';
-import { MenuDropDwon } from '~/components/Menu';
+import React, { useEffect, useRef, useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { BatchPaymentTable, Layout, Loading, Modal } from '~/components';
+import { ModalStatus } from '~/components/Modals/ModalStatus';
 import {
   DeleteScheduleTransactions,
+  getValidateScheduleTransaction,
   useScheduleTransactions,
 } from '~/services/hooks/usePaymentsSchedule';
+import { IPaginationData } from '~/types/pagination';
+import { IDataPIX } from '~/types/scheduledTransactions';
+import { registerPayment } from '~/services/hooks/usePaymentsSchedule';
+
+interface RegisterPayment {
+  file: File;
+}
+
+export const createPaymentFormSchema = yup.object().shape({
+  file: yup.mixed().required('Arquivo Obrigátorio'),
+});
 
 export default function Payment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
   const [type, setType] = useState('pix');
+  const [items, setItems] = useState<IPaginationData<IDataPIX>>();
+  const [loading, setLoading] = useState(false);
+  const [deletSchedule, setDeletSchedule] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSuccess, seIsSuccess] = useState(false);
+  const [page, setPage] = useState(1);
+  const [fileSrc, setFileSrc] = useState<File | any>();
+  const [uploadFile, setUploadFile] = useState<File | any>();
+  const toast = useToast();
   const {
     isOpen: isOpenUpload,
     onOpen: onOpenUpload,
     onClose: onCloseUpload,
   } = useDisclosure();
-  const [page, setPage] = useState(1);
-  const { data, refetch, isLoading, isFetching } =
-    useScheduleTransactions(page);
+  const {
+    isOpen: isOpenError,
+    onOpen: onPenError,
+    onClose: onCloseError,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenDelet,
+    onOpen: onPenDelet,
+    onClose: onCloseDelet,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenSuccess,
+    onOpen: onPenSuccess,
+    onClose: onCloseSuccess,
+  } = useDisclosure();
+
+  const file = useRef<HTMLInputElement | null>(null);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    getValues,
+    trigger,
+    formState: { errors },
+  } = useForm<RegisterPayment>({
+    resolver: yupResolver(createPaymentFormSchema),
+  });
+
+  const openUpload = () => {
+    file.current && file.current.click();
+  };
+
+  const handleUpload = async (files: FileList | null) => {
+    if (files) {
+      const objectURL: string = window.URL.createObjectURL(files[0]);
+      let file = files[0];
+      let type = files[0]?.type;
+      setFileSrc({ preview: objectURL, file, type });
+      setValue('file', file);
+      await trigger(['file']);
+    }
+    file.current && (file.current.value = '');
+  };
+
+  const handleSendPayment: SubmitHandler<RegisterPayment> = async (data) => {
+    const formData = new FormData();
+    formData.append('transaction_type', type);
+    formData.append('file', data.file);
+    seIsSuccess(true);
+    setLoading(true);
+    try {
+      const response = await registerPayment(formData);
+      toast({
+        title: 'Enviado com Sucesso!',
+        status: 'success',
+        variant: 'solid',
+        isClosable: true,
+      });
+      onCloseUpload();
+      setTimeout(() => onPenSuccess(), 400);
+      setIsError(false);
+    } catch (err: any) {
+      setIsError(true);
+      setErrorMessage(
+        err?.response?.data?.errors?.file ||
+          err?.response?.data?.errors?.map((item: any) => item) ||
+          err?.response?.data?.message
+      );
+      onPenError();
+      toast({
+        title:
+          err?.response?.data?.errors?.file ||
+          err?.response?.data?.errors?.map((item: any) => item) ||
+          err?.response?.data?.message,
+        status: 'error',
+        variant: 'solid',
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+      seIsSuccess(false);
+    }
+  };
 
   async function deletScheduleTrasanction(checkIDS: number[]) {
     if (!checkIDS.length) {
       return;
     }
+
     return await Promise.all(
       checkIDS.map((id: any) => DeleteScheduleTransactions(id))
-    ).finally(() => {
-      refetch();
-    });
+    )
+      .then(() => {
+        setDeletSchedule(true);
+        setLoading(true);
+      })
+      .finally(() => {
+        setDeletSchedule(false);
+        setLoading(false);
+      });
   }
+  async function getScheduleTransaction() {
+    setLoading(true);
+    try {
+      const response = await getValidateScheduleTransaction();
+      setItems(response);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getScheduleTransaction();
+  }, [deletSchedule]);
 
   return (
     <Box h="full">
@@ -203,22 +322,24 @@ export default function Payment() {
                           textTransform="uppercase"
                           fontWeight="600"
                           padding="8px 1.25rem"
-                          onClick={() => deletScheduleTrasanction(scheduleID)}
-                          isLoading={isFetching}
+                          onClick={onPenDelet}
+                          isLoading={loading}
                         >
                           <Icon
                             icon="ep:delete"
                             width={17}
                             style={{ marginRight: 5 }}
                           />{' '}
-                          {isFetching ? 'Excluindo' : 'Excluir'}
+                          {loading ? 'Excluindo' : 'Excluir'}
                         </Button>
                       </Flex>
                       <BatchPaymentTable
-                        refetch={refetch}
+                        loading={setLoading}
+                        setState={setItems}
+                        // refetch={refetch}
                         setPage={setPage}
-                        isLoading={isFetching}
-                        items={data}
+                        isLoading={loading}
+                        items={items}
                         getScheduleIDS={(ids) => setScheduleID(ids)}
                       />
                     </TabPanel>
@@ -231,12 +352,118 @@ export default function Payment() {
           </Box>
         </Flex>
       </Layout>
+      <ModalStatus
+        variant="error"
+        title="Error"
+        titleButton="Ok, entendi"
+        description={errorMessage}
+        isOpen={isOpenError}
+        onClose={onCloseError}
+      />
+      <ModalStatus
+        variant="alert"
+        handleClick={() => deletScheduleTrasanction(scheduleID)}
+        titleButton="excluir"
+        isOpen={isOpenDelet}
+        onClose={onCloseDelet}
+      />
+      <ModalStatus
+        variant="success"
+        title="pronto"
+        route="/payment/review/pix"
+        description="Dados importados com sucesso!
+          Prossiga para autorizar o pagamento em lote."
+        titleButton="avançar"
+        isOpen={isOpenSuccess}
+        onClose={onCloseSuccess}
+      />
       <Modal
         isOpen={isOpenUpload}
         onClose={onCloseUpload}
         title="IMPORTAR DADOS"
       >
-        <ModalUploadPayment refetch={refetch} type={type} />
+        <>
+          {isSuccess ? (
+            <Flex h="300px" flexDir="column" justify="center" align="center">
+              <Loading
+                size="xl"
+                thickness="7px"
+                speed="0.88s"
+                w="80px"
+                h="80px"
+                color="#21C6DE"
+              />
+              <Text
+                my="35px"
+                w="70%"
+                mx="auto"
+                color=" #7F8B9F"
+                textAlign="center"
+                fontFamily="Lato"
+                fontStyle="normal"
+                fontWeight="700"
+                fontSize="20px"
+              >
+                Aguarde, estamos processando sua importação
+              </Text>
+            </Flex>
+          ) : (
+            <Box as="form" onSubmit={handleSubmit(handleSendPayment)}>
+              <Text mb="20px">{type?.toLocaleUpperCase()}</Text>
+              <Center
+                border="0.125rem"
+                borderStyle="dashed"
+                borderColor={isError || errors.file ? 'red' : '#cbd3e0'}
+                onClick={openUpload}
+                cursor="pointer"
+                py="40px"
+              >
+                <Box>
+                  <Center>
+                    <Icon
+                      icon="fa6-solid:cloud-arrow-up"
+                      color={isError || errors.file ? 'red' : '#cbd3e0'}
+                      fontSize={50}
+                    />
+                  </Center>
+                  {getValues('file') ? (
+                    <Text color="#cbd3e0">{getValues('file')?.name}</Text>
+                  ) : (
+                    <Text color={isError || errors.file ? 'red' : '#cbd3e0'}>
+                      Procurar Arquivo para Carregar
+                    </Text>
+                  )}
+                </Box>
+              </Center>
+              <input
+                {...register('file')}
+                accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                type="file"
+                hidden
+                ref={file}
+                onChange={(event) => handleUpload(event.target.files)}
+              />
+              <Flex>
+                {errors.file && (
+                  <Text color="red" mt="5px">
+                    {errors.file.message}
+                  </Text>
+                )}
+              </Flex>
+              <Button
+                mt="25px"
+                mb="30px"
+                type="submit"
+                w="full"
+                color="#fff"
+                bg="#2E4EFF"
+                borderRadius="40px"
+              >
+                UPLOAD
+              </Button>
+            </Box>
+          )}
+        </>
       </Modal>
     </Box>
   );
