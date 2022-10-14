@@ -23,10 +23,13 @@ import { ModalStatus } from '~/components/Modals/ModalStatus';
 import {
   DeleteScheduleTransactions,
   getValidateScheduleTransaction,
-  useScheduleTransactions,
 } from '~/services/hooks/usePaymentsSchedule';
 import { IPaginationData } from '~/types/pagination';
-import { IDataPIX } from '~/types/scheduledTransactions';
+import {
+  IDataBillPayment,
+  IDataPIX,
+  IDataTed,
+} from '~/types/scheduledTransactions';
 import { registerPayment } from '~/services/hooks/usePaymentsSchedule';
 
 interface RegisterPayment {
@@ -41,6 +44,9 @@ export default function Payment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
   const [type, setType] = useState('pix');
   const [items, setItems] = useState<IPaginationData<IDataPIX>>();
+  const [billPayment, setBillPayment] =
+    useState<IPaginationData<IDataBillPayment>>();
+  const [transfer, setTransfer] = useState<IPaginationData<IDataTed>>();
   const [loading, setLoading] = useState(false);
   const [deletSchedule, setDeletSchedule] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -134,6 +140,7 @@ export default function Payment() {
         isClosable: true,
       });
     } finally {
+      getScheduleTransaction();
       setLoading(false);
       seIsSuccess(false);
     }
@@ -159,8 +166,15 @@ export default function Payment() {
   async function getScheduleTransaction() {
     setLoading(true);
     try {
-      const response = await getValidateScheduleTransaction();
-      setItems(response);
+      const responsePix = await getValidateScheduleTransaction<IDataPIX>('pix');
+      const responseBillPayment =
+        await getValidateScheduleTransaction<IDataBillPayment>('bill-payment');
+      const responseTransfer = await getValidateScheduleTransaction<IDataTed>(
+        'transfer'
+      );
+      setTransfer(responseTransfer);
+      setBillPayment(responseBillPayment);
+      setItems(responsePix);
     } catch (error) {
       console.log(error);
     } finally {
@@ -170,7 +184,7 @@ export default function Payment() {
 
   useEffect(() => {
     getScheduleTransaction();
-  }, [deletSchedule]);
+  }, [deletSchedule, isSuccess]);
 
   return (
     <Box h="full">
@@ -334,6 +348,7 @@ export default function Payment() {
                         </Button>
                       </Flex>
                       <BatchPaymentTable
+                        type="pix"
                         loading={setLoading}
                         setState={setItems}
                         // refetch={refetch}
@@ -343,8 +358,51 @@ export default function Payment() {
                         getScheduleIDS={(ids) => setScheduleID(ids)}
                       />
                     </TabPanel>
-                    <TabPanel></TabPanel>
-                    <TabPanel></TabPanel>
+                    <TabPanel>
+                      <Flex w="full" justify="right" pb="20px">
+                        <Button
+                          bg="#F03D3E"
+                          color="#fff"
+                          fontSize="0.875rem"
+                          borderRadius="20px"
+                          h="38px"
+                          w="205px"
+                          textTransform="uppercase"
+                          fontWeight="600"
+                          padding="8px 1.25rem"
+                          onClick={onPenDelet}
+                          isLoading={loading}
+                        >
+                          <Icon
+                            icon="ep:delete"
+                            width={17}
+                            style={{ marginRight: 5 }}
+                          />{' '}
+                          {loading ? 'Excluindo' : 'Excluir'}
+                        </Button>
+                      </Flex>
+                      <BatchPaymentTable
+                        type="transfer"
+                        loading={setLoading}
+                        setState={setTransfer}
+                        // refetch={refetch}
+                        setPage={setPage}
+                        isLoading={loading}
+                        dataTransfer={transfer}
+                        getScheduleIDS={(ids) => setScheduleID(ids)}
+                      />
+                    </TabPanel>
+                    <TabPanel>
+                      {/* <BatchPaymentTable
+                        loading={setLoading}
+                        setState={setBillPayment}
+                        // refetch={refetch}
+                        setPage={setPage}
+                        isLoading={loading}
+                        items={billPayment}
+                        getScheduleIDS={(ids) => setScheduleID(ids)}
+                      /> */}
+                    </TabPanel>
                   </TabPanels>
                 </Box>
               </Tabs>
