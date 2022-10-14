@@ -2,7 +2,7 @@ export function setLocalStorage(key: string, value: any) {
   window.localStorage.setItem(key, JSON.stringify(value));
 }
 export function getLocalStorage(key: string) {
-  if (typeof window !== undefined) {
+  if (typeof window !== 'undefined') {
     return window.localStorage.getItem(key);
   }
 }
