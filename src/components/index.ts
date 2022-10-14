@@ -17,6 +17,7 @@ import { ExtractAllTable } from './Tables/extractAllTable';
 import { ExtractHomeTable } from './Tables/extractHomeTable';
 import { BatchPaymentTable } from './Tables/batchPaymentTable';
 import { ModalUploadPayment } from './Modals/ModalUploadPayment';
+import { ModalEditPayment } from './Modals/ModalEditPayment';
 
 export {
   Button,
@@ -38,4 +39,5 @@ export {
   ExtractHomeTable,
   BatchPaymentTable,
   ModalUploadPayment,
+  ModalEditPayment,
 };

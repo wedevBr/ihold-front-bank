@@ -8,19 +8,25 @@ import {
   Divider,
   useDisclosure,
 } from '@chakra-ui/react';
-import { BatchPaymentTable, Input, Layout, Modal } from '~/components';
+import {
+  BatchPaymentTable,
+  Input,
+  Layout,
+  Modal,
+  ModalEditPayment,
+} from '~/components';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import {
   DeleteScheduleTransactions,
   GetScheduleAllTransactionDataApproved,
   getValidateScheduleTransaction,
-  useScheduleTransactions,
 } from '~/services/hooks/usePaymentsSchedule';
 import { IDataPIX } from '~/types/scheduledTransactions';
 import { IPaginationData } from '~/types/pagination';
 import { ModalStatus } from '~/components/Modals/ModalStatus';
 import { ModalAuth } from '~/components/Modals/ModalAuth';
+import { setLocalStorage } from '~/utils/localStorageFormat';
 
 export default function ReviewPayment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
@@ -29,6 +35,7 @@ export default function ReviewPayment() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [deletSchedule, setDeletSchedule] = useState(false);
+  const [edit, setEdit] = useState<IDataPIX>();
   const [password, setPassword] = useState('');
   const {
     isOpen: isOpenAuth,
@@ -45,6 +52,11 @@ export default function ReviewPayment() {
     isOpen: isOpenSuccess,
     onOpen: onPenSuccess,
     onClose: onCloseSuccess,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenEditPix,
+    onOpen: onPenEditPix,
+    onClose: onCloseEditPix,
   } = useDisclosure();
 
   async function handleConfirmationPayment(secretPassword: string) {
@@ -69,8 +81,13 @@ export default function ReviewPayment() {
   async function getScheduleTransaction() {
     setLoading(true);
     try {
-      const response = await getValidateScheduleTransaction();
+      const response = await getValidateScheduleTransaction<IDataPIX>('pix');
       setItems(response);
+      setEdit(response?.data?.find((i) => i.id === 605));
+      setLocalStorage(
+        'pix',
+        response?.data?.find((i) => i.id === 605)
+      );
     } catch (error) {
       console.log(error);
     } finally {
@@ -101,6 +118,8 @@ export default function ReviewPayment() {
   }, [deletSchedule]);
 
   console.log({ page });
+
+  // const pix = (items?.data && items?.data?.find((i) => i.id === 605)) || {};
 
   return (
     <Box h="full" w="full">
@@ -150,7 +169,8 @@ export default function ReviewPayment() {
                 textTransform="uppercase"
                 fontWeight="600"
                 padding="8px 1.25rem"
-                onClick={() => onOpenAuth()}
+                onClick={() => onPenEditPix()}
+                // onClick={() => onOpenAuth()}
               >
                 <Icon
                   icon="bx:check-shield"
@@ -218,49 +238,12 @@ export default function ReviewPayment() {
         onClose={onCloseAuth}
         handleClick={() => handleConfirmationPayment(password)}
       />
-      {/* <Modal>
-        <Box>
-          <Text>AUTORIZAR PAGAMENTO</Text>
-          <Text>
-            Digite sua senha de acesso para confirmar a autorização do pagamento
-            em lote
-          </Text>
-          <Input
-            top="60%"
-            name="Password"
-            label=""
-            labelColor="#7F8B9F"
-            size="lg"
-            bg="transparent"
-            fontSize="18px"
-            height="56px"
-            border="0px"
-            borderBottom="1px solid #7F8B9F"
-            borderRadius={0}
-            placeholder="*********"
-            type="password"
-            iconColor="#21C6DE"
-            _focus={{
-              borderBottom: '1px solid #2E4EFF',
-            }}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            // {...register('password')}
-            // error={formState?.errors?.password}
-          />
-          <Button
-            onClick={() => handleConfirmationPayment(password)}
-            mt="25px"
-            mb="30px"
-            w="full"
-            color="#fff"
-            bg="#2E4EFF"
-            borderRadius="40px"
-          >
-            CONFIRMAR
-          </Button>
-        </Box>
-      </Modal> */}
+      <ModalEditPayment
+        dataPix={edit as IDataPIX}
+        isOpen={isOpenEditPix}
+        onClose={onCloseEditPix}
+        type="pix"
+      />
     </Box>
   );
 }
