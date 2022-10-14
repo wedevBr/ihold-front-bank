@@ -1,7 +1,11 @@
 import { api } from '../api';
 import { HandleError } from '~/error/HandlerError';
 import { IPaginationData } from '~/types/pagination';
-import { IDataPIX } from '~/types/scheduledTransactions';
+import {
+  IDataBillPayment,
+  IDataPIX,
+  IDataTed,
+} from '~/types/scheduledTransactions';
 import { useQuery } from 'react-query';
 
 export async function registerPayment(transactionData: FormData) {
@@ -14,17 +18,19 @@ export async function registerPayment(transactionData: FormData) {
     throw err;
   }
 }
-export const getValidateScheduleTransaction = async (
-  page?: number,
+export const getValidateScheduleTransaction = async <T>(
+  type?: 'pix' | 'transfer' | 'bill-payment',
   per_page?: number
-): Promise<IPaginationData<IDataPIX>> => {
+): Promise<IPaginationData<T>> => {
   try {
     const { data } = await api.get(
-      '/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&filter[transaction_type_id]=2',
+      `/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&filter[transaction_type_id]=${
+        type === 'pix' ? '2' : type === 'transfer' ? '1' : '3'
+      }`,
       {
         params: {
           'page[size]': 10,
-          'page[number]': page || 1,
+          // 'page[number]': 1,
         },
       }
     );
@@ -38,15 +44,15 @@ export const getValidateScheduleTransaction = async (
   }
 };
 
-export function useScheduleTransactions(page?: number) {
-  return useQuery(
-    ['getScheduleTransactions', page],
-    () => getValidateScheduleTransaction(page),
-    {
-      keepPreviousData: true,
-    }
-  );
-}
+// export function useScheduleTransactions(page?: number) {
+//   return useQuery(
+//     ['getScheduleTransactions', page],
+//     () => getValidateScheduleTransaction(page),
+//     {
+//       keepPreviousData: true,
+//     }
+//   );
+// }
 
 export async function DeleteScheduleTransactions(transactionId: number) {
   try {
