@@ -6,7 +6,7 @@ export interface IDataPIX {
   is_approved: boolean;
   completed_at: string;
   created_at: string;
-  payload: IPayloadPix;
+  payload: any | IPayloadPix;
   transaction: ITransaction;
   transaction_type: ITransactionType;
   status: IStatus;
@@ -19,7 +19,7 @@ export interface IDataBillPayment {
   is_approved: boolean;
   completed_at: string;
   created_at: string;
-  payload: IPayloadTicket;
+  payload: any | IPayloadTicket;
   transaction: ITransaction;
   transaction_type: ITransactionType;
   status: IStatus;
@@ -32,21 +32,21 @@ export interface IDataTed {
   is_approved: boolean;
   completed_at: string;
   created_at: string;
-  payload: IPayloadTed;
+  payload: any | IPayloadTed;
   transaction: ITransaction;
   transaction_type: ITransactionType;
   status: IStatus;
   account: IAccount;
 }
 
- interface IPayloadTicket {
+interface IPayloadTicket {
   digitable_line: string;
   payment_date: any;
   description: string;
-  amount: number
+  amount: number;
 }
 
-interface IPayloadPix {
+export interface IPayloadPix {
   key_type: string;
   key: string;
   amount: string;

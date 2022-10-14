@@ -63,7 +63,6 @@ export function Pagination({
       );
       setState(data);
       // setAll(data.data);
-      console.log({ data });
     } catch (error) {
       console.log();
     } finally {
