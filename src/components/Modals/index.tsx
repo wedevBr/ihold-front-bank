@@ -40,6 +40,7 @@ export function Modal({
         minW="500px"
         bg="transparent"
         shadow="none"
+       
       >
         <Flex justifyContent="flex-end">
           <CloseButton
@@ -49,8 +50,8 @@ export function Modal({
             _focus={{ borderColor: 'white' }}
           />
         </Flex>
-        <ModalHeader bg="white" borderTopRadius="6px" padding={padding || ''}>
-          <Text textAlign="left" fontSize="18px">
+        <ModalHeader  borderTop="4px" borderColor="#00102A" bg="white" borderTopRadius="6px" padding={padding || ''}>
+          <Text textAlign="left" fontSize="18px" lineHeight="21px">
             {title}
           </Text>
         </ModalHeader>
