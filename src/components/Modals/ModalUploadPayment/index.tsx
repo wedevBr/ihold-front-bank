@@ -6,6 +6,7 @@ import {
   Center,
   Select,
   useToast,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -21,9 +22,12 @@ import { registerPayment } from '~/services/hooks/usePaymentsSchedule';
 import { error } from 'console';
 import { Loading } from '~/components/Loading';
 import Link from 'next/link';
+import { ModalStatus } from '../ModalStatus';
 
 interface IPropsModal {
   type?: 'pix' | 'transfer' | 'bill-payment' | string;
+  setLoading: (state: boolean) => void;
+  onClose?: () => void;
   refetch?: (
     options?: RefetchOptions & RefetchQueryFilters
   ) => Promise<QueryObserverResult>;
@@ -37,13 +41,23 @@ export const createPaymentFormSchema = yup.object().shape({
   file: yup.mixed().required('Arquivo Obrigátorio'),
 });
 
-export const ModalUploadPayment = ({ refetch, type = 'pix' }: IPropsModal) => {
+export const ModalUploadPayment = ({
+  refetch,
+  onClose,
+  type = 'pix',
+  setLoading,
+}: IPropsModal) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isSuccess, seIsSuccess] = useState(false);
   const [fileSrc, setFileSrc] = useState<File | any>();
   const [uploadFile, setUploadFile] = useState<File | any>();
   const toast = useToast();
+  const {
+    isOpen: isOpenDelet,
+    onOpen: onPenDelet,
+    onClose: onCloseDelet,
+  } = useDisclosure();
 
   const file = useRef<HTMLInputElement | null>(null);
   const {
@@ -87,6 +101,7 @@ export const ModalUploadPayment = ({ refetch, type = 'pix' }: IPropsModal) => {
     formData.append('file', data.file);
     setIsLoading(true);
     refetch && refetch();
+    setLoading(true);
     try {
       const response = await registerPayment(formData);
       toast({
@@ -95,9 +110,11 @@ export const ModalUploadPayment = ({ refetch, type = 'pix' }: IPropsModal) => {
         variant: 'solid',
         isClosable: true,
       });
+      onPenDelet();
       refetch && refetch();
       setIsError(false);
       seIsSuccess(true);
+      onClose && onClose();
     } catch (err: any) {
       setIsError(true);
       toast({
@@ -111,6 +128,7 @@ export const ModalUploadPayment = ({ refetch, type = 'pix' }: IPropsModal) => {
       });
     } finally {
       setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -173,61 +191,15 @@ export const ModalUploadPayment = ({ refetch, type = 'pix' }: IPropsModal) => {
           </Button>
         </Box>
       ) : isSuccess ? (
-        <Box h="300px">
-          <Flex
-            pos="absolute"
-            flexDir="column"
-            top={8}
-            left={0}
-            right={0}
-            borderTopRadius="5px"
-            bg="#27AE60"
-            color="#fff"
-            justify="center"
-            align="center"
-            h="180px"
-          >
-            <Icon icon="bi:check-circle" width={55} />
-            <Text
-              color="#FFFFFF"
-              textAlign="center"
-              fontFamily="Lato"
-              fontStyle="normal"
-              fontWeight="700"
-              fontSize="30px"
-            >
-              PRONTO
-            </Text>
-          </Flex>
-          <Text
-            pos="absolute"
-            top={250}
-            left={5}
-            right={5}
-            color="#7F8B9F"
-            textAlign="center"
-            fontFamily="Lato"
-            fontStyle="normal"
-            fontWeight="700"
-            fontSize="17px"
-          >
-            Dados importados com sucesso! Prossiga para autorizar o pagamento em
-            lote.
-          </Text>
-          <Link href="/payment/review">
-            <Button
-              pos="absolute"
-              bottom={7}
-              left={5}
-              right={5}
-              color="#fff"
-              bg="#2E4EFF"
-              borderRadius="40px"
-            >
-              AVANÇAR
-            </Button>
-          </Link>
-        </Box>
+        <ModalStatus
+          variant="success"
+          title="pronto"
+          description="Dados importados com sucesso!
+          Prossiga para autorizar o pagamento em lote."
+          titleButton="avançar"
+          isOpen={isOpenDelet}
+          onClose={onCloseDelet}
+        />
       ) : (
         <Flex h="300px" flexDir="column" justify="center" align="center">
           <Loading
