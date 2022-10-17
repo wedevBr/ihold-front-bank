@@ -52,6 +52,7 @@ export default function Payment() {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSuccess, seIsSuccess] = useState(false);
+  const [refreshItems, setRefreshItems] = useState(false);
   const [page, setPage] = useState(1);
   const [fileSrc, setFileSrc] = useState<File | any>();
   const [uploadFile, setUploadFile] = useState<File | any>();
@@ -184,10 +185,10 @@ export default function Payment() {
 
   useEffect(() => {
     getScheduleTransaction();
-  }, [deletSchedule, isSuccess]);
+  }, [deletSchedule, isSuccess, refreshItems]);
 
   return (
-    <Box h="full">
+    <Box h="full" overflowX="hidden">
       <Layout>
         <Flex mt="30px">
           <Box w="100%">
@@ -349,6 +350,7 @@ export default function Payment() {
                       </Flex>
                       <BatchPaymentTable
                         type="pix"
+                        refreshItems={setRefreshItems}
                         loading={setLoading}
                         setState={setItems}
                         // refetch={refetch}
@@ -382,6 +384,7 @@ export default function Payment() {
                         </Button>
                       </Flex>
                       <BatchPaymentTable
+                        refreshItems={setRefreshItems}
                         type="transfer"
                         loading={setLoading}
                         setState={setTransfer}
@@ -428,7 +431,7 @@ export default function Payment() {
       <ModalStatus
         variant="success"
         title="pronto"
-        route="/payment/review/pix"
+        route={`/payment/review/${type}`}
         description="Dados importados com sucesso!
           Prossiga para autorizar o pagamento em lote."
         titleButton="avançar"
