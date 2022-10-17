@@ -100,13 +100,13 @@ export function getAPIClient(ctx?: any) {
         }
       }
 
-      // 400 - Bad Request
-      if (error.response.status === 400) {
-        clearLocalStorage();
-        signOut();
-        // process.browser ? signOut() : Promise.reject(error);
-        return Promise.reject(error);
-      }
+      // // 400 - Bad Request
+      // if (error.response.status === 400) {
+      //   clearLocalStorage();
+      //   signOut();
+      //   // process.browser ? signOut() : Promise.reject(error);
+      //   return Promise.reject(error);
+      // }
       if (error.response.status === 401) {
         clearLocalStorage();
         signOut();

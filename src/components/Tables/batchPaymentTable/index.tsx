@@ -17,8 +17,10 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  TableContainer,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { Loading, Pagination } from '~/components';
+import { Loading, ModalEditPayment, Pagination } from '~/components';
 import { StatementData } from '~/types/statements.types';
 import { Icon } from '@iconify/react';
 import moment from 'moment';
@@ -39,10 +41,15 @@ import {
   RefetchQueryFilters,
 } from 'react-query';
 import { getLocalStorage, setLocalStorage } from '~/utils/localStorageFormat';
+import { ModalAuth } from '~/components/Modals/ModalAuth';
+import { GetScheduleAllTransactionDataApproved } from '~/services/hooks/usePaymentsSchedule';
+import { ModalStatus } from '~/components/Modals/ModalStatus';
+import { GetStatementsDownloadVoucher } from '~/services/hooks/useStatements';
 // import { dateFnsFormatDate } from '~/utils/fotmat';
 
 type tableProps = {
   type?: 'pix' | 'transfer' | 'bill-payment';
+  edit?: boolean;
   dataBillPayment?: IPaginationData<IDataBillPayment>;
   dataTransfer?: IPaginationData<IDataTed>;
   items?: IPaginationData<IDataPIX>;
@@ -52,6 +59,7 @@ type tableProps = {
   page?: number;
   setPage: (numberPage: number) => void;
   setState: (item: any) => void;
+  refreshItems?: (state: boolean) => void;
   refetch?: (
     options?: RefetchOptions & RefetchQueryFilters
   ) => Promise<QueryObserverBaseResult>;
@@ -67,15 +75,39 @@ export const BatchPaymentTable = ({
   dataBillPayment,
   dataTransfer,
   isLoading,
+  edit,
   getScheduleIDS,
+  refreshItems,
   loading,
   setPage,
   setState,
   refetch,
 }: tableProps) => {
   const [allChecked, setAllChecked] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [checked, setChecked] = useState<checkBoxsSelected[]>([]);
+  const [password, setPassword] = useState('');
+  const [uuid, setUuid] = useState(0);
+  const [transaction, setTransaction] = useState<IDataPIX | IDataTed>();
   const check = useRef(null);
+
+  const {
+    isOpen: isOpenAuth,
+    onOpen: onOpenAuth,
+    onClose: onCloseAuth,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenSuccess,
+    onOpen: onPenSuccess,
+    onClose: onCloseSuccess,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenEditPix,
+    onOpen: onPenEditPix,
+    onClose: onCloseEditPix,
+  } = useDisclosure();
 
   const individualCheck = (id: number, state: boolean) => {
     if (checked.find((user) => user.id === id)) {
@@ -107,6 +139,34 @@ export const BatchPaymentTable = ({
     }
   };
 
+  async function handleConfirmationPayment(secretPassword: string) {
+    if (uuid && secretPassword) {
+      setPaymentLoading(true);
+      refreshItems && refreshItems(true);
+      return await GetScheduleAllTransactionDataApproved(uuid, secretPassword)
+        .then((_) => {
+          onCloseAuth();
+          onPenSuccess();
+        })
+        .finally(() => {
+          setPaymentLoading(false);
+          setUuid(0);
+          refreshItems && refreshItems(false);
+          loading(false);
+        });
+    }
+  }
+
+  function handleDownloadVoucher(statementId: number) {
+    // setModalErrorIsOpen(false);
+
+    GetStatementsDownloadVoucher(statementId).then((response) => {
+      console.log(response, 'comprovante.pdf');
+
+      // fileDownload(response, 'comprovante.pdf');
+    });
+  }
+
   useEffect(() => {
     const format = () => {
       const data_IDs: number[] = [];
@@ -132,11 +192,11 @@ export const BatchPaymentTable = ({
       <Loading />
     </Center>
   ) : (
-    <>
-      <Box overflowX="auto" maxH="1400px">
-        <Table>
+    <Box>
+      <TableContainer overflowX="scroll" maxH="1400px">
+        <Table whiteSpace="nowrap" variant="simple">
           <Thead width="100%" color="#FFF">
-            <Tr bg="#7F8B9F" fontSize="1rem" whiteSpace="nowrap">
+            <Tr bg="#7F8B9F" fontSize="1rem">
               <Th>
                 {' '}
                 <Checkbox
@@ -230,14 +290,14 @@ export const BatchPaymentTable = ({
             )?.map((item, index) => (
               <Tr key={index} fontSize="15px">
                 <Td
-                  overflow="hidden"
+                  // overflow="hidden"
                   bg="#ffffff"
                   textAlign="center"
                   borderColor="gray.100"
-                  whiteSpace="nowrap"
-                  minWidth="40px"
-                  maxWidth="40px"
-                  width="300px"
+                  // whiteSpace="nowrap"
+                  // minWidth="40px"
+                  // maxWidth="40px"
+                  // width="300px"
                 >
                   <Checkbox
                     onChange={(e) => {
@@ -286,19 +346,23 @@ export const BatchPaymentTable = ({
                     ? moment(item?.scheduled_date).format('DD/MMM, HH:mm')
                     : ''}
                 </Td>
-                <Td maxW="255px" px="0px">
-                  {type === 'pix'
-                    ? item?.payload?.email
-                    : type === 'transfer'
-                    ? item?.payload?.recipient?.bank_name
-                    : ''}
+                <Td px="0px">
+                  {type === 'pix' ? (
+                    <Text>{item?.payload?.email}</Text>
+                  ) : type === 'transfer' ? (
+                    item?.payload?.recipient?.bank_name
+                  ) : (
+                    ''
+                  )}
                 </Td>
-                <Td minW="180px">
-                  {type === 'pix'
-                    ? item.payload?.description
-                    : type === 'transfer'
-                    ? item?.payload?.recipient?.bank_code
-                    : ''}
+                <Td>
+                  {type === 'pix' ? (
+                    <Text>{item.payload?.description}</Text>
+                  ) : type === 'transfer' ? (
+                    item?.payload?.recipient?.bank_code
+                  ) : (
+                    ''
+                  )}
                 </Td>
                 <Td minW="180px">
                   {type === 'pix'
@@ -310,7 +374,18 @@ export const BatchPaymentTable = ({
 
                 <Td>
                   {type === 'pix' ? (
-                    <Badge variant="solid" colorScheme="green">
+                    <Badge
+                      variant="solid"
+                      colorScheme={
+                        item?.status.name === 'pending'
+                          ? 'yellow'
+                          : item?.status.name === 'waiting' || 'canceled'
+                          ? 'red'
+                          : item?.status.name === 'processing'
+                          ? 'blue.200'
+                          : 'green'
+                      }
+                    >
                       {item.status.name}
                     </Badge>
                   ) : type === 'transfer' ? (
@@ -333,35 +408,105 @@ export const BatchPaymentTable = ({
                 )}
                 <Td minW="20px">
                   <Flex align="center" justifyContent="center">
-                    <Box bg="#dde2eb" p="6px" borderRadius="50px">
+                    <Box
+                      bg="#dde2eb"
+                      p="6px"
+                      borderRadius="50px"
+                      onClick={() => handleDownloadVoucher(item.id)}
+                    >
                       <Icon icon="bx:download" width={20} />
                     </Box>
                   </Flex>
                 </Td>
-                <Td>
-                  <Menu>
-                    <MenuButton>
-                      <Icon icon="carbon:settings" width={20} />
-                    </MenuButton>
-                    <MenuList>
-                      <MenuItem>Pagamento</MenuItem>
-                    </MenuList>
-                  </Menu>
-                </Td>
+                {!item.is_approved && (
+                  <Td>
+                    <Menu direction="rtl">
+                      <MenuButton>
+                        <Icon icon="carbon:settings" width={20} />
+                      </MenuButton>
+                      <MenuList>
+                        <MenuItem
+                          onClick={() => {
+                            setUuid(item.id);
+                            onOpenAuth();
+                          }}
+                        >
+                          <Icon
+                            icon="bx:check-shield"
+                            color="#21C6DE"
+                            width={20}
+                          />{' '}
+                          <Text ml={2}>Pagemento</Text>
+                        </MenuItem>
+                        {edit && (
+                          <MenuItem
+                            onClick={() => {
+                              setUuid(item.id);
+                              setTransaction(item);
+                              onPenEditPix();
+                              console.log({ item });
+                            }}
+                          >
+                            <Icon
+                              icon="codicon:edit"
+                              color="#21C6DE"
+                              width={20}
+                            />{' '}
+                            <Text ml={2}>Editar</Text>
+                          </MenuItem>
+                        )}
+                        <ModalEditPayment
+                          dataTransfer={transaction as IDataTed}
+                          dataPix={transaction as IDataPIX}
+                          isOpen={isOpenEditPix}
+                          onClose={onCloseEditPix}
+                          type={type}
+                        />
+                      </MenuList>
+                    </Menu>
+                  </Td>
+                )}
               </Tr>
             ))}
           </Tbody>
         </Table>
-        <Pagination
-          setPage={setPage}
-          loading={loading}
-          setState={setState}
-          next={items?.links?.next}
-          prev={items?.links?.prev}
-          total={items?.meta?.last_page}
-          current={items?.meta?.current_page}
-        />
-      </Box>
-    </>
+      </TableContainer>
+      <Flex justify="right" w="full">
+        <Text mr="5" mt="2" fontSize="17px">
+          Total de transações:{' '}
+          {items?.data.length ||
+            dataBillPayment?.data.length ||
+            dataTransfer?.data.length ||
+            0}
+        </Text>
+      </Flex>
+      <Pagination
+        setPage={setPage}
+        loading={loading}
+        setState={setState}
+        next={items?.links?.next}
+        prev={items?.links?.prev}
+        total={items?.meta?.last_page}
+        current={items?.meta?.current_page}
+      />
+
+      <ModalAuth
+        handlePassword={(pass) => setPassword(pass)}
+        loading={paymentLoading}
+        isOpen={isOpenAuth}
+        onClose={onCloseAuth}
+        handleClick={() => handleConfirmationPayment(password)}
+      />
+
+      <ModalStatus
+        variant="success"
+        title="PAGAMENTO AUTORIZADO"
+        route="/home/all-statements"
+        description="Seu pagamento em lote foi autorizado com sucesso! Acompanhe o status de pagamento pelo extrato."
+        titleButton="Ver extrato"
+        isOpen={isOpenSuccess}
+        onClose={onCloseSuccess}
+      />
+    </Box>
   );
 };
