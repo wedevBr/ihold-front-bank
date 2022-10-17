@@ -27,6 +27,7 @@ import { IPaginationData } from '~/types/pagination';
 import { ModalStatus } from '~/components/Modals/ModalStatus';
 import { ModalAuth } from '~/components/Modals/ModalAuth';
 import { setLocalStorage } from '~/utils/localStorageFormat';
+import { useRouter } from 'next/router';
 
 export default function ReviewPayment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
@@ -53,11 +54,8 @@ export default function ReviewPayment() {
     onOpen: onPenSuccess,
     onClose: onCloseSuccess,
   } = useDisclosure();
-  const {
-    isOpen: isOpenEditPix,
-    onOpen: onPenEditPix,
-    onClose: onCloseEditPix,
-  } = useDisclosure();
+
+  const { query } = useRouter();
 
   async function handleConfirmationPayment(secretPassword: string) {
     if (items && secretPassword) {
@@ -81,13 +79,13 @@ export default function ReviewPayment() {
   async function getScheduleTransaction() {
     setLoading(true);
     try {
-      const response = await getValidateScheduleTransaction<IDataPIX>('pix');
-      setItems(response);
-      setEdit(response?.data?.find((i) => i.id === 605));
-      setLocalStorage(
-        'pix',
-        response?.data?.find((i) => i.id === 605)
+      const response = await getValidateScheduleTransaction<IDataPIX>(
+        query.transaction as 'pix' | 'transfer' | 'bill-payment'
       );
+      setItems({
+        ...response,
+        data: response.data.filter((item) => item.is_approved === false),
+      });
     } catch (error) {
       console.log(error);
     } finally {
@@ -169,8 +167,7 @@ export default function ReviewPayment() {
                 textTransform="uppercase"
                 fontWeight="600"
                 padding="8px 1.25rem"
-                onClick={() => onPenEditPix()}
-                // onClick={() => onOpenAuth()}
+                onClick={() => onOpenAuth()}
               >
                 <Icon
                   icon="bx:check-shield"
@@ -206,11 +203,14 @@ export default function ReviewPayment() {
           mt="30px"
         >
           <BatchPaymentTable
+            type={query.transaction as 'pix' | 'transfer' | 'bill-payment'}
+            edit
             loading={setLoading}
             setState={setItems}
             setPage={setPage}
             isLoading={loading}
             items={items}
+            dataTransfer={items}
             getScheduleIDS={(ids) => setScheduleID(ids)}
           />
         </Box>
@@ -237,12 +237,6 @@ export default function ReviewPayment() {
         isOpen={isOpenAuth}
         onClose={onCloseAuth}
         handleClick={() => handleConfirmationPayment(password)}
-      />
-      <ModalEditPayment
-        dataPix={edit as IDataPIX}
-        isOpen={isOpenEditPix}
-        onClose={onCloseEditPix}
-        type="pix"
       />
     </Box>
   );
