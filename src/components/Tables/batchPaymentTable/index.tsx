@@ -503,7 +503,7 @@ export const BatchPaymentTable = ({
         />
       </Box>
       <Flex justify="right" w="full">
-        <Text mr="5" mt="2" fontSize="17px">
+        <Text mr="5" mt="5" fontSize="17px">
           Total de transações:{' '}
           {items?.data.length ||
             dataBillPayment?.data.length ||
