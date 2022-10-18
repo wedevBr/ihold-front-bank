@@ -9,27 +9,36 @@ import {
   ExtractAllTable,
   Layout,
 } from '~/components';
-import { GetAllStatementsOperation, GetStatementsOperation } from '~/services/hooks/useStatements';
+import {
+  GetAllStatementsOperation,
+  GetStatementsOperation,
+} from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
 
 export default function AllStatements() {
-
-  const { data, isLoading } = useQuery([0], () => GetAllStatementsOperation(0), {
-    staleTime: 1000 * 60, // 1 minute
-  });
+  const { data, isLoading } = useQuery(
+    [0],
+    () => GetAllStatementsOperation(0),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
   // const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 0], () => GetStatementsOperation('cash-in', 0), {
   //   staleTime: 1000 * 120, // 1 minute
   // });
-  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 0], () => GetStatementsOperation('cash-out', 0), {
-    staleTime: 1000 * 60, // 1 minute
-  });
+  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(
+    ['cash-out', 0],
+    () => GetStatementsOperation('cash-out', 0),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
 
-  const outAmount = data?.summary?.cash_out?.amount || "";
-  const InAmount = data?.summary?.cash_in?.amount || "";
+  const outAmount = data?.summary?.cash_out?.amount || '';
+  const InAmount = data?.summary?.cash_in?.amount || '';
 
-
-  const handleCalcValue = (val: string) => parseInt(val?.replace(/[\D]+/g, ""));
+  const handleCalcValue = (val: string) => parseInt(val?.replace(/[\D]+/g, ''));
   const result = handleCalcValue(InAmount) - handleCalcValue(outAmount);
 
   return (
@@ -87,7 +96,6 @@ export default function AllStatements() {
           {routeTransactions.map((item, idx) => (
             <CardTransaction
               key={idx}
-              path={item?.path || ''}
               name={item.title}
               icon={<Icon icon={item.iconName} color="#21C6DE" width={25} />}
             />
