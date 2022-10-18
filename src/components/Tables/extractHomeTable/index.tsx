@@ -82,13 +82,13 @@ export const ExtractHomeTable = ({ items, isLoading }: tableProps) => {
                       ? truncate(item?.metadata?.recipient?.name ?? '', 22)
                         ? truncate(item?.metadata?.recipient?.name ?? '', 22)
                         : truncate(
-                            item?.metadata?.payload.merchant.name ?? '',
+                            item?.metadata?.payload?.merchant?.name ?? '',
                             22
                           )
                       : truncate(item?.metadata?.sender?.name ?? '', 22)
                       ? truncate(item?.metadata?.sender?.name ?? '', 22)
                       : truncate(
-                          item?.metadata?.payload.merchant.name ?? '',
+                          item?.metadata?.payload?.merchant?.name ?? '',
                           22
                         )}
                   </Td>

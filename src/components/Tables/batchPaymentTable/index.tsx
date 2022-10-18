@@ -192,298 +192,293 @@ export const BatchPaymentTable = ({
     </Center>
   ) : (
     <Box>
-      <TableContainer overflowX="scroll" maxH="1400px">
-        <Table whiteSpace="nowrap" variant="simple">
-          <Thead width="100%" color="#FFF">
-            <Tr bg="#7F8B9F" fontSize="1rem">
-              <Th>
-                {' '}
-                <Checkbox
-                  isChecked={allChecked}
-                  onChange={() => {
-                    if (allChecked) {
-                      setAllChecked(!allChecked);
-                      setChecked([]);
-                      return;
-                    }
-                    totalCheck(items?.data || []);
-                  }}
-                />
-              </Th>
-              <Th color="#FFF">
-                {' '}
-                {type === 'pix'
-                  ? 'TIPO DE CHAVE'
-                  : type === 'transfer'
-                  ? 'TIPO DE CONTA'
-                  : 'LINHA DIGITÁVEL'}
-              </Th>
-              <Th color="#FFF">
-                {type === 'pix'
-                  ? 'CHAVE PIX'
-                  : type === 'transfer'
-                  ? 'NOME'
-                  : 'AGENDAMENTO'}
-              </Th>
-              <Th color="#FFF">
-                {type === 'pix'
-                  ? 'CPF/CNPJ'
-                  : type === 'transfer'
-                  ? 'CPF/CNPJ'
-                  : 'PAGAMENTO'}
-              </Th>
-              <Th color="#FFF">
-                {type === 'pix'
-                  ? 'AGENDAMENTO'
-                  : type === 'transfer'
-                  ? 'AGENDAMENTO'
-                  : 'VALOR'}
-              </Th>
-              <Th color="#FFF">
-                {type === 'pix'
-                  ? 'EMAIL'
-                  : type === 'transfer'
-                  ? 'EMPRESA'
-                  : 'STATUS'}
-              </Th>
-              <Th color="#FFF">
-                {type === 'pix'
-                  ? 'DESCRIÇÃO'
-                  : type === 'transfer'
-                  ? 'AGÊNCIA'
-                  : 'STATUS'}
-              </Th>
-              {type === 'pix' || type === 'transfer' ? (
-                <Th color="#FFF">
-                  {type === 'pix'
-                    ? 'VALOR'
-                    : type === 'transfer'
-                    ? 'CONTA'
-                    : 'STATUS'}
-                </Th>
-              ) : (
-                <></>
-              )}
+      <Table overflowX="scroll" whiteSpace="nowrap">
+        <Thead color="#FFF">
+          <Tr bg="#7F8B9F" fontSize="1rem">
+            <Th>
+              {' '}
+              <Checkbox
+                isChecked={allChecked}
+                onChange={() => {
+                  if (allChecked) {
+                    setAllChecked(!allChecked);
+                    setChecked([]);
+                    return;
+                  }
+                  totalCheck(items?.data || []);
+                }}
+              />
+            </Th>
+            <Th color="#FFF">
+              {' '}
+              {type === 'pix'
+                ? 'TIPO DE CHAVE'
+                : type === 'transfer'
+                ? 'TIPO DE CONTA'
+                : 'LINHA DIGITÁVEL'}
+            </Th>
+            <Th color="#FFF" maxW="100px">
+              {type === 'pix'
+                ? 'CHAVE PIX'
+                : type === 'transfer'
+                ? 'NOME'
+                : 'AGENDAMENTO'}
+            </Th>
+            <Th color="#FFF">
+              {type === 'pix'
+                ? 'CPF/CNPJ'
+                : type === 'transfer'
+                ? 'CPF/CNPJ'
+                : 'PAGAMENTO'}
+            </Th>
+            <Th color="#FFF">
+              {type === 'pix'
+                ? 'AGENDAMENTO'
+                : type === 'transfer'
+                ? 'AGENDAMENTO'
+                : 'VALOR'}
+            </Th>
+            <Th color="#FFF">
+              {type === 'pix'
+                ? 'EMAIL'
+                : type === 'transfer'
+                ? 'EMPRESA'
+                : 'STATUS'}
+            </Th>
+            <Th color="#FFF">
+              {type === 'pix'
+                ? 'DESCRIÇÃO'
+                : type === 'transfer'
+                ? 'AGÊNCIA'
+                : 'STATUS'}
+            </Th>
+            {type === 'pix' || type === 'transfer' ? (
               <Th color="#FFF">
                 {type === 'pix'
-                  ? 'STATUS'
-                  : type === 'transfer'
                   ? 'VALOR'
-                  : 'BOLETO'}
+                  : type === 'transfer'
+                  ? 'CONTA'
+                  : 'STATUS'}
               </Th>
-              {type === 'transfer' && (
-                <Th color="#FFF">
-                  {type === 'transfer' ? 'STATUS' : 'BOLETO'}
-                </Th>
-              )}
-              <Th color="#FFF">COMPROVANTE</Th>
-              <Th color="#FFF">AÇÕES</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {(type === 'pix'
-              ? items?.data
-              : type === 'transfer'
-              ? dataTransfer?.data
-              : dataBillPayment?.data || []
-            )?.map((item, index) => (
-              <Tr key={index} fontSize="15px">
-                <Td
-                  // overflow="hidden"
-                  bg="#ffffff"
-                  textAlign="center"
-                  borderColor="gray.100"
-                  // whiteSpace="nowrap"
-                  // minWidth="40px"
-                  // maxWidth="40px"
-                  // width="300px"
-                >
-                  <Checkbox
-                    onChange={(e) => {
-                      individualCheck(item.id, e.target.checked);
-                    }}
-                    isChecked={
-                      checked.find((user) => user.id === item.id)?.value ||
-                      false
-                    }
-                  />
-                </Td>
-                <Td>
-                  {type === 'pix'
-                    ? item?.payload?.key_type
-                    : type === 'transfer'
-                    ? (item?.payload?.recipient?.account_type === 'checking' &&
-                        'Corrente') ||
-                      (item?.payload?.recipient?.account_type === 'savings' &&
-                        'Poupança')
-                    : item.account}
-                </Td>
-                <Td minW="200px">
-                  {type === 'pix'
-                    ? item?.payload?.key_type === 'TELEFONE'
-                      ? phonesFormat(item?.payload.key)
-                      : item?.payload?.key_type === 'CPF'
-                      ? nifFormat(
-                          item?.payload.key,
-                          item?.payload.key.length === 11 ? 'cpf' : 'cnpj'
-                        )
-                      : item?.payload.key
-                    : type === 'transfer'
-                    ? item?.payload?.recipient?.name
-                    : ''}
-                </Td>
-                <Td minW="200px">
-                  {type === 'pix'
+            ) : (
+              <></>
+            )}
+            <Th color="#FFF">
+              {type === 'pix'
+                ? 'STATUS'
+                : type === 'transfer'
+                ? 'VALOR'
+                : 'BOLETO'}
+            </Th>
+            {type === 'transfer' && (
+              <Th color="#FFF">{type === 'transfer' ? 'STATUS' : 'BOLETO'}</Th>
+            )}
+            <Th color="#FFF">COMPROVANTE</Th>
+            <Th color="#FFF">AÇÕES</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {(type === 'pix'
+            ? items?.data
+            : type === 'transfer'
+            ? dataTransfer?.data
+            : dataBillPayment?.data || []
+          )?.map((item, index) => (
+            <Tr key={index} fontSize="15px">
+              <Td
+                // overflow="hidden"
+                bg="#ffffff"
+                textAlign="center"
+                borderColor="gray.100"
+                // whiteSpace="nowrap"
+                // minWidth="40px"
+                // maxWidth="40px"
+                // width="300px"
+              >
+                <Checkbox
+                  onChange={(e) => {
+                    individualCheck(item.id, e.target.checked);
+                  }}
+                  isChecked={
+                    checked.find((user) => user.id === item.id)?.value || false
+                  }
+                />
+              </Td>
+              <Td>
+                {type === 'pix'
+                  ? item?.payload?.key_type
+                  : type === 'transfer'
+                  ? (item?.payload?.recipient?.account_type === 'checking' &&
+                      'Corrente') ||
+                    (item?.payload?.recipient?.account_type === 'savings' &&
+                      'Poupança')
+                  : item.account}
+              </Td>
+              <Td minW="200px" w="100px">
+                {type === 'pix'
+                  ? item?.payload?.key_type === 'TELEFONE'
+                    ? phonesFormat(item?.payload.key)
+                    : item?.payload?.key_type === 'CPF'
                     ? nifFormat(
-                        item?.payload?.nif_number,
-                        item?.payload?.nif_number.length === 11 ? 'cpf' : 'cnpj'
+                        item?.payload?.key,
+                        item?.payload?.key.length === 11 ? 'cpf' : 'cnpj'
                       )
-                    : type === 'transfer'
-                    ? nifFormat(
-                        item?.account?.nif_number,
-                        item?.account?.nif_number.length > 11 ? 'cnpj' : 'cpf'
-                      )
-                    : ''}
-                </Td>
-                <Td>
-                  {type === 'pix'
-                    ? moment(item?.scheduled_date).locale('pt-br').format('L')
-                    : type === 'transfer'
-                    ? moment(item?.scheduled_date).locale('pt-br').format('L')
-                    : ''}
-                </Td>
-                <Td px="0px">
-                  {type === 'pix' ? (
-                    <Text>{item?.payload?.email}</Text>
-                  ) : type === 'transfer' ? (
-                    item?.payload?.recipient?.bank_name
-                  ) : (
-                    ''
-                  )}
-                </Td>
-                <Td>
-                  {type === 'pix' ? (
-                    <Text>{item.payload?.description}</Text>
-                  ) : type === 'transfer' ? (
-                    item?.payload?.recipient?.bank_code
-                  ) : (
-                    ''
-                  )}
-                </Td>
-                <Td minW="180px">
-                  {type === 'pix'
-                    ? `R$ ${formatCalcValue(item.payload?.amount)}`
-                    : type === 'transfer'
-                    ? item?.payload?.recipient?.account
-                    : ''}
-                </Td>
-
-                <Td>
-                  {type === 'pix' ? (
-                    <Badge
-                      variant="solid"
-                      colorScheme={
-                        item?.status.name === 'pending'
-                          ? 'yellow'
-                          : item?.status.name === 'waiting' ||
-                            item?.status.name === 'canceled'
-                          ? 'red'
-                          : item?.status.name === 'processing'
-                          ? 'blue.200'
-                          : item?.status.name === 'completed'
-                          ? 'green'
-                          : ''
-                      }
-                    >
-                      {item?.status?.name === 'pending' && 'Pendente'}
-                      {item?.status?.name === 'waiting' && 'Em espera'}
-                      {item?.status?.name === 'canceled' && 'Cancelado'}
-                      {item?.status?.name === 'completed' && 'Completo'}
-                      {item?.status?.name === 'processing' && 'Em processos'}
-                    </Badge>
-                  ) : type === 'transfer' ? (
-                    formatCalcValue(item.payload?.amount)
-                  ) : (
-                    ''
-                  )}
-                </Td>
-                {type === 'transfer' && (
-                  <Td minW="180px">
-                    <Badge
-                      variant="solid"
-                      colorScheme={
-                        item?.status.name === 'pending' ? 'yellow' : 'green'
-                      }
-                    >
-                      {item?.status.name}
-                    </Badge>
-                  </Td>
+                    : item?.payload.key
+                  : type === 'transfer'
+                  ? item?.payload?.recipient?.name
+                  : ''}
+              </Td>
+              <Td minW="200px">
+                {type === 'pix'
+                  ? nifFormat(
+                      item?.payload?.nif_number,
+                      item?.payload?.nif_number.length === 11 ? 'cpf' : 'cnpj'
+                    )
+                  : type === 'transfer'
+                  ? nifFormat(
+                      item?.account?.nif_number,
+                      item?.account?.nif_number.length > 11 ? 'cnpj' : 'cpf'
+                    )
+                  : ''}
+              </Td>
+              <Td>
+                {type === 'pix'
+                  ? moment(item?.scheduled_date).locale('pt-br').format('L')
+                  : type === 'transfer'
+                  ? moment(item?.scheduled_date).locale('pt-br').format('L')
+                  : ''}
+              </Td>
+              <Td px="0px">
+                {type === 'pix' ? (
+                  <Text>{item?.payload?.email}</Text>
+                ) : type === 'transfer' ? (
+                  item?.payload?.recipient?.bank_name
+                ) : (
+                  ''
                 )}
-                <Td minW="20px">
-                  <Flex align="center" justifyContent="center">
-                    <Box
-                      bg="#dde2eb"
-                      p="6px"
-                      borderRadius="50px"
-                      onClick={() => handleDownloadVoucher(item.id)}
-                    >
-                      <Icon icon="bx:download" width={20} />
-                    </Box>
-                  </Flex>
+              </Td>
+              <Td>
+                {type === 'pix' ? (
+                  <Text>{item.payload?.description}</Text>
+                ) : type === 'transfer' ? (
+                  item?.payload?.recipient?.bank_code
+                ) : (
+                  ''
+                )}
+              </Td>
+              <Td minW="180px">
+                {type === 'pix'
+                  ? `R$ ${formatCalcValue(item.payload?.amount)}`
+                  : type === 'transfer'
+                  ? item?.payload?.recipient?.account
+                  : ''}
+              </Td>
+
+              <Td>
+                {type === 'pix' ? (
+                  <Badge
+                    variant="solid"
+                    colorScheme={
+                      item?.status.name === 'pending'
+                        ? 'yellow'
+                        : item?.status.name === 'waiting' ||
+                          item?.status.name === 'canceled'
+                        ? 'red'
+                        : item?.status.name === 'processing'
+                        ? 'blue.200'
+                        : item?.status.name === 'completed'
+                        ? 'green'
+                        : ''
+                    }
+                  >
+                    {item?.status?.name === 'pending' && 'Pendente'}
+                    {item?.status?.name === 'waiting' && 'Em espera'}
+                    {item?.status?.name === 'canceled' && 'Cancelado'}
+                    {item?.status?.name === 'completed' && 'Completo'}
+                    {item?.status?.name === 'processing' && 'Em processos'}
+                  </Badge>
+                ) : type === 'transfer' ? (
+                  formatCalcValue(item.payload?.amount)
+                ) : (
+                  ''
+                )}
+              </Td>
+              {type === 'transfer' && (
+                <Td minW="180px">
+                  <Badge
+                    variant="solid"
+                    colorScheme={
+                      item?.status.name === 'pending' ? 'yellow' : 'green'
+                    }
+                  >
+                    {item?.status.name}
+                  </Badge>
                 </Td>
-                {!item.is_approved && (
-                  <Td>
-                    <Menu direction="rtl">
-                      <MenuButton>
-                        <Icon icon="carbon:settings" width={20} />
-                      </MenuButton>
-                      <MenuList>
+              )}
+              <Td minW="20px">
+                <Flex align="center" justifyContent="center">
+                  <Box
+                    bg="#dde2eb"
+                    p="6px"
+                    borderRadius="50px"
+                    onClick={() => handleDownloadVoucher(item.id)}
+                  >
+                    <Icon icon="bx:download" width={20} />
+                  </Box>
+                </Flex>
+              </Td>
+              {!item.is_approved && (
+                <Td>
+                  <Menu direction="rtl">
+                    <MenuButton>
+                      <Icon icon="carbon:settings" width={20} />
+                    </MenuButton>
+                    <MenuList>
+                      <MenuItem
+                        onClick={() => {
+                          setUuid(item.id);
+                          onOpenAuth();
+                        }}
+                      >
+                        <Icon
+                          icon="bx:check-shield"
+                          color="#21C6DE"
+                          width={20}
+                        />{' '}
+                        <Text ml={2}>Pagemento</Text>
+                      </MenuItem>
+                      {edit && (
                         <MenuItem
                           onClick={() => {
                             setUuid(item.id);
-                            onOpenAuth();
+                            setTransaction(item);
+                            onPenEditPix();
+                            console.log({ item });
                           }}
                         >
                           <Icon
-                            icon="bx:check-shield"
+                            icon="codicon:edit"
                             color="#21C6DE"
                             width={20}
                           />{' '}
-                          <Text ml={2}>Pagemento</Text>
+                          <Text ml={2}>Editar</Text>
                         </MenuItem>
-                        {edit && (
-                          <MenuItem
-                            onClick={() => {
-                              setUuid(item.id);
-                              setTransaction(item);
-                              onPenEditPix();
-                              console.log({ item });
-                            }}
-                          >
-                            <Icon
-                              icon="codicon:edit"
-                              color="#21C6DE"
-                              width={20}
-                            />{' '}
-                            <Text ml={2}>Editar</Text>
-                          </MenuItem>
-                        )}
-                        <ModalEditPayment
-                          dataTransfer={transaction as IDataTed}
-                          dataPix={transaction as IDataPIX}
-                          isOpen={isOpenEditPix}
-                          onClose={onCloseEditPix}
-                          type={type}
-                        />
-                      </MenuList>
-                    </Menu>
-                  </Td>
-                )}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
+                      )}
+                      <ModalEditPayment
+                        dataTransfer={transaction as IDataTed}
+                        dataPix={transaction as IDataPIX}
+                        isOpen={isOpenEditPix}
+                        onClose={onCloseEditPix}
+                        type={type}
+                      />
+                    </MenuList>
+                  </Menu>
+                </Td>
+              )}
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
       <Flex justify="right" w="full">
         <Text mr="5" mt="2" fontSize="17px">
           Total de transações:{' '}
