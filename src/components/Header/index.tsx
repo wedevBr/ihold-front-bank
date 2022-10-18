@@ -22,6 +22,7 @@ import { AccountUser } from '~/types/accounts.types';
 import { Input } from '../input';
 import { useQuery } from 'react-query';
 import { formatCalcValue } from '~/utils/formatValue';
+import { nifFormat } from '~/utils/nifFormat';
 
 interface HeaderProps {
   name: string;
@@ -37,6 +38,13 @@ export function Header({ name, avatar }: HeaderProps) {
   const { signOut } = useAuthContext();
   const [toggle, setToggle] = useState(false);
 
+  const { data: dataBalance, isLoading: IsloadingBalance } = useQuery(
+    'balance-user',
+    GetUserAccountBalanceData,
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
   const { data, isLoading } = useQuery(
     'account-user',
     GetAuthenticatedUserData,
@@ -44,6 +52,7 @@ export function Header({ name, avatar }: HeaderProps) {
       staleTime: 1000 * 60, // 1 minute
     }
   );
+  console.log({ dataBalance });
 
   return (
     <Box w="100%" h="90px" bg="#00102A" display="flex" alignItems="center">
@@ -84,7 +93,11 @@ export function Header({ name, avatar }: HeaderProps) {
               </Text>
             </Flex>
             <Text mt="5px" userSelect="none">{`R$ ${
-              toggle ? formatCalcValue('100') : '***********'
+              toggle
+                ? dataBalance?.data
+                  ? formatCalcValue(String(dataBalance?.data?.amount) || '0')
+                  : formatCalcValue('000')
+                : '***********'
             }`}</Text>
           </Box>
           <Center height="50px">
@@ -114,7 +127,12 @@ export function Header({ name, avatar }: HeaderProps) {
               ) : (
                 <Text>{`Olá, ${data?.data?.register_name}`}</Text>
               )}
-              <Text>{data?.data?.nif_number}</Text>
+              <Text>
+                {nifFormat(
+                  (data?.data?.nif_number as string) ?? '',
+                  data?.data?.nif_number.length === 11 ? 'cpf' : 'cnpj'
+                )}
+              </Text>
             </Box>
           </Flex>
 

@@ -24,8 +24,6 @@ type tableProps = {
 };
 
 export const ExtractPixAndTedTable = ({ items, isLoading }: tableProps) => {
-  
-
   return isLoading ? (
     <Center h="500px" mt="30px">
       <Loading />
@@ -59,7 +57,9 @@ export const ExtractPixAndTedTable = ({ items, isLoading }: tableProps) => {
                       borderRadius="5px"
                       p="8px"
                       background={
-                        item?.operation === 'cash-in' ? '#27ae6033' : '#ff313b33'
+                        item?.operation === 'cash-in'
+                          ? '#27ae6033'
+                          : '#ff313b33'
                       }
                     >
                       {item?.operation === 'cash-in' ? (
@@ -83,9 +83,11 @@ export const ExtractPixAndTedTable = ({ items, isLoading }: tableProps) => {
                       : truncate(item?.metadata?.sender?.name ?? '', 22)}
                   </Td>
                   <Td>{truncate(item?.description ?? '', 35)}</Td>
-                  <Td>{moment(item?.completed_at).format("DD/MMM, HH:mm")}</Td>
+                  <Td>{moment(item?.completed_at).format('LLL')}</Td>
                   <Td
-                    color={item?.operation === 'cash-in' ? '#27AE60' : '#F03D3E'}
+                    color={
+                      item?.operation === 'cash-in' ? '#27AE60' : '#F03D3E'
+                    }
                   >
                     {item?.operation === 'cash-in'
                       ? `R$${item?.amount}`

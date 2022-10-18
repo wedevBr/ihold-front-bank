@@ -21,10 +21,9 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { Loading, ModalEditPayment, Pagination } from '~/components';
-import { StatementData } from '~/types/statements.types';
 import { Icon } from '@iconify/react';
 import moment from 'moment';
-import { truncate } from '~/utils/truncate';
+import 'moment/locale/pt-br';
 import {
   IDataBillPayment,
   IDataPIX,
@@ -321,7 +320,14 @@ export const BatchPaymentTable = ({
                 </Td>
                 <Td minW="200px">
                   {type === 'pix'
-                    ? phonesFormat(item?.payload.key)
+                    ? item?.payload?.key_type === 'TELEFONE'
+                      ? phonesFormat(item?.payload.key)
+                      : item?.payload?.key_type === 'CPF'
+                      ? nifFormat(
+                          item?.payload.key,
+                          item?.payload.key.length === 11 ? 'cpf' : 'cnpj'
+                        )
+                      : item?.payload.key
                     : type === 'transfer'
                     ? item?.payload?.recipient?.name
                     : ''}
@@ -341,9 +347,9 @@ export const BatchPaymentTable = ({
                 </Td>
                 <Td>
                   {type === 'pix'
-                    ? moment(item?.scheduled_date).format('DD/MMM, HH:mm')
+                    ? moment(item?.scheduled_date).locale('pt-br').format('L')
                     : type === 'transfer'
-                    ? moment(item?.scheduled_date).format('DD/MMM, HH:mm')
+                    ? moment(item?.scheduled_date).locale('pt-br').format('L')
                     : ''}
                 </Td>
                 <Td px="0px">
@@ -379,14 +385,21 @@ export const BatchPaymentTable = ({
                       colorScheme={
                         item?.status.name === 'pending'
                           ? 'yellow'
-                          : item?.status.name === 'waiting' || 'canceled'
+                          : item?.status.name === 'waiting' ||
+                            item?.status.name === 'canceled'
                           ? 'red'
                           : item?.status.name === 'processing'
                           ? 'blue.200'
-                          : 'green'
+                          : item?.status.name === 'completed'
+                          ? 'green'
+                          : ''
                       }
                     >
-                      {item.status.name}
+                      {item?.status?.name === 'pending' && 'Pendente'}
+                      {item?.status?.name === 'waiting' && 'Em espera'}
+                      {item?.status?.name === 'canceled' && 'Cancelado'}
+                      {item?.status?.name === 'completed' && 'Completo'}
+                      {item?.status?.name === 'processing' && 'Em processos'}
                     </Badge>
                   ) : type === 'transfer' ? (
                     formatCalcValue(item.payload?.amount)

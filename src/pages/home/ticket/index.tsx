@@ -9,22 +9,33 @@ import {
   Layout,
   TicketTable,
 } from '~/components';
-import { GetAllStatementsOperation, GetStatementsOperation } from '~/services/hooks/useStatements';
+import {
+  GetAllStatementsOperation,
+  GetStatementsOperation,
+} from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
 
 export default function Ticket() {
-  const { data, isLoading } = useQuery([3], () => GetAllStatementsOperation(3), {
-    staleTime: 1000 * 60, // 1 minute
-  });
-  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 3], () => GetStatementsOperation('cash-out', 3), {
-    staleTime: 1000 * 60, // 1 minute
-  });
+  const { data, isLoading } = useQuery(
+    [3],
+    () => GetAllStatementsOperation(3),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
+  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(
+    ['cash-out', 3],
+    () => GetStatementsOperation('cash-out', 3),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
 
-  const outAmount = data?.summary?.cash_out?.amount || "";
-  const InAmount = data?.summary?.cash_in?.amount || "";
+  const outAmount = data?.summary?.cash_out?.amount || '';
+  const InAmount = data?.summary?.cash_in?.amount || '';
 
-  const handleCalcValue = (val: string) => parseInt(val?.replace(/[\D]+/g, ""));
+  const handleCalcValue = (val: string) => parseInt(val?.replace(/[\D]+/g, ''));
   const result = handleCalcValue(InAmount) - handleCalcValue(outAmount);
 
   return (
@@ -72,7 +83,6 @@ export default function Ticket() {
             </TabPanel>
           </ContainerTransaction>
         </Box>
-
       </Box>
       <Box bg="#FFFFFF" p="50px" mt="30px" borderRadius="10px">
         <Text>MAIS ACESSADOS</Text>
@@ -80,7 +90,7 @@ export default function Ticket() {
           {routeTransactions.map((item, idx) => (
             <CardTransaction
               key={idx}
-              path={item?.path || ''}
+              // path={item?.path || ''}
               name={item.title}
               icon={<Icon icon={item.iconName} color="#21C6DE" width={25} />}
             />
