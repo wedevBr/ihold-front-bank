@@ -9,7 +9,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
-      - "traefik.http.routers.ihold_front_web_nginx.rule=Host(`internetbanking.iholdbank.digitall`)"
+      - "traefik.http.routers.ihold_front_web_nginx.rule=Host(`internetbanking.iholdbank.digital`)"
       - "traefik.http.routers.ihold_front_web_nginx.entrypoints=websecure"
       - "traefik.http.routers.ihold_front_web_nginx.tls=true"
       - "traefik.http.routers.ihold_front_web_nginx.tls.certresolver=iholdresolver"
