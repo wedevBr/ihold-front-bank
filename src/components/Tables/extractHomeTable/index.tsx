@@ -24,8 +24,6 @@ type tableProps = {
 };
 
 export const ExtractHomeTable = ({ items, isLoading }: tableProps) => {
-
-
   return isLoading ? (
     <Center h="300px" mt="30px">
       <Loading />
@@ -52,14 +50,16 @@ export const ExtractHomeTable = ({ items, isLoading }: tableProps) => {
                 >
                   <Td
                     p="5px"
-                  // width="1.75rem"
-                  // height="1.75rem"
+                    // width="1.75rem"
+                    // height="1.75rem"
                   >
                     <Box
                       borderRadius="5px"
                       p="8px"
                       background={
-                        item?.operation === 'cash-in' ? '#27ae6033' : '#ff313b33'
+                        item?.operation === 'cash-in'
+                          ? '#27ae6033'
+                          : '#ff313b33'
                       }
                     >
                       {item?.operation === 'cash-in' ? (
@@ -78,18 +78,25 @@ export const ExtractHomeTable = ({ items, isLoading }: tableProps) => {
                     </Box>
                   </Td>
                   <Td minW="200px">
-                    {item?.operation === "cash-out"
+                    {item?.operation === 'cash-out'
                       ? truncate(item?.metadata?.recipient?.name ?? '', 22)
                         ? truncate(item?.metadata?.recipient?.name ?? '', 22)
-                        : truncate(item?.metadata?.payload.merchant.name ?? '', 22)
+                        : truncate(
+                            item?.metadata?.payload.merchant.name ?? '',
+                            22
+                          )
                       : truncate(item?.metadata?.sender?.name ?? '', 22)
-                        ? truncate(item?.metadata?.sender?.name ?? '', 22)
-                        : truncate(item?.metadata?.payload.merchant.name ?? '', 22)}
-
+                      ? truncate(item?.metadata?.sender?.name ?? '', 22)
+                      : truncate(
+                          item?.metadata?.payload.merchant.name ?? '',
+                          22
+                        )}
                   </Td>
-                  <Td>{moment(item?.completed_at).format("DD/MMM, HH:mm")}</Td>
+                  <Td>{moment(item?.completed_at).format('LLL')}</Td>
                   <Td
-                    color={item?.operation === 'cash-in' ? '#27AE60' : '#F03D3E'}
+                    color={
+                      item?.operation === 'cash-in' ? '#27AE60' : '#F03D3E'
+                    }
                   >
                     {item?.operation === 'cash-in'
                       ? `R$${item?.amount}`

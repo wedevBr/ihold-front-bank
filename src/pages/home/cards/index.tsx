@@ -9,25 +9,40 @@ import {
   ExtractPixAndTedTable,
   Layout,
 } from '~/components';
-import { GetAllStatementsOperation, GetStatementsOperation } from '~/services/hooks/useStatements';
+import {
+  GetAllStatementsOperation,
+  GetStatementsOperation,
+} from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
 
 export default function Pix() {
-  const { data, isLoading } = useQuery([4], () => GetAllStatementsOperation(4), {
-    staleTime: 1000 * 60, // 1 minute
-  });
-  const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(['cash-in', 4], () => GetStatementsOperation('cash-in', 4), {
-    staleTime: 1000 * 60, // 1 minute
-  });
-  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(['cash-out', 4], () => GetStatementsOperation('cash-out', 4), {
-    staleTime: 1000 * 60, // 1 minute
-  });
+  const { data, isLoading } = useQuery(
+    [4],
+    () => GetAllStatementsOperation(4),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
+  const { data: dataCashIn, isLoading: isLoadingCahsIn } = useQuery(
+    ['cash-in', 4],
+    () => GetStatementsOperation('cash-in', 4),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
+  const { data: dataCashOut, isLoading: isLoadingCashOut } = useQuery(
+    ['cash-out', 4],
+    () => GetStatementsOperation('cash-out', 4),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
 
-  const outAmount = data?.summary?.cash_out?.amount || "";
-  const InAmount = data?.summary?.cash_in?.amount || "";
+  const outAmount = data?.summary?.cash_out?.amount || '';
+  const InAmount = data?.summary?.cash_in?.amount || '';
 
-  const handleCalcValue = (val: string) => parseInt(val?.replace(/[\D]+/g, ""));
+  const handleCalcValue = (val: string) => parseInt(val?.replace(/[\D]+/g, ''));
   const result = handleCalcValue(InAmount) - handleCalcValue(outAmount);
 
   return (
@@ -71,14 +86,19 @@ export default function Pix() {
               <ExtractPixAndTedTable isLoading={isLoading} items={data} />
             </TabPanel>
             <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoadingCahsIn} items={dataCashIn} />
+              <ExtractPixAndTedTable
+                isLoading={isLoadingCahsIn}
+                items={dataCashIn}
+              />
             </TabPanel>
             <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoadingCashOut} items={dataCashOut} />
+              <ExtractPixAndTedTable
+                isLoading={isLoadingCashOut}
+                items={dataCashOut}
+              />
             </TabPanel>
           </ContainerTransaction>
         </Box>
-
       </Box>
       <Box bg="#FFFFFF" p="50px" mt="30px" borderRadius="10px">
         <Text>MAIS ACESSADOS</Text>
@@ -86,7 +106,7 @@ export default function Pix() {
           {routeTransactions.map((item, idx) => (
             <CardTransaction
               key={idx}
-              path={item?.path || ''}
+              // path={item?.path || ''}
               name={item.title}
               icon={<Icon icon={item.iconName} color="#21C6DE" width={25} />}
             />

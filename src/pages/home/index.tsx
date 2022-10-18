@@ -2,11 +2,7 @@ import { Box, Flex, SimpleGrid, Text, Image } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
 import React from 'react';
 import { useQuery } from 'react-query';
-import {
-  CardTransaction,
-  ExtractHomeTable,
-  Layout,
-} from '~/components';
+import { CardTransaction, ExtractHomeTable, Layout } from '~/components';
 import { MenuDropDwon } from '~/components/Menu';
 import { GetAllStatementsOperation } from '~/services/hooks/useStatements';
 export const routeTransactions = [
@@ -14,14 +10,14 @@ export const routeTransactions = [
     id: 1,
     iconName: 'ic:baseline-pix',
     title: 'Pix',
-    path: '/home/pix',
+    // path: '/home/pix',
   },
 
   {
     id: 2,
     iconName: 'akar-icons:arrow-repeat',
     title: 'Transferir',
-    path: '/home/ted',
+    // path: '/home/ted',
   },
   {
     id: 3,
@@ -32,7 +28,7 @@ export const routeTransactions = [
     id: 4,
     iconName: 'bi:qr-code-scan',
     title: 'Pagar',
-    path: '/payment',
+    // path: '/payment',
   },
   {
     id: 5,
@@ -47,12 +43,20 @@ export const routeTransactions = [
 ];
 
 export default function Home() {
-  const { data, isLoading } = useQuery([0], () => GetAllStatementsOperation(0), {
-    staleTime: 1000 * 60, // 1 minute
-  });
-  const { data: pixData, isLoading: pixLoading } = useQuery([2], () => GetAllStatementsOperation(2), {
-    staleTime: 1000 * 60, // 1 minute
-  });
+  const { data, isLoading } = useQuery(
+    [0],
+    () => GetAllStatementsOperation(0),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
+  const { data: pixData, isLoading: pixLoading } = useQuery(
+    [2],
+    () => GetAllStatementsOperation(2),
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
   return (
     <Box h="full">
       <Layout>
@@ -116,7 +120,7 @@ export default function Home() {
                 {routeTransactions.map((item, idx) => (
                   <CardTransaction
                     key={idx}
-                    path={item?.path || ''}
+                    path={''}
                     name={item.title}
                     icon={
                       <Icon icon={item.iconName} color="#21C6DE" width={25} />
@@ -125,16 +129,15 @@ export default function Home() {
                 ))}
               </SimpleGrid>
             </Box>
-            <SimpleGrid columns={2} gap={5}
-              mt="20px"
-            >
+            <SimpleGrid columns={2} gap={5} mt="20px">
               <Box
                 bg="#FFFFFF"
                 h="161px"
                 p="20px"
                 borderRadius="10px"
                 boxShadow="base"
-                w="full">
+                w="full"
+              >
                 <Flex pt="10px">
                   <Image
                     src="/assets/bitcoin.svg"
@@ -153,7 +156,8 @@ export default function Home() {
                 p="20px"
                 borderRadius="10px"
                 boxShadow="base"
-                w="full">
+                w="full"
+              >
                 <Flex pt="10px">
                   <Image
                     src="/assets/etherium.svg"
@@ -175,7 +179,7 @@ export default function Home() {
               backgroundSize="cover"
             >
               <Flex>
-                <Box >
+                <Box>
                   <Image
                     src="/assets/cellphone.png"
                     alt="cellphone"
@@ -188,6 +192,6 @@ export default function Home() {
           </Box>
         </Flex>
       </Layout>
-    </Box >
+    </Box>
   );
 }
