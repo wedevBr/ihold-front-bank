@@ -79,3 +79,18 @@ export async function GetScheduleAllTransactionDataApproved(
     console.log();
   }
 }
+
+export async function UpdateScheduleTransactions(
+  transactionId: number,
+  transactionData: object
+) {
+  try {
+    const { data } = await api.put(
+      `/schedule_transactions/${transactionId}`,
+      transactionData
+    );
+    return data;
+  } catch (error: any) {
+    throw error;
+  }
+}
