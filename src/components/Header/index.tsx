@@ -95,7 +95,9 @@ export function Header({ name, avatar }: HeaderProps) {
             <Text mt="5px" userSelect="none">{`R$ ${
               toggle
                 ? dataBalance?.data
-                  ? formatCalcValue(String(dataBalance?.data?.amount) || '0')
+                  ? formatCalcValue(
+                      String(dataBalance?.data?.amount + 0) || '0'
+                    )
                   : formatCalcValue('000')
                 : '***********'
             }`}</Text>
