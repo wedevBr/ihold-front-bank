@@ -333,10 +333,14 @@ export const BatchPaymentTable = ({
                 </Td>
                 <Td minW="200px">
                   {type === 'pix'
-                    ? nifFormat(
-                        item?.payload?.nif_number,
-                        item?.payload?.nif_number.length === 11 ? 'cpf' : 'cnpj'
-                      )
+                    ? (item?.payload?.nif_number &&
+                        nifFormat(
+                          item?.payload?.nif_number,
+                          item?.payload?.nif_number?.length === 11
+                            ? 'cpf'
+                            : 'cnpj'
+                        )) ||
+                      ''
                     : type === 'transfer'
                     ? nifFormat(
                         item?.account?.nif_number,
