@@ -52,7 +52,6 @@ export function Header({ name, avatar }: HeaderProps) {
       staleTime: 1000 * 60, // 1 minute
     }
   );
-  console.log({ dataBalance });
 
   return (
     <Box w="100%" h="90px" bg="#00102A" display="flex" alignItems="center">
@@ -95,7 +94,9 @@ export function Header({ name, avatar }: HeaderProps) {
             <Text mt="5px" userSelect="none">{`R$ ${
               toggle
                 ? dataBalance?.data
-                  ? formatCalcValue(String(dataBalance?.data?.amount) || '0')
+                  ? formatCalcValue(
+                      String(dataBalance?.data?.amount + 0) || '0'
+                    )
                   : formatCalcValue('000')
                 : '***********'
             }`}</Text>

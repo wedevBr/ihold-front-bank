@@ -33,6 +33,7 @@ export default function ReviewPayment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
   const [items, setItems] = useState<IPaginationData<IDataPIX>>();
   const [loading, setLoading] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [deletSchedule, setDeletSchedule] = useState(false);
@@ -113,11 +114,7 @@ export default function ReviewPayment() {
 
   useEffect(() => {
     getScheduleTransaction();
-  }, [deletSchedule]);
-
-  console.log({ page });
-
-  // const pix = (items?.data && items?.data?.find((i) => i.id === 605)) || {};
+  }, [deletSchedule, loadingEdit]);
 
   return (
     <Box h="full" w="full">
@@ -205,7 +202,7 @@ export default function ReviewPayment() {
           <BatchPaymentTable
             type={query.transaction as 'pix' | 'transfer' | 'bill-payment'}
             edit
-            loading={setLoading}
+            loading={setLoadingEdit}
             setState={setItems}
             setPage={setPage}
             isLoading={loading}

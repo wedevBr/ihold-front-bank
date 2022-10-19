@@ -140,6 +140,7 @@ export const BatchPaymentTable = ({
 
   async function handleConfirmationPayment(secretPassword: string) {
     if (uuid && secretPassword) {
+      loading(true);
       setPaymentLoading(true);
       refreshItems && refreshItems(true);
       return await GetScheduleAllTransactionDataApproved(uuid, secretPassword)
@@ -176,15 +177,13 @@ export const BatchPaymentTable = ({
   }, [checked]);
 
   useEffect(() => {
-    if (!items?.data?.length) {
+    if (!items?.data?.length || dataTransfer?.data?.length) {
       setAllChecked(false);
       setChecked([]);
       refetch && refetch();
     }
     setChecked([]);
-  }, [items]);
-
-  console.log({ checked });
+  }, [items, dataTransfer]);
 
   return isLoading ? (
     <Center h="500px" mt="30px">
@@ -206,7 +205,7 @@ export const BatchPaymentTable = ({
                       setChecked([]);
                       return;
                     }
-                    totalCheck(items?.data || []);
+                    totalCheck(items?.data || dataTransfer?.data || []);
                   }}
                 />
               </Th>
@@ -457,7 +456,6 @@ export const BatchPaymentTable = ({
                               setUuid(item.id);
                               setTransaction(item);
                               onPenEditPix();
-                              console.log({ item });
                             }}
                           >
                             <Icon
@@ -474,6 +472,7 @@ export const BatchPaymentTable = ({
                           isOpen={isOpenEditPix}
                           onClose={onCloseEditPix}
                           type={type}
+                          setLoading={loading}
                         />
                       </MenuList>
                     </Menu>

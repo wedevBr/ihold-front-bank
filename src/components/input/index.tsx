@@ -20,7 +20,7 @@ interface IInputProps extends ChakraInputProps {
   bgFocus?: string;
   bgPlaceholder?: string;
   label?: string;
-  error?: FieldError;
+  error?: any;
 }
 
 const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
