@@ -15,15 +15,23 @@ import {
   Text,
   useDisclosure,
   ModalProps,
+  useToast,
 } from '@chakra-ui/react';
 import { Input } from '~/components';
 import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { IDataPIX, IDataTed } from '~/types/scheduledTransactions';
 import { getLocalStorage } from '~/utils/localStorageFormat';
+import { formatMask } from '~/utils/formatMask';
+import { nifFormat } from '~/utils/nifFormat';
+import { formatCalcValue } from '~/utils/formatValue';
+import { UpdateScheduleTransactions } from '~/services/hooks/usePaymentsSchedule';
 interface PropsModalEdit extends Omit<ModalProps, 'children'> {
   type?: 'pix' | 'transfer' | 'bill-payment';
   dataPix: IDataPIX;
   dataTransfer: IDataTed;
+  setLoading?: (loading: boolean) => void;
 }
 interface Pix {
   key_type: string;
@@ -34,6 +42,27 @@ interface Pix {
   email: string;
   scheduled_date: string;
 }
+const pixSchema = yup.object().shape({
+  amount: yup.string().required('Valor Obrigatório'),
+  email: yup.string(),
+  scheduled_date: yup.string().required('Agendamento Obrigatório'),
+  key_type: yup.string().required('Tipo de Chave Obrigatória'),
+  key: yup.string().required('Chave Obrigatória'),
+  description: yup.string(),
+  nif_number: yup.string(),
+});
+const transferSchema = yup.object().shape({
+  amount_transfer: yup.string().required('Valor Obrigatório'),
+  account_type: yup.string(),
+  scheduled_date_transfer: yup.string().required('Agendamento Obrigatório'),
+  bank_name: yup.string().required('Tipo de Chave Obrigatória'),
+  branch: yup.string().required('Chave Obrigatória'),
+  name: yup.string().required('Chave Obrigatória'),
+  bank_code: yup.string(),
+  description: yup.string(),
+  nif_number: yup.string(),
+  account: yup.string(),
+});
 
 export function ModalEditPayment({
   type = 'bill-payment',
@@ -41,22 +70,89 @@ export function ModalEditPayment({
   dataTransfer,
   isOpen,
   onClose,
+  setLoading,
 }: PropsModalEdit) {
-  console.log({ dataTransfer });
-
+  const [loadindEdit, setLoadingEdit] = useState(false);
+  const toast = useToast();
+  const typeSchema = type === 'pix' ? pixSchema : transferSchema;
   const { register, handleSubmit, formState, setValue } = useForm({
+    resolver: yupResolver(typeSchema),
     mode: 'onBlur',
   });
   async function handleEditData(data: any) {
-    console.log(data);
+    const transfer = {
+      is_approved: dataTransfer.is_approved,
+      status_id: dataTransfer.status.id,
+      scheduled_date: data.scheduled_date_transfer,
+      payload: {
+        amount: data.amount_transfer,
+        description: data.description,
+        nif_number: data.nif_number,
+        recipient: {
+          account_type:
+            data.account_type === 'Corrente' ? 'checking' : 'savings',
+          bank_code: data.bank_code,
+          branch: data.branch,
+          bank_name: dataTransfer?.payload?.recipient?.bank_name,
+          account: data.account,
+          name: data.name,
+        },
+      },
+    };
+    const pix = {
+      is_approved: dataPix.is_approved,
+      status_id: 1,
+      scheduled_date: data.scheduled_date,
+      payload: {
+        key_type: data.key_type,
+        key: data.key,
+        amount: data.amount,
+        description: data.description,
+        nif_number: data.nif_number,
+        email: data.email,
+      },
+    };
+    setLoadingEdit(true);
+
+    try {
+      setLoading && setLoading(true);
+      const result = await UpdateScheduleTransactions(
+        type === 'pix' ? dataPix.id : dataTransfer.id,
+        type === 'pix' ? pix : transfer
+      );
+
+      toast({
+        title: 'Dados Alterados com Sucesso!',
+        status: 'success',
+        variant: 'solid',
+        isClosable: true,
+      });
+
+      onClose();
+    } catch (error: any) {
+      toast({
+        title:
+          error?.response?.data?.errors?.scheduled_date?.map(
+            (item: any) => item
+          ) || error?.response?.data?.message,
+        status: 'error',
+        variant: 'solid',
+        isClosable: true,
+      });
+      console.log(error);
+    } finally {
+      setLoading && setLoading(false);
+      setLoadingEdit(false);
+    }
+    console.log({ data });
   }
   useEffect(() => {
     if (dataPix && type === 'pix') {
-      setValue('amount', dataPix?.payload.amount);
+      setValue('amount', formatCalcValue(String(dataPix?.payload.amount)));
       setValue('email', dataPix?.payload.email);
       setValue('scheduled_date', dataPix?.scheduled_date);
       setValue('key_type', dataPix?.payload?.key_type);
-      setValue('key', dataPix?.scheduled_date);
+      setValue('key', dataPix?.payload?.key);
       setValue('description', dataPix?.payload?.description);
       setValue('nif_number', dataPix?.payload?.nif_number);
     }
@@ -67,7 +163,7 @@ export function ModalEditPayment({
 
       const { account_type, bank_code, branch, account, name, bank_name } =
         recipient;
-      setValue('amount_transfer', amount);
+      setValue('amount_transfer', formatCalcValue(String(amount)));
       setValue(
         'account_type',
         account_type === 'checking' ? 'Corrente' : 'Poupança'
@@ -114,8 +210,14 @@ export function ModalEditPayment({
                     _focus={{
                       borderBottom: '1px solid #2E4EFF',
                     }}
-                    {...register('amount')}
-                    // error={false}
+                    {...register('amount', {
+                      onChange(event: React.ChangeEvent<HTMLInputElement>) {
+                        const { value } = event.currentTarget;
+                        event.currentTarget.value =
+                          formatCalcValue(value) || '';
+                      },
+                    })}
+                    error={formState?.errors?.amount}
                   />
                   <Flex gap={5} py="5px">
                     <Box w="30%">
@@ -133,7 +235,7 @@ export function ModalEditPayment({
                           borderBottom: '1px solid #2E4EFF',
                         }}
                         {...register('key_type')}
-                        // error={formState?.errors?.username || any}
+                        error={formState?.errors?.key_type}
                       />
                     </Box>
                     <Input
@@ -151,7 +253,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('key')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.key}
                     />
                   </Flex>
                   <SimpleGrid columns={2} gap={5} py="5px">
@@ -170,7 +272,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('nif_number')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.nif_number}
                     />
                     <Input
                       label="E-mail"
@@ -187,7 +289,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('email')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.email}
                     />
                     <Input
                       label="Agendamento"
@@ -206,7 +308,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('scheduled_date')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.scheduled_date}
                     />
                     <Input
                       label="Descrição"
@@ -223,7 +325,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('description')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.description}
                     />
                   </SimpleGrid>
                 </>
@@ -243,8 +345,14 @@ export function ModalEditPayment({
                     _focus={{
                       borderBottom: '1px solid #2E4EFF',
                     }}
-                    {...register('amount_transfer')}
-                    // error={formState?.errors?.username || any}
+                    {...register('amount_transfer', {
+                      onChange(event: React.ChangeEvent<HTMLInputElement>) {
+                        const { value } = event.currentTarget;
+                        event.currentTarget.value =
+                          formatCalcValue(value) || '';
+                      },
+                    })}
+                    error={formState?.errors?.amount_transfer}
                   />
                   <Flex gap={5} py="5px">
                     <Box w="30%">
@@ -262,7 +370,7 @@ export function ModalEditPayment({
                           borderBottom: '1px solid #2E4EFF',
                         }}
                         {...register('account_type')}
-                        // error={formState?.errors?.username || any}
+                        error={formState?.errors?.account_type}
                       />
                     </Box>
                     <Input
@@ -280,7 +388,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('name')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.name}
                     />
                   </Flex>
                   <SimpleGrid columns={2} gap={5} py="5px">
@@ -299,7 +407,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('bank_name')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.bank_name}
                     />
                     <Input
                       label="CPF/CNPJ"
@@ -316,7 +424,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('nif_number_transfer')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.nif_number_transfer}
                     />
                     <Input
                       label="Agência"
@@ -333,7 +441,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('branch')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.branch}
                     />
                     <Input
                       label="Conta"
@@ -350,7 +458,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('bank_code')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.bank_code}
                     />
                     <Input
                       label="Agendamento"
@@ -369,7 +477,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('scheduled_date_transfer')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.scheduled_date_transfer}
                     />
                     <Input
                       label="Descrição"
@@ -386,7 +494,7 @@ export function ModalEditPayment({
                         borderBottom: '1px solid #2E4EFF',
                       }}
                       {...register('description_transfer')}
-                      // error={formState?.errors?.username || any}
+                      error={formState?.errors?.description_transfer}
                     />
                   </SimpleGrid>
                 </>
@@ -520,6 +628,8 @@ export function ModalEditPayment({
                   color="#070A0E"
                   type="submit"
                   borderRadius="40px"
+                  isLoading={loadindEdit}
+                  onClick={() => console.log(formState?.errors)}
                   _hover={{ background: '#2E4EFF', color: '#FFF' }}
                 >
                   SALVAR

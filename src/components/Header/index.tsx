@@ -52,7 +52,6 @@ export function Header({ name, avatar }: HeaderProps) {
       staleTime: 1000 * 60, // 1 minute
     }
   );
-  console.log({ dataBalance });
 
   return (
     <Box w="100%" h="90px" bg="#00102A" display="flex" alignItems="center">
