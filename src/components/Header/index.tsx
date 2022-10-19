@@ -91,14 +91,15 @@ export function Header({ name, avatar }: HeaderProps) {
                 Saldo em conta
               </Text>
             </Flex>
-            <Text mt="5px" userSelect="none">{`R$ ${
+            <Text mt="5px" userSelect="none">{` ${
               toggle
                 ? dataBalance?.data
-                  ? formatCalcValue(
-                      String(dataBalance?.data?.amount + 0) || '0'
-                    )
+                  ? dataBalance?.data?.amount.toLocaleString('pt-br', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })
                   : formatCalcValue('000')
-                : '***********'
+                : 'R$ ***********'
             }`}</Text>
           </Box>
           <Center height="50px">
@@ -128,12 +129,16 @@ export function Header({ name, avatar }: HeaderProps) {
               ) : (
                 <Text>{`Olá, ${data?.data?.register_name}`}</Text>
               )}
-              <Text>
-                {nifFormat(
-                  (data?.data?.nif_number as string) ?? '',
-                  data?.data?.nif_number.length === 11 ? 'cpf' : 'cnpj'
-                )}
-              </Text>
+              {toggle ? (
+                <Text>
+                  {nifFormat(
+                    (data?.data?.nif_number as string) ?? '',
+                    data?.data?.nif_number.length === 11 ? 'cpf' : 'cnpj'
+                  )}
+                </Text>
+              ) : (
+                <Text>{isLoading ? '' : '***********'}</Text>
+              )}
             </Box>
           </Flex>
 
