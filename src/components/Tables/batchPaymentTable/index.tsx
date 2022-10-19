@@ -342,10 +342,12 @@ export const BatchPaymentTable = ({
                         )) ||
                       ''
                     : type === 'transfer'
-                    ? nifFormat(
-                        item?.account?.nif_number,
-                        item?.account?.nif_number.length > 11 ? 'cnpj' : 'cpf'
-                      )
+                    ? (item?.account?.nif_number &&
+                        nifFormat(
+                          item?.account?.nif_number,
+                          item?.account?.nif_number.length > 11 ? 'cnpj' : 'cpf'
+                        )) ||
+                      ''
                     : ''}
                 </Td>
                 <Td>
