@@ -122,7 +122,7 @@ export function ModalEditPayment({
       );
 
       toast({
-        title: 'Dados Alterados com Sucesso!',
+        title: 'Dados atualizados com sucesso! ',
         status: 'success',
         variant: 'solid',
         isClosable: true,
