@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -81,12 +82,11 @@ export default function ReviewPayment() {
     setLoading(true);
     try {
       const response = await getValidateScheduleTransaction<IDataPIX>(
-        query.transaction as 'pix' | 'transfer' | 'bill-payment'
+        query.transaction as 'pix' | 'transfer' | 'bill-payment',
+        0,
+        'false'
       );
-      setItems({
-        ...response,
-        data: response.data.filter((item) => item.is_approved === false),
-      });
+      setItems(response);
     } catch (error) {
       console.log(error);
     } finally {
@@ -114,7 +114,7 @@ export default function ReviewPayment() {
 
   useEffect(() => {
     getScheduleTransaction();
-  }, [deletSchedule, loadingEdit]);
+  }, [deletSchedule, loadingEdit, paymentLoading]);
 
   return (
     <Box h="full" w="full">
@@ -201,8 +201,10 @@ export default function ReviewPayment() {
         >
           <BatchPaymentTable
             type={query.transaction as 'pix' | 'transfer' | 'bill-payment'}
+            filterApproved="false"
             edit
-            loading={setLoadingEdit}
+            loadingEdit={setLoadingEdit}
+            loading={setLoading}
             setState={setItems}
             setPage={setPage}
             isLoading={loading}
