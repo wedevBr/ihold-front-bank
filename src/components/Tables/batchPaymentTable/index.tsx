@@ -19,6 +19,7 @@ import {
   MenuItem,
   TableContainer,
   useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
 import { Loading, ModalEditPayment, Pagination } from '~/components';
 import { Icon } from '@iconify/react';
@@ -48,12 +49,14 @@ import { GetStatementsDownloadVoucher } from '~/services/hooks/useStatements';
 
 type tableProps = {
   type?: 'pix' | 'transfer' | 'bill-payment';
+  filterApproved?: 'true' | 'false';
   edit?: boolean;
   dataBillPayment?: IPaginationData<IDataBillPayment>;
   dataTransfer?: IPaginationData<IDataTed>;
   items?: IPaginationData<IDataPIX>;
   isLoading?: boolean;
   loading: (state: boolean) => void;
+  loadingEdit?: (state: boolean) => void;
   getScheduleIDS?: (ids: number[]) => void;
   page?: number;
   setPage: (numberPage: number) => void;
@@ -75,9 +78,11 @@ export const BatchPaymentTable = ({
   dataTransfer,
   isLoading,
   edit,
+  filterApproved,
   getScheduleIDS,
   refreshItems,
   loading,
+  loadingEdit,
   setPage,
   setState,
   refetch,
@@ -88,7 +93,6 @@ export const BatchPaymentTable = ({
   const [password, setPassword] = useState('');
   const [uuid, setUuid] = useState(0);
   const [transaction, setTransaction] = useState<IDataPIX | IDataTed>();
-  const check = useRef(null);
 
   const {
     isOpen: isOpenAuth,
@@ -107,6 +111,7 @@ export const BatchPaymentTable = ({
     onOpen: onPenEditPix,
     onClose: onCloseEditPix,
   } = useDisclosure();
+  const toast = useToast();
 
   const individualCheck = (id: number, state: boolean) => {
     if (checked.find((user) => user.id === id)) {
@@ -143,17 +148,30 @@ export const BatchPaymentTable = ({
       loading(true);
       setPaymentLoading(true);
       refreshItems && refreshItems(true);
-      return await GetScheduleAllTransactionDataApproved(uuid, secretPassword)
-        .then((_) => {
+      try {
+        const response = await GetScheduleAllTransactionDataApproved(
+          uuid,
+          secretPassword
+        );
+        if (!response) {
+          toast({
+            title: 'Senha inválida!',
+            status: 'error',
+            variant: 'solid',
+            isClosable: true,
+          });
           onCloseAuth();
-          onPenSuccess();
-        })
-        .finally(() => {
-          setPaymentLoading(false);
-          setUuid(0);
-          refreshItems && refreshItems(false);
-          loading(false);
-        });
+          return;
+        }
+        onCloseAuth();
+        onPenSuccess();
+      } catch (error) {
+      } finally {
+        setPaymentLoading(false);
+        setUuid(0);
+        refreshItems && refreshItems(false);
+        loading(false);
+      }
     }
   }
 
@@ -478,7 +496,7 @@ export const BatchPaymentTable = ({
                           isOpen={isOpenEditPix}
                           onClose={onCloseEditPix}
                           type={type}
-                          setLoading={loading}
+                          setLoading={loadingEdit && loadingEdit}
                         />
                       </MenuList>
                     </Menu>
@@ -510,13 +528,14 @@ export const BatchPaymentTable = ({
       <Flex justify="right" w="full">
         <Text mr="5" mt="5" fontSize="17px">
           Total de transações:{' '}
-          {items?.data.length ||
-            dataBillPayment?.data.length ||
-            dataTransfer?.data.length ||
+          {items?.data?.length ||
+            dataBillPayment?.data?.length ||
+            dataTransfer?.data?.length ||
             0}
         </Text>
       </Flex>
       <Pagination
+        filterApproved={filterApproved}
         setPage={setPage}
         loading={loading}
         setState={setState}

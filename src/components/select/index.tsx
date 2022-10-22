@@ -13,7 +13,7 @@ interface SelectProps extends ChakraSelectProps {
   label?: string;
   colorLabel?: string;
   widthDefault?: any;
-  error?: FieldError;
+  error?: any;
   disabled?: boolean;
   children: ReactNode;
   labelFontSize?: string;

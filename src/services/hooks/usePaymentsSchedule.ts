@@ -20,13 +20,14 @@ export async function registerPayment(transactionData: FormData) {
 }
 export const getValidateScheduleTransaction = async <T>(
   type?: 'pix' | 'transfer' | 'bill-payment',
-  per_page?: number
+  per_page?: number,
+  filterApproved?: 'true' | 'false'
 ): Promise<IPaginationData<T>> => {
   try {
     const { data } = await api.get(
       `/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&filter[transaction_type_id]=${
         type === 'pix' ? '2' : type === 'transfer' ? '1' : '3'
-      }`,
+      }${!!filterApproved ? `&filter[approved]=${filterApproved}` : ''}`,
       {
         params: {
           'page[size]': 10,

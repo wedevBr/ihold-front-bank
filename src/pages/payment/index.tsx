@@ -429,6 +429,7 @@ export default function Payment() {
         onClose={onCloseDelet}
       />
       <ModalStatus
+        closeOnOverlayClick={false}
         variant="success"
         title="pronto"
         route={`/payment/review/${type}`}
@@ -442,6 +443,7 @@ export default function Payment() {
         isOpen={isOpenUpload}
         onClose={onCloseUpload}
         title="IMPORTAR DADOS"
+        closeOnOverlayClick={false}
       >
         <>
           {isSuccess ? (
