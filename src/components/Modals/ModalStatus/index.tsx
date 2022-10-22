@@ -37,6 +37,7 @@ export function ModalStatus({
   route,
   handleClick,
   onClose,
+  ...rest
 }: IModalStatus) {
   return (
     <Modal
@@ -44,6 +45,7 @@ export function ModalStatus({
       onClose={onClose}
       autoFocus
       motionPreset="slideInBottom"
+      {...rest}
     >
       <ModalOverlay />
       <ModalContent color="#fff">

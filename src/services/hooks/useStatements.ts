@@ -47,3 +47,23 @@ export async function GetStatementsDownloadVoucher(statementId: number) {
     throw error;
   }
 }
+export async function GetStatementsDownloadExtract(
+  type: string,
+  date_start: string,
+  date_end: string
+) {
+  try {
+    const { data } = await api.get(
+      `/statements/downloads/extract/${type}?filter[between_dates]=${date_start},${date_end}`,
+      {
+        responseType: 'blob',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
+    );
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
