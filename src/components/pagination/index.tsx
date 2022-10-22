@@ -12,7 +12,7 @@ interface INavigation {
   next?: string | null;
   prev?: string | null;
   setState: (item: any) => void;
-  // setAll: (item: any) => void;
+  filterApproved?: 'true' | 'false';
   setPage: (numberPage: number) => void;
   loading: (state: boolean) => void;
   total?: number;
@@ -23,7 +23,7 @@ export function Pagination({
   next,
   prev,
   setState,
-  // setAll,
+  filterApproved,
   setPage,
   loading,
   total = 1,
@@ -53,7 +53,9 @@ export function Pagination({
     loading(true);
     try {
       const { data } = await api.get(
-        '/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&filter[transaction_type_id]=2',
+        `/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&filter[transaction_type_id]=2${
+          !!filterApproved ? `&filter[approved]=${filterApproved}` : ''
+        }`,
         {
           params: {
             'page[number]': page,

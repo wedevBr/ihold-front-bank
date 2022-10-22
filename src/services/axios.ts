@@ -114,7 +114,7 @@ export function getAPIClient(ctx?: any) {
       }
 
       // Error Request
-      if ([403, 404, 405, 408, 428].includes(error.response.status)) {
+      if ([404, 405, 408, 428].includes(error.response.status)) {
         clearLocalStorage();
         process.browser
           ? signOut() // logout user signOut()

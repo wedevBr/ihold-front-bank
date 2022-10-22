@@ -34,13 +34,12 @@ export function Modal({
 }: ModalProps) {
   return (
     <ChakraModal isOpen={isOpen} onClose={onClose} {...rest}>
-      <ModalOverlay backdropFilter="blur(5px)" />
+      <ModalOverlay />
       <ModalContent
         maxW="max-content"
         minW="500px"
         bg="transparent"
         shadow="none"
-       
       >
         <Flex justifyContent="flex-end">
           <CloseButton
@@ -50,7 +49,13 @@ export function Modal({
             _focus={{ borderColor: 'white' }}
           />
         </Flex>
-        <ModalHeader  borderTop="4px" borderColor="#00102A" bg="white" borderTopRadius="6px" padding={padding || ''}>
+        <ModalHeader
+          borderTop="4px"
+          borderColor="#00102A"
+          bg="white"
+          borderTopRadius="6px"
+          padding={padding || ''}
+        >
           <Text textAlign="left" fontSize="18px" lineHeight="21px">
             {title}
           </Text>

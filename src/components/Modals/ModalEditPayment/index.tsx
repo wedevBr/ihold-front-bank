@@ -149,12 +149,12 @@ export function ModalEditPayment({
   useEffect(() => {
     if (dataPix && type === 'pix') {
       setValue('amount', formatCalcValue(String(dataPix?.payload.amount)));
-      setValue('email', dataPix?.payload.email);
+      setValue('email', dataPix?.payload.email || '');
       setValue('scheduled_date', dataPix?.scheduled_date);
       setValue('key_type', dataPix?.payload?.key_type);
       setValue('key', dataPix?.payload?.key);
-      setValue('description', dataPix?.payload?.description);
-      setValue('nif_number', dataPix?.payload?.nif_number);
+      setValue('description', dataPix?.payload?.description || '');
+      setValue('nif_number', dataPix?.payload?.nif_number || '');
     }
     if (dataTransfer && type === 'transfer') {
       const { scheduled_date, payload, account: accountItems } = dataTransfer;
@@ -174,8 +174,8 @@ export function ModalEditPayment({
       setValue('bank_name', bank_name);
       setValue('branch', branch);
       setValue('name', name);
-      setValue('description_transfer', description);
-      setValue('nif_number_transfer', nif_number);
+      setValue('description_transfer', description || '');
+      setValue('nif_number_transfer', nif_number || '');
     }
   }, [dataPix, dataTransfer]);
   return (
