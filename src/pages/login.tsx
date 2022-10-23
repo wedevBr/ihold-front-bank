@@ -159,16 +159,18 @@ export default function Login() {
               ENTRAR
             </Button>
             <Box mt="18px"></Box>
-            <Button
-              bg="#FFF"
-              border="1px"
-              borderColor="#2E4EFF"
-              color="#2E4EFF"
-              w="100%"
-              borderRadius="40px"
-            >
-              ABRIR CONTA
-            </Button>
+            <Link href="/onboarding">
+              <Button
+                bg="#FFF"
+                border="1px"
+                borderColor="#2E4EFF"
+                color="#2E4EFF"
+                w="100%"
+                borderRadius="40px"
+              >
+                ABRIR CONTA
+              </Button>
+            </Link>
           </Box>
         </Box>
       </Box>
