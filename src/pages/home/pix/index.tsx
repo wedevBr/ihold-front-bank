@@ -1,22 +1,46 @@
-import { Box, Flex, SimpleGrid, TabPanel, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  SimpleGrid,
+  TabPanel,
+  Text,
+  useDisclosure,
+  useToast,
+} from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
-import React from 'react';
+import React, { useState } from 'react';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import moment from 'moment';
+import { useForm } from 'react-hook-form';
 import { useQuery } from 'react-query';
 import {
   CardTransaction,
   CardValue,
   ContainerTransaction,
   ExtractPixAndTedTable,
+  Input,
   Layout,
+  Modal,
+  Select,
 } from '~/components';
 import {
   GetAllStatementsOperation,
+  GetStatementsDownloadExtract,
   GetStatementsOperation,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
 
+const dowloadSchema = yup.object().shape({
+  date_start: yup.string().required('Período inicial obrigatório'),
+  date_end: yup.string().required('Período final obrigatório'),
+  type: yup.string(),
+});
+
 export default function Pix() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { data, isLoading } = useQuery(
     [2],
     () => GetAllStatementsOperation(2),
@@ -44,6 +68,52 @@ export default function Pix() {
 
   const handleCalcValue = (val: string) => parseInt(val?.replace(/[\D]+/g, ''));
   const result = handleCalcValue(InAmount) - handleCalcValue(outAmount);
+  const [loading, setLoading] = useState(false);
+  const toast = useToast();
+  const { register, handleSubmit, formState, setValue } = useForm({
+    resolver: yupResolver(dowloadSchema),
+    mode: 'onBlur',
+  });
+  async function handleDowloadExtract(data: any) {
+    console.log({ data });
+
+    setLoading(true);
+    const formatType =
+      data.type === '1' ? 'PDF' : data.type === '2' ? 'CSV' : 'OFX';
+    try {
+      const response = await GetStatementsDownloadExtract(
+        formatType,
+        data.date_start,
+        data.date_end,
+        'pix'
+      );
+
+      toast({
+        title: 'Exportação com sucesso! ',
+        status: 'success',
+        variant: 'solid',
+        isClosable: true,
+      });
+      const fileURL = window.URL.createObjectURL(response);
+      let link = document.createElement('a');
+      link.href = fileURL;
+      link.download = `Extrato-${moment(data.date_start).format('L')}-${moment(
+        data.date_end
+      ).format('L')}.${formatType.toLocaleLowerCase()}`;
+      link.click();
+
+      onClose();
+    } catch (error: any) {
+      toast({
+        title: 'Não encontramos extrato para data de início! ',
+        status: 'error',
+        variant: 'solid',
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <Layout>
@@ -81,7 +151,34 @@ export default function Pix() {
             />
             <Text ml="5px">EXTRATO PIX</Text>
           </Flex>
-          <ContainerTransaction tabName={['todos', 'entrada', 'Saída']}>
+          <ContainerTransaction
+            tabName={['todos', 'entrada', 'Saída']}
+            header={
+              <Button
+                bg="#2E4EFF"
+                _hover={{ bg: '#435ffa' }}
+                _active={{ bg: '#2444f6' }}
+                color="#fff"
+                w="121px"
+                fontSize="0.875rem"
+                borderRadius="20px"
+                h="35px"
+                textTransform="uppercase"
+                fontWeight="600"
+                padding="8px 1.25rem"
+                onClick={onOpen}
+              >
+                <Flex align="center">
+                  <Icon
+                    icon="clarity:import-line"
+                    width={20}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text>EXPORTAR</Text>
+                </Flex>
+              </Button>
+            }
+          >
             <TabPanel>
               <ExtractPixAndTedTable isLoading={isLoading} items={data} />
             </TabPanel>
@@ -113,6 +210,80 @@ export default function Pix() {
           ))}
         </Flex>
       </Box>
+      <Modal isOpen={isOpen} onClose={onClose} title="EXPORTAR EXTRATOS">
+        <Box as="form" onSubmit={handleSubmit(handleDowloadExtract)}>
+          <Flex align="center" w="full" justify="space-between" mb="20px">
+            <Input
+              label="Período Inicial"
+              labelColor="#7F8B9F"
+              w="full"
+              size="sm"
+              bg="transparent"
+              color="#7F8B9F"
+              type="date"
+              fontSize="16px"
+              border="0px"
+              borderBottom="1px solid #7F8B9F"
+              borderRadius={0}
+              placeholder="dd/mm/aaaa"
+              _focus={{
+                borderBottom: '1px solid #2E4EFF',
+              }}
+              {...register('date_start')}
+              error={formState?.errors?.date_start}
+            />
+            <Input
+              label="Período Final"
+              labelColor="#7F8B9F"
+              w="full"
+              size="sm"
+              bg="transparent"
+              color="#7F8B9F"
+              type="date"
+              fontSize="16px"
+              border="0px"
+              borderBottom="1px solid #7F8B9F"
+              borderRadius={0}
+              placeholder="dd/mm/aaaa"
+              _focus={{
+                borderBottom: '1px solid #2E4EFF',
+              }}
+              {...register('date_end')}
+              error={formState?.errors?.date_end}
+            />
+          </Flex>
+          <Select
+            mb="20px"
+            label="Tipo"
+            {...register('type')}
+            error={formState?.errors?.type}
+          >
+            {['PDF', 'CSV', 'OFX'].map((item, key) => (
+              <option value={+key + 1} key={key}>
+                {item}
+              </option>
+            ))}
+          </Select>
+          <Button
+            my="20px"
+            bg="#2E4EFF"
+            _hover={{ bg: '#435ffa' }}
+            _active={{ bg: '#2444f6' }}
+            color="#fff"
+            w="full"
+            fontSize="0.875rem"
+            borderRadius="20px"
+            h="35px"
+            textTransform="uppercase"
+            fontWeight="600"
+            padding="8px 1.25rem"
+            type="submit"
+            isLoading={loading}
+          >
+            DOWLOAD
+          </Button>
+        </Box>
+      </Modal>
     </Layout>
   );
 }
