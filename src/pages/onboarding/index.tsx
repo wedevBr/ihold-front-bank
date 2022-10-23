@@ -484,7 +484,6 @@ export default function OnBoarding() {
             </TabPanel>
             <TabPanel py="0">
               <Box
-                h="200px"
                 p="20px"
                 bg="#FFFFFF"
                 borderRadius="6px"
@@ -547,7 +546,6 @@ export default function OnBoarding() {
             </TabPanel>
             <TabPanel py="0">
               <Box
-                h="200px"
                 p="20px"
                 bg="#FFFFFF"
                 borderRadius="6px"
@@ -597,8 +595,8 @@ export default function OnBoarding() {
                         console.log(formState.errors);
                         const tab2 = await trigger(['address']);
                         if (tab2) {
-                          setCurrentTab((current) => current + 1);
-                          setPermissionTab((prev) => [...prev, 3]);
+                          // setCurrentTab((current) => current + 1);
+                          // setPermissionTab((prev) => [...prev, 3]);
                         }
                       }}
                     >
@@ -610,7 +608,6 @@ export default function OnBoarding() {
             </TabPanel>
             <TabPanel py="0">
               <Box
-                h="200px"
                 p="20px"
                 bg="#FFFFFF"
                 borderRadius="6px"
