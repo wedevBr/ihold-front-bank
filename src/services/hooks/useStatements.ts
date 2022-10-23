@@ -50,11 +50,22 @@ export async function GetStatementsDownloadVoucher(statementId: number) {
 export async function GetStatementsDownloadExtract(
   type: string,
   date_start: string,
-  date_end: string
+  date_end: string,
+  typeTrasanction?: 'pix' | 'transfer' | 'bill-payment'
 ) {
   try {
     const { data } = await api.get(
-      `/statements/downloads/extract/${type}?filter[between_dates]=${date_start},${date_end}`,
+      `/statements/downloads/extract/${type}?filter[between_dates]=${date_start},${date_end}${
+        !!typeTrasanction
+          ? `&filter[transaction_type_id]=${
+              typeTrasanction === 'pix'
+                ? '2'
+                : typeTrasanction === 'transfer'
+                ? '1'
+                : '3'
+            }`
+          : ''
+      }`,
       {
         responseType: 'blob',
         headers: {
