@@ -56,13 +56,13 @@ interface IOnBoarding {
 
 const onboardingSchema = yup.object().shape({
   // document_typet: yup.string().required('Período inicial obrigatório'),
-  birth: yup.string().required('Período final obrigatório'),
-  social_name: yup.string().required('Período final obrigatório'),
-  nif_number: yup.string().required('Período final obrigatório'),
-  email: yup.string().required('Período final obrigatório'),
-  mother_name: yup.string().required('Período final obrigatório'),
-  number: yup.string().required('Período final obrigatório'),
-  address: yup.string().required('Período final obrigatório'),
+  birth: yup.string().required('Data de nascimento obrigatório'),
+  social_name: yup.string().required('Nome completo obrigatório'),
+  nif_number: yup.string().required('CPF obrigatório'),
+  email: yup.string().email('Email inválido').required('email obrigatório'),
+  mother_name: yup.string().required('Nome da mãe obrigatório'),
+  number: yup.string().required('Numero  obrigatório'),
+  address: yup.string().required('Endereço obrigatório'),
 });
 
 export default function OnBoarding() {
