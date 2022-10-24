@@ -448,7 +448,9 @@ export const BatchPaymentTable = ({
                       bg="#dde2eb"
                       p="6px"
                       borderRadius="50px"
-                      onClick={() => handleDownloadVoucher(item.id)}
+                      onClick={() =>
+                        handleDownloadVoucher(item?.transaction_type?.id)
+                      }
                     >
                       <Icon icon="bx:download" width={20} />
                     </Box>
