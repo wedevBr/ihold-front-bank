@@ -80,7 +80,7 @@ export default function OnBoarding() {
       iconName: 'bx:user',
     },
     {
-      title: 'Endereço PESSOAL',
+      title: 'Endereço Pessoal',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'akar-icons:location',
     },
@@ -95,22 +95,22 @@ export default function OnBoarding() {
       iconName: 'carbon:enterprise',
     },
     {
-      title: 'Dados Comerciais',
+      title: 'ENDEREÇO COMERCIAL',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'carbon:enterprise',
     },
     {
-      title: 'Dados Comerciais',
+      title: 'DOCUMENTAÇÃO',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'carbon:enterprise',
     },
     {
-      title: 'Dados Comerciais',
+      title: 'SOCIEDADES',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'carbon:enterprise',
     },
     {
-      title: 'Dados Comerciais',
+      title: 'SENHA',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'carbon:enterprise',
     },
@@ -162,7 +162,15 @@ export default function OnBoarding() {
                 <Tab p="0" w="full" isDisabled={!permissionTab.includes(key)}>
                   <Flex align="center" justify="space-between" w="full">
                     <Box mr="5px">
-                      <Text>{item.title}</Text>
+                      <Text
+                        textTransform="uppercase"
+                        fontFamily="lato"
+                        fontStyle="normal"
+                        fontWeight="700"
+                        fontSize="16px"
+                      >
+                        {item.title}
+                      </Text>
                       <Text mt="0">{item.subTitle}</Text>
                     </Box>
                     <Flex
