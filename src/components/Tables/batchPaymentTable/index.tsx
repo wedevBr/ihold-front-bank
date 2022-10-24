@@ -182,12 +182,14 @@ export const BatchPaymentTable = ({
       const fileURL = window.URL.createObjectURL(response);
       let link = document.createElement('a');
       link.href = fileURL;
-      link.download = `${type}.pdf`;
+      link.download = `comprovante-${
+        type === 'transfer'
+          ? 'transferência'
+          : type === 'bill-payment'
+          ? 'Boleto'
+          : 'Pix'
+      }.pdf`;
       link.click();
-
-      console.log(response, 'comprovante.pdf');
-
-      // fileDownload(response, 'comprovante.pdf');
     });
   }
 
