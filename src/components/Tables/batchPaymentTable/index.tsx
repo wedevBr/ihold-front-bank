@@ -179,6 +179,12 @@ export const BatchPaymentTable = ({
     // setModalErrorIsOpen(false);
 
     GetStatementsDownloadVoucher(statementId).then((response) => {
+      const fileURL = window.URL.createObjectURL(response);
+      let link = document.createElement('a');
+      link.href = fileURL;
+      link.download = `${type}.pdf`;
+      link.click();
+
       console.log(response, 'comprovante.pdf');
 
       // fileDownload(response, 'comprovante.pdf');
@@ -448,9 +454,7 @@ export const BatchPaymentTable = ({
                       bg="#dde2eb"
                       p="6px"
                       borderRadius="50px"
-                      onClick={() =>
-                        handleDownloadVoucher(item?.transaction_type?.id)
-                      }
+                      onClick={() => handleDownloadVoucher(item?.id)}
                     >
                       <Icon icon="bx:download" width={20} />
                     </Box>
