@@ -39,6 +39,7 @@ export async function GetStatementsDownloadVoucher(statementId: number) {
     const { data } = await api.get(`/statements/downloads/${statementId}`, {
       responseType: 'blob',
       headers: {
+        'Content-Type': 'application/pdf',
         'Access-Control-Allow-Origin': '*',
       },
     });
