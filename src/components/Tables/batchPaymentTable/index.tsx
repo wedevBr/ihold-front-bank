@@ -449,19 +449,30 @@ export const BatchPaymentTable = ({
                   </Td>
                 )}
                 <Td minW="20px">
-                  <Flex align="center" justifyContent="center">
-                    <Box
-                      bg="#dde2eb"
-                      p="6px"
-                      borderRadius="50px"
-                      onClick={() => handleDownloadVoucher(item?.id)}
-                    >
-                      <Icon icon="bx:download" width={20} />
-                    </Box>
-                  </Flex>
+                  {(item?.status?.name === 'completed' && (
+                    <Flex align="center" justifyContent="center">
+                      <Box
+                        bg="#dde2eb"
+                        p="6px"
+                        borderRadius="50px"
+                        onClick={() => handleDownloadVoucher(item?.id)}
+                      >
+                        <Icon icon="bx:download" width={20} />
+                      </Box>
+                    </Flex>
+                  )) || (
+                    <Flex align="center" justifyContent="center">
+                      <Box
+                        // bg="#dde2eb"
+                        p="6px"
+                        borderRadius="50px"
+                        // onClick={() => handleDownloadVoucher(item?.id)}
+                      ></Box>
+                    </Flex>
+                  )}
                 </Td>
-                {!item.is_approved && (
-                  <Td>
+                <Td>
+                  {!item.is_approved && (
                     <Menu direction="rtl">
                       <MenuButton>
                         <Icon icon="carbon:settings" width={20} />
@@ -506,8 +517,8 @@ export const BatchPaymentTable = ({
                         />
                       </MenuList>
                     </Menu>
-                  </Td>
-                )}
+                  )}
+                </Td>
               </Tr>
             ))}
           </Tbody>
