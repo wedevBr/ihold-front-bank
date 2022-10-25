@@ -31,7 +31,7 @@ import {
   GetAllStatementsOperation,
   GetStatementsDownloadExtract,
   GetStatementsOperation,
-  useCustomers,
+  useTransactions,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
@@ -45,6 +45,7 @@ const dowloadSchema = yup.object().shape({
 
 export default function Pix() {
   const [filterDate, setFilterDate] = useState('');
+  const [activeFilter, setActiveFilter] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [per_page, setPerPage] = useState(25);
   const dates = [7, 15, 30, 60];
@@ -53,7 +54,7 @@ export default function Pix() {
     return moment(date).subtract(days, 'days').format('YYYY-MM-DD');
   };
 
-  const { data: DataPix, isFetching } = useCustomers(
+  const { data: DataPix, isFetching } = useTransactions(
     currentPage,
     per_page,
     'pix',
@@ -173,8 +174,8 @@ export default function Pix() {
       </SimpleGrid>
       <Box bg="#FFFFFF" p="50px" mt="30px" borderRadius="10px">
         <Text>Extrato: iHold Bank </Text>
-        <Flex my="10px" w="380px" justify="space-between">
-          <Button
+        <Flex my="10px" w="300px" justify="space-between" mb="25px">
+          {/* <Button
             transition="all linear .55s"
             variant="unstyled"
             fontSize="14px"
@@ -187,7 +188,7 @@ export default function Pix() {
             onClick={() => setFilterDate('')}
           >
             Todos
-          </Button>
+          </Button> */}
           {dates.map((day, key) => (
             <Button
               key={key}
@@ -200,22 +201,25 @@ export default function Pix() {
               border="1px solid #CBD3E0"
               color={+filterDate === day ? '#fff' : ''}
               bg={+filterDate === day ? '#2E4EFF' : ''}
-              onClick={() => setFilterDate(day.toString())}
+              onClick={() => {
+                setActiveFilter(!activeFilter);
+                if (+day !== +filterDate) {
+                  setCurrentPage(1);
+                  setFilterDate(day.toString());
+                  return;
+                } else if (!activeFilter) {
+                  setCurrentPage(1);
+                  setFilterDate(day.toString());
+                  return;
+                }
+                setFilterDate('');
+              }}
             >
               {day} dias
             </Button>
           ))}
         </Flex>
         <Box w="full" borderRadius="6px" h="620px">
-          <Flex mb="30px">
-            <Icon
-              width="25px"
-              cursor="pointer"
-              color="#21C6DE"
-              icon="akar-icons:eye"
-            />
-            <Text ml="5px">EXTRATO PIX</Text>
-          </Flex>
           <ContainerTransaction
             tabName={['completo', 'entrada', 'Saída']}
             header={

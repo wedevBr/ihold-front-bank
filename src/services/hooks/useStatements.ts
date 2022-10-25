@@ -118,7 +118,7 @@ export async function getAllStatementsOperation(
   }
 }
 
-export function useCustomers(
+export function useTransactions(
   page?: number,
   per_page?: number,
   statementId?: string,
