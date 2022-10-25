@@ -13,7 +13,7 @@ interface ICardValue {
   type: 'cash-in' | 'cash-out' | 'prevision' | 'default';
   value?: string | number;
   percentage: number;
-  result?: number
+  result?: number;
 }
 
 export function CardValue({
@@ -39,7 +39,7 @@ export function CardValue({
       case 'prevision':
         return {
           color: '#21C6DE',
-          name: 'Previsão',
+          name: 'Saldo',
           icon: '',
         };
 
@@ -89,8 +89,12 @@ export function CardValue({
           fontWeight="700"
           fontSize="30px"
           color={handleType({ type }).color}
-        >{value ? result < 0 ? `-R$ ${formatCalcValue(value.toString())}` : `R$ ${formatCalcValue(value.toString())}` : ""}
-
+        >
+          {value
+            ? result < 0
+              ? `-R$ ${formatCalcValue(value.toString())}`
+              : `R$ ${formatCalcValue(value.toString())}`
+            : ''}
         </Text>
         <Text
           fontFamily="Lato"

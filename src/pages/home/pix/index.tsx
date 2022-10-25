@@ -3,6 +3,8 @@ import {
   Button,
   Flex,
   SimpleGrid,
+  Skeleton,
+  Spinner,
   TabPanel,
   Text,
   useDisclosure,
@@ -29,9 +31,11 @@ import {
   GetAllStatementsOperation,
   GetStatementsDownloadExtract,
   GetStatementsOperation,
+  useTransactions,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
 import { routeTransactions } from '..';
+import { createPagination } from '~/hooks/createPagination';
 
 const dowloadSchema = yup.object().shape({
   date_start: yup.string().required('Período inicial obrigatório'),
@@ -40,6 +44,30 @@ const dowloadSchema = yup.object().shape({
 });
 
 export default function Pix() {
+  const [filterDate, setFilterDate] = useState('');
+  const [activeFilter, setActiveFilter] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [per_page, setPerPage] = useState(25);
+  const dates = [7, 15, 30, 60];
+  const date = new Date();
+  const formatPrevDate = (days: number) => {
+    return moment(date).subtract(days, 'days').format('YYYY-MM-DD');
+  };
+
+  const { data: DataPix, isFetching } = useTransactions(
+    currentPage,
+    per_page,
+    'pix',
+    filterDate && formatPrevDate(+filterDate),
+    filterDate && moment(date).format('YYYY-MM-DD')
+  );
+
+  const { pagination } = createPagination(
+    5,
+    DataPix?.meta?.last_page || 10,
+    DataPix?.meta?.current_page || 0
+  );
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data, isLoading } = useQuery(
     [2],
@@ -115,6 +143,10 @@ export default function Pix() {
     }
   }
 
+  // console.log(moment(moment('2022/10/24').add(7, 'days')).format('YYYY/MM/DD'));
+
+  // console.log(moment('2022/10/24').subtract(4, 'days').format('YYYY/MM/DD'));
+
   return (
     <Layout>
       <SimpleGrid
@@ -141,18 +173,55 @@ export default function Pix() {
         />
       </SimpleGrid>
       <Box bg="#FFFFFF" p="50px" mt="30px" borderRadius="10px">
+        <Text>Extrato: iHold Bank </Text>
+        <Flex my="10px" w="300px" justify="space-between" mb="25px">
+          {/* <Button
+            transition="all linear .55s"
+            variant="unstyled"
+            fontSize="14px"
+            w="67px"
+            h="26"
+            borderRadius="52px"
+            border="1px solid #CBD3E0"
+            color={!filterDate ? '#fff' : ''}
+            bg={!filterDate ? '#2E4EFF' : ''}
+            onClick={() => setFilterDate('')}
+          >
+            Todos
+          </Button> */}
+          {dates.map((day, key) => (
+            <Button
+              key={key}
+              transition="all linear .55s"
+              variant="unstyled"
+              w="67px"
+              h="26"
+              fontSize="14px"
+              borderRadius="52px"
+              border="1px solid #CBD3E0"
+              color={+filterDate === day ? '#fff' : ''}
+              bg={+filterDate === day ? '#2E4EFF' : ''}
+              onClick={() => {
+                setActiveFilter(!activeFilter);
+                if (+day !== +filterDate) {
+                  setCurrentPage(1);
+                  setFilterDate(day.toString());
+                  return;
+                } else if (!activeFilter) {
+                  setCurrentPage(1);
+                  setFilterDate(day.toString());
+                  return;
+                }
+                setFilterDate('');
+              }}
+            >
+              {day} dias
+            </Button>
+          ))}
+        </Flex>
         <Box w="full" borderRadius="6px" h="620px">
-          <Flex mb="30px">
-            <Icon
-              width="25px"
-              cursor="pointer"
-              color="#21C6DE"
-              icon="akar-icons:eye"
-            />
-            <Text ml="5px">EXTRATO PIX</Text>
-          </Flex>
           <ContainerTransaction
-            tabName={['todos', 'entrada', 'Saída']}
+            tabName={['completo', 'entrada', 'Saída']}
             header={
               <Button
                 bg="#2E4EFF"
@@ -180,7 +249,7 @@ export default function Pix() {
             }
           >
             <TabPanel>
-              <ExtractPixAndTedTable isLoading={isLoading} items={data} />
+              <ExtractPixAndTedTable isLoading={isFetching} items={DataPix} />
             </TabPanel>
             <TabPanel>
               <ExtractPixAndTedTable
@@ -196,6 +265,64 @@ export default function Pix() {
             </TabPanel>
           </ContainerTransaction>
         </Box>
+        <Flex align="center" w="full" justify="center" mt="40px">
+          <Box cursor={!!DataPix?.links.prev ? 'pointer' : 'not-allowed'}>
+            <Icon
+              icon="dashicons:arrow-left-alt2"
+              color={!!DataPix?.links.prev ? '#7f8b9f' : '#ccc'}
+              width="20"
+              height="20"
+              onClick={() => {
+                if (DataPix?.links.prev) {
+                  setCurrentPage((page) => page - 1);
+                }
+              }}
+            />
+          </Box>
+
+          <Flex minW="250px" justify="center">
+            {!isFetching
+              ? pagination.map((item, key) => (
+                  <Button
+                    // mx="3px"
+                    borderRadius="6px"
+                    w="38px"
+                    h="38px"
+                    key={key}
+                    onClick={() => setCurrentPage(item)}
+                    color={currentPage === item ? '#FFFFFF' : '#CBD3E0'}
+                    bg={currentPage === item ? '#2E4EFF' : ''}
+                  >
+                    {item}
+                  </Button>
+                ))
+              : Array.from({ length: 5 }).map((_, key) => (
+                  <Skeleton
+                    w="38px"
+                    h="38px"
+                    key={key}
+                    borderRadius="6px"
+                    mx="3px"
+                  />
+                ))}
+          </Flex>
+          <Box cursor={!!DataPix?.links.next ? 'pointer' : 'not-allowed'}>
+            <Icon
+              icon="dashicons:arrow-right-alt2"
+              color={!!DataPix?.links.next ? '#7f8b9f' : '#ccc'}
+              width="20"
+              height="20"
+              style={{
+                cursor: DataPix?.links.next ? 'pointer' : 'not-allowed',
+              }}
+              onClick={() => {
+                if (DataPix?.links.next) {
+                  setCurrentPage((page) => page + 1);
+                }
+              }}
+            />
+          </Box>
+        </Flex>
       </Box>
       <Box bg="#FFFFFF" p="50px" mt="30px" borderRadius="10px">
         <Text>MAIS ACESSADOS</Text>

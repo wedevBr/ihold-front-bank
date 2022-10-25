@@ -10,8 +10,28 @@ export function NavBar() {
 
   const routes = [
     {
-      name: 'HOME ',
+      name: 'CONTA DIGITAL',
       path: '/home',
+      icon: <Icon icon="akar-icons:home" color="#21C6DE" width={25} />,
+    },
+    {
+      name: 'CARTÕES',
+      path: '',
+      icon: <Icon icon="lucide:credit-card" color="#21C6DE" width={27} />,
+    },
+    {
+      name: 'CRIPTOATIVOS',
+      path: '',
+      icon: <Icon icon="bi:phone" color="#21C6DE" width={26} />,
+    },
+    {
+      name: 'PAGAMENTOS',
+      path: ['/payment', '/payment/review'],
+      icon: <Icon icon="mdi:qrcode-scan" color="#21C6DE" width={25} />,
+    },
+    {
+      name: 'EXTRATOS',
+      path: '/home/all-statements',
       subMenu: [
         {
           name: 'Extrato',
@@ -34,31 +54,11 @@ export function NavBar() {
         //   path: '/home/cards',
         // },
       ],
-      icon: <Icon icon="akar-icons:home" color="#21C6DE" width={25} />,
-    },
-    {
-      name: 'CONTA DIGITAL',
-      path: '',
-      icon: <Icon icon="bi:phone" color="#21C6DE" width={26} />,
-    },
-    {
-      name: 'CARTÕES',
-      path: '',
-      icon: <Icon icon="lucide:credit-card" color="#21C6DE" width={27} />,
-    },
-    {
-      name: 'PAGAMENTOS',
-      path: ['/payment', '/payment/review'],
-      icon: <Icon icon="mdi:qrcode-scan" color="#21C6DE" width={25} />,
-    },
-    {
-      name: 'DEPOSITAR',
-      path: '',
       icon: <Icon icon="ion:wallet-outline" color="#21C6DE" width={26} />,
     },
     {
-      name: 'DUVIDAS',
-      path: '/',
+      name: 'API',
+      path: 'https://staging.banking.wedev.software/api/documentation',
       icon: (
         <Icon
           icon="ant-design:question-circle-outlined"
@@ -83,7 +83,34 @@ export function NavBar() {
         >
           {routes.map((item, idx) => {
             const route = item.name === 'PAGAMENTOS' ? item.path[0] : item.path;
-            return (
+            return item.name === 'API' ? (
+              <Center key={idx}>
+                <a target="_blank" href={route as string} rel="noreferrer">
+                  <Center
+                    cursor="pointer"
+                    mb="7px"
+                    borderWidth=" 0px  0px 3.5px 0px"
+                    borderColor={
+                      item.path.includes(asPath) ? '#00102A' : '#FFFFFF'
+                    }
+                  >
+                    <MenuDropDwon subMenus={item?.subMenu}>
+                      <Flex>
+                        {item.icon}
+                        <Text
+                          ml="10px"
+                          color={!item.path ? '#ccc' : '#00102A'}
+                          size="1rem"
+                          fontWeight="700"
+                        >
+                          {item.name}
+                        </Text>
+                      </Flex>
+                    </MenuDropDwon>
+                  </Center>
+                </a>
+              </Center>
+            ) : (
               <Link
                 href={route as string}
                 style={{ marginBottom: '10px', border: '1px solid #000' }}

@@ -1,26 +1,41 @@
 export interface StatementData {
-  data?: IPixAndTEDStatementsData[]
-  summary?: ISummary
+  data?: IPixAndTEDStatementsData[];
+  links: {
+    first: string | null;
+    last: string | null;
+    next: string | null;
+    prev: string | null;
+  };
+  meta: {
+    current_page?: number;
+    from?: number;
+    last_page?: number;
+    links?: any;
+    path?: string;
+    per_page?: number;
+    to?: number;
+    total?: number;
+  };
+  summary?: ISummary;
 }
 
 export interface IPixAndTEDStatementsData {
-  id: number,
-  txid: string,
-  transaction: string,
-  amount: string,
-  amount_cents: number,
-  description: string,
-  operation: string,
-  due_date: Date | null,
-  process_at: Date,
-  completed_at: Date,
-  metadata?: IMetadataPixAndTED,
-  transaction_type?: ITransactionType,
-
+  id: number;
+  txid: string;
+  transaction: string;
+  amount: string;
+  amount_cents: number;
+  description: string;
+  operation: string;
+  due_date: Date | null;
+  process_at: Date;
+  completed_at: Date;
+  metadata?: IMetadataPixAndTED;
+  transaction_type?: ITransactionType;
 }
 
 export interface ITransferStatementsData {
-  payment_date(payment_date: any): import("react").ReactNode;
+  payment_date(payment_date: any): import('react').ReactNode;
   id: number;
   txid: string;
   transaction: string;
@@ -55,7 +70,7 @@ interface IMetadataPixAndTED {
   recipient: IRecipient;
   payload: Payload;
   recipient_name: string;
-  assignor?:string
+  assignor?: string;
 }
 
 interface Payload {
@@ -163,8 +178,8 @@ export interface ISummary {
 }
 
 export type ITransaction_type =
-  | "transfer"
-  | "pix"
-  | "card-transaction"
-  | "bill-payment"
-  | "deposit-billet";
+  | 'transfer'
+  | 'pix'
+  | 'card-transaction'
+  | 'bill-payment'
+  | 'deposit-billet';
