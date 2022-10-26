@@ -14,7 +14,7 @@ import {
   GetStatementsOperation,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
-import { routeTransactions } from '..';
+import { routeTransactions } from '../../digital-account';
 
 export default function Pix() {
   const { data, isLoading } = useQuery(

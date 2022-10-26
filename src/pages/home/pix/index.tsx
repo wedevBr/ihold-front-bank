@@ -34,7 +34,7 @@ import {
   useTransactions,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
-import { routeTransactions } from '..';
+import { routeTransactions } from '../../digital-account';
 import { createPagination } from '~/hooks/createPagination';
 
 const dowloadSchema = yup.object().shape({
@@ -249,7 +249,7 @@ export default function Pix() {
             }
           >
             <TabPanel>
-              <ExtractPixAndTedTable isLoading={isFetching} items={DataPix} />
+              {/* <ExtractPixAndTedTable isLoading={isFetching} items={DataPix} /> */}
             </TabPanel>
             <TabPanel>
               <ExtractPixAndTedTable
