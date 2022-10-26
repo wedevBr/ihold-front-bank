@@ -30,7 +30,7 @@ export const getValidateScheduleTransaction = async <T>(
       }${!!filterApproved ? `&filter[approved]=${filterApproved}` : ''}`,
       {
         params: {
-          'page[size]': 50,
+          'page[size]': per_page || 50,
           // 'page[number]': 1,
         },
       }
