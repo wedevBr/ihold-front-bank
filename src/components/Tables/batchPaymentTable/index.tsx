@@ -217,7 +217,7 @@ export const BatchPaymentTable = ({
     </Center>
   ) : (
     <>
-      <Box overflowX="scroll">
+      <Box overflowX="scroll" h="600px">
         <Table>
           <Thead color="#FFF">
             <Tr bg="#7F8B9F" fontSize="1rem">

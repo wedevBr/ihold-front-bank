@@ -83,7 +83,7 @@ export default function ReviewPayment() {
     try {
       const response = await getValidateScheduleTransaction<IDataPIX>(
         query.transaction as 'pix' | 'transfer' | 'bill-payment',
-        0,
+        70,
         'false'
       );
       setItems(response);
