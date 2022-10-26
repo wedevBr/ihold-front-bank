@@ -42,7 +42,7 @@ export const routeTransactions = [
   },
 ];
 
-export default function Home() {
+export default function DigitalAccount() {
   const { data, isLoading } = useQuery(
     [0],
     () => GetAllStatementsOperation(0),

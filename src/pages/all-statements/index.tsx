@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   Box,
   Button,
@@ -18,7 +19,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Icon } from '@iconify/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import moment from 'moment';
@@ -42,7 +43,7 @@ import {
   useTransactions,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
-import { routeTransactions } from '..';
+import { routeTransactions } from '../digital-account';
 import { createPagination } from '~/hooks/createPagination';
 import { truncate } from '~/utils/truncate';
 
@@ -61,7 +62,11 @@ export default function AllStatements() {
   } = useDisclosure();
 
   const [filterDate, setFilterDate] = useState('');
-  const [t, T] = useState<any>();
+
+  const [filterStart, setFilterStart] = useState<any>();
+  const [filterEnd, setFilterEnd] = useState<any>();
+  const [type, setType] = useState('');
+  const [activeType, setActiveType] = useState(true);
   const [activeFilter, setActiveFilter] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [per_page, setPerPage] = useState(25);
@@ -74,9 +79,15 @@ export default function AllStatements() {
   const { data: DataPix, isFetching } = useTransactions(
     currentPage,
     per_page,
-    '',
-    filterDate && formatPrevDate(+filterDate),
-    filterDate && moment(date).format('YYYY-MM-DD')
+    type === 'Pix'
+      ? 'pix'
+      : type === 'Ted'
+      ? 'transfer'
+      : type === 'Boleto'
+      ? 'bill-payment'
+      : '',
+    (filterDate && formatPrevDate(+filterDate)) || filterStart,
+    (filterDate && moment(date).format('YYYY-MM-DD')) || filterEnd
   );
 
   const { pagination } = createPagination(
@@ -144,6 +155,7 @@ export default function AllStatements() {
       setLoading(false);
     }
   }
+  console.log({ filterDate });
 
   return (
     <Layout>
@@ -174,21 +186,7 @@ export default function AllStatements() {
         <Box w="full" borderRadius="6px" h="">
           <Text>Extrato: iHold Bank </Text>
           <Flex my="10px" mb="25px" justify="space-between" w="full">
-            <Flex w="300px" justify="space-between">
-              {/* <Button
-            transition="all linear .55s"
-            variant="unstyled"
-            fontSize="14px"
-            w="67px"
-            h="26"
-            borderRadius="52px"
-            border="1px solid #CBD3E0"
-            color={!filterDate ? '#fff' : ''}
-            bg={!filterDate ? '#2E4EFF' : ''}
-            onClick={() => setFilterDate('')}
-          >
-            Todos
-          </Button> */}
+            <Flex w="500px" justify="space-between">
               {dates.map((day, key) => (
                 <Button
                   key={key}
@@ -216,6 +214,35 @@ export default function AllStatements() {
                   }}
                 >
                   {day} dias
+                </Button>
+              ))}
+              {['Pix', 'Ted', 'Boleto'].map((day, key) => (
+                <Button
+                  key={key}
+                  transition="all linear .55s"
+                  variant="unstyled"
+                  w="67px"
+                  h="26"
+                  fontSize="14px"
+                  borderRadius="52px"
+                  border="1px solid #CBD3E0"
+                  color={type === day ? '#fff' : ''}
+                  bg={type === day ? '#2E4EFF' : ''}
+                  onClick={() => {
+                    setActiveFilter(!activeType);
+                    if (day !== type) {
+                      setCurrentPage(1);
+                      setType(day);
+                      return;
+                    } else if (!activeType) {
+                      setCurrentPage(1);
+                      setType(day.toString());
+                      return;
+                    }
+                    setType('');
+                  }}
+                >
+                  {day}
                 </Button>
               ))}
             </Flex>
@@ -272,7 +299,7 @@ export default function AllStatements() {
                         <Tr
                           // h="40px"
                           top={0}
-                          // zIndex={2000}
+                          zIndex={1000}
                           pos="sticky"
                           bg="#F0F0F3"
                         >
@@ -282,109 +309,134 @@ export default function AllStatements() {
                           <Th>VALOR</Th>
                         </Tr>
                       </Thead>
-                      <Tbody>
-                        {DataPix &&
-                          DataPix.data?.map((item, key) => {
-                            return (
-                              <Tr key={key} borderTop="1px solid #CBD3E0">
-                                <Td maxW="20px" w="10px">
-                                  {item?.completed_at !== item?.completed_at
-                                    ? null
-                                    : moment(item?.completed_at)
-                                        .format('DD MMM')
-                                        .toUpperCase()}
+                      {DataPix &&
+                        DataPix.data?.map((item, key) => {
+                          return (
+                            <Tbody key={key} w="full" pos="relative">
+                              <Tr
+                                pos="sticky"
+                                top={6}
+                                bg="#FFFFFF"
+                                transition="all linear .25s"
+                              >
+                                <Td>
+                                  <Text w="full">
+                                    {moment(new Date(item?.date))
+                                      .format('DD MMM')
+                                      .toUpperCase()}
+                                  </Text>
                                 </Td>
-                                <Td maxW="20px" w="10px">
-                                  <Box
-                                    borderRadius="5px"
-                                    p="8px"
-                                    background={
-                                      item?.operation === 'cash-in'
-                                        ? '#27ae6033'
-                                        : '#ff313b33'
-                                    }
-                                  >
-                                    {item?.operation === 'cash-in' ? (
-                                      <Icon
-                                        icon="bi:arrow-90deg-up"
-                                        color="#27AE60"
-                                        width={16}
-                                      />
-                                    ) : (
-                                      <Icon
-                                        icon="bi:arrow-90deg-down"
-                                        color="#F03D3E"
-                                        width={16}
-                                      />
-                                    )}
-                                  </Box>
-                                </Td>
-                                <Td minW="200px" w="100px">
-                                  <Box>
-                                    <Text color="#070A0E" fontWeight={600}>
-                                      {item?.description.includes(
-                                        'TRANSFERÊNCIA ENVIADA'
-                                      )
-                                        ? 'TRANSFERÊNCIA ENVIADA'
-                                        : item?.description.includes(
-                                            'TRANSFERÊNCIA RECEBIDA'
-                                          )
-                                        ? 'TRANSFERÊNCIA RECEBIDA'
-                                        : item?.description.includes(
-                                            'PIX RECEBIDO'
-                                          )
-                                        ? 'PIX RECEBIDO'
-                                        : item?.description.includes(
-                                            'PIX ENVIADO'
-                                          )
-                                        ? 'PIX ENVIADO'
-                                        : ''}
-                                    </Text>
-                                    <Text>
-                                      {item?.operation === 'cash-out'
-                                        ? item?.metadata?.recipient?.name
-                                          ? item?.metadata?.recipient?.name
-                                          : item?.metadata?.payload?.merchant
-                                              ?.name
-                                        : item?.metadata?.sender?.name
-                                        ? item?.metadata?.sender?.name
-                                        : item?.metadata?.payload?.merchant
-                                            ?.name}
-                                    </Text>
-                                    <Text color="#7F8B9F">
-                                      {moment(item?.completed_at).format('LT')}
-                                    </Text>
-                                  </Box>
-                                </Td>
-                                <Td
-                                  color={
-                                    item?.operation === 'cash-in'
-                                      ? '#27AE60'
-                                      : '#F03D3E'
-                                  }
-                                >
-                                  {item?.operation === 'cash-in'
-                                    ? `R$${item?.amount}`
-                                    : `-  R$${item?.amount}`}
+                                <Td colSpan={3}>
+                                  <Box bg="#CBD3E0" w="full" h="1px" />
                                 </Td>
                               </Tr>
-                            );
-                          })}
-                      </Tbody>
+                              {item.item?.map((transaction: any, idx: any) => (
+                                <Tr key={idx}>
+                                  <Td maxW="20px" w="10px">
+                                    <></>
+                                  </Td>
+                                  <Td maxW="20px" w="10px">
+                                    <Box
+                                      borderRadius="5px"
+                                      p="8px"
+                                      background={
+                                        transaction?.operation === 'cash-in'
+                                          ? '#27ae6033'
+                                          : '#ff313b33'
+                                      }
+                                    >
+                                      {transaction?.operation === 'cash-in' ? (
+                                        <Icon
+                                          icon="bi:arrow-90deg-up"
+                                          color="#27AE60"
+                                          width={16}
+                                        />
+                                      ) : (
+                                        <Icon
+                                          icon="bi:arrow-90deg-down"
+                                          color="#F03D3E"
+                                          width={16}
+                                        />
+                                      )}
+                                    </Box>
+                                  </Td>
+                                  <Td minW="200px" w="100px">
+                                    <Box>
+                                      <Text color="#070A0E" fontWeight={600}>
+                                        {transaction?.description?.includes(
+                                          'TRANSFERÊNCIA ENVIADA'
+                                        )
+                                          ? 'TRANSFERÊNCIA ENVIADA'
+                                          : transaction?.description?.includes(
+                                              'TRANSFERÊNCIA RECEBIDA'
+                                            )
+                                          ? 'TRANSFERÊNCIA RECEBIDA'
+                                          : transaction?.description?.includes(
+                                              'PIX RECEBIDO'
+                                            )
+                                          ? 'PIX RECEBIDO'
+                                          : transaction?.description?.includes(
+                                              'PIX ENVIADO'
+                                            )
+                                          ? 'PIX ENVIADO'
+                                          : transaction?.description}
+                                      </Text>
+                                      <Text>
+                                        {transaction?.operation === 'cash-out'
+                                          ? transaction?.metadata?.assignor
+                                            ? transaction?.metadata?.assignor
+                                            : transaction?.metadata?.recipient
+                                                ?.name
+                                            ? transaction?.metadata?.recipient
+                                                ?.name
+                                            : transaction?.metadata?.payload
+                                                ?.merchant?.name
+                                          : transaction?.metadata?.sender?.name
+                                          ? transaction?.metadata?.sender?.name
+                                          : transaction?.metadata?.payload
+                                              ?.merchant
+                                          ? transaction?.metadata?.payload
+                                              ?.merchant?.name
+                                          : ''}
+                                      </Text>
+                                      <Text color="#7F8B9F">
+                                        {moment(
+                                          transaction?.completed_at
+                                        ).format('LT')}
+                                      </Text>
+                                    </Box>
+                                  </Td>
+                                  <Td
+                                    color={
+                                      transaction?.operation === 'cash-in'
+                                        ? '#27AE60'
+                                        : '#F03D3E'
+                                    }
+                                  >
+                                    {transaction?.operation === 'cash-in'
+                                      ? `R$${transaction?.amount}`
+                                      : `-  R$${transaction?.amount}`}
+                                  </Td>
+                                </Tr>
+                              ))}
+                            </Tbody>
+                          );
+                        })}
                     </Table>
                   </TableContainer>
                 </Box>
               )}
-              {/* <ExtractAllTable isLoading={isFetching} items={DataPix} /> */}
               <Flex align="center" w="full" justify="center" mt="40px">
-                <Box cursor={!!DataPix?.links.prev ? 'pointer' : 'not-allowed'}>
+                <Box
+                  cursor={!!DataPix?.links?.prev ? 'pointer' : 'not-allowed'}
+                >
                   <Icon
                     icon="dashicons:arrow-left-alt2"
-                    color={!!DataPix?.links.prev ? '#7f8b9f' : '#ccc'}
+                    color={!!DataPix?.links?.prev ? '#7f8b9f' : '#ccc'}
                     width="20"
                     height="20"
                     onClick={() => {
-                      if (DataPix?.links.prev) {
+                      if (DataPix?.links?.prev) {
                         setCurrentPage((page) => page - 1);
                       }
                     }}
@@ -417,17 +469,19 @@ export default function AllStatements() {
                         />
                       ))}
                 </Flex>
-                <Box cursor={!!DataPix?.links.next ? 'pointer' : 'not-allowed'}>
+                <Box
+                  cursor={!!DataPix?.links?.next ? 'pointer' : 'not-allowed'}
+                >
                   <Icon
                     icon="dashicons:arrow-right-alt2"
-                    color={!!DataPix?.links.next ? '#7f8b9f' : '#ccc'}
+                    color={!!DataPix?.links?.next ? '#7f8b9f' : '#ccc'}
                     width="20"
                     height="20"
                     style={{
-                      cursor: DataPix?.links.next ? 'pointer' : 'not-allowed',
+                      cursor: DataPix?.links?.next ? 'pointer' : 'not-allowed',
                     }}
                     onClick={() => {
-                      if (DataPix?.links.next) {
+                      if (DataPix?.links?.next) {
                         setCurrentPage((page) => page + 1);
                       }
                     }}
@@ -546,6 +600,7 @@ export default function AllStatements() {
             <Input
               label="Período Inicial"
               labelColor="#7F8B9F"
+              name=""
               w="full"
               size="sm"
               bg="transparent"
@@ -553,16 +608,19 @@ export default function AllStatements() {
               type="date"
               fontSize="16px"
               border="0px"
+              value={filterStart}
+              onChange={(e) => setFilterStart(e.target.value)}
               borderBottom="1px solid #7F8B9F"
               borderRadius={0}
               placeholder="dd/mm/aaaa"
               _focus={{
                 borderBottom: '1px solid #2E4EFF',
               }}
-              {...register('date_start')}
-              error={formState?.errors?.date_start}
+              // {...register('date_start')}
+              // error={formState?.errors?.date_start}
             />
             <Input
+              name=""
               label="Período Final"
               labelColor="#7F8B9F"
               w="full"
@@ -571,6 +629,13 @@ export default function AllStatements() {
               color="#7F8B9F"
               type="date"
               fontSize="16px"
+              value={filterEnd}
+              onChange={(e) => {
+                setFilterEnd(e.target.value);
+                if (filterStart) {
+                  setTimeout(() => onCloseFilter(), 1000);
+                }
+              }}
               border="0px"
               borderBottom="1px solid #7F8B9F"
               borderRadius={0}
@@ -578,28 +643,25 @@ export default function AllStatements() {
               _focus={{
                 borderBottom: '1px solid #2E4EFF',
               }}
-              {...register('date_end')}
-              error={formState?.errors?.date_end}
+              // {...register('date_end')}
+              // error={formState?.errors?.date_end}
             />
           </Flex>
-          <Button
-            my="20px"
-            bg="#2E4EFF"
-            _hover={{ bg: '#435ffa' }}
-            _active={{ bg: '#2444f6' }}
-            color="#fff"
-            w="full"
-            fontSize="0.875rem"
-            borderRadius="20px"
-            h="35px"
-            textTransform="uppercase"
-            fontWeight="600"
-            padding="8px 1.25rem"
-            // type="submit"
-            isLoading={loading}
+          <Flex
+            mb="20px"
+            color="#21C6DE"
+            cursor="pointer"
+            w="-webkit-max-content"
+            align="center"
+            onClick={() => {
+              setFilterStart('');
+              setFilterEnd('');
+              onCloseFilter();
+            }}
           >
-            Filtrar
-          </Button>
+            <Icon icon="fluent:delete-28-regular" width={20} color="#21C6DE" />
+            <Text>Limpar Filtro</Text>
+          </Flex>
         </Box>
       </Modal>
     </Layout>
