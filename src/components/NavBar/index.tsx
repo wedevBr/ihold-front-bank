@@ -5,13 +5,20 @@ import Link from 'next/link';
 import { Header } from '~/components';
 import { MenuDropDwon } from '../Menu';
 
+interface IMenuProps {
+  name: string;
+  path: any;
+  icon: any;
+  subMenu?: any[];
+}
+
 export function NavBar() {
   const { asPath, query } = useRouter();
 
-  const routes = [
+  const routes: IMenuProps[] = [
     {
       name: 'CONTA DIGITAL',
-      path: '/home',
+      path: '/digital-account',
       icon: <Icon icon="akar-icons:home" color="#21C6DE" width={25} />,
     },
     {
@@ -31,29 +38,30 @@ export function NavBar() {
     },
     {
       name: 'EXTRATOS',
-      path: '/home/all-statements',
-      subMenu: [
-        {
-          name: 'Extrato',
-          path: '/home/all-statements',
-        },
-        {
-          name: 'Pix',
-          path: '/home/pix',
-        },
-        {
-          name: 'TED',
-          path: '/home/ted',
-        },
-        {
-          name: 'Boleto',
-          path: '/home/ticket',
-        },
-        // {
-        //   name: 'Cartões',
-        //   path: '/home/cards',
-        // },
-      ],
+      path: '/all-statements',
+      // subMenu: [],
+      // [
+      //   {
+      //     name: 'Extrato',
+      //     path: '/home/all-statements',
+      //   },
+      //   {
+      //     name: 'Pix',
+      //     path: '/home/pix',
+      //   },
+      //   {
+      //     name: 'TED',
+      //     path: '/home/ted',
+      //   },
+      //   {
+      //     name: 'Boleto',
+      //     path: '/home/ticket',
+      //   },
+      //   // {
+      //   //   name: 'Cartões',
+      //   //   path: '/home/cards',
+      //   // },
+      // ],
       icon: <Icon icon="ion:wallet-outline" color="#21C6DE" width={26} />,
     },
     {
