@@ -217,7 +217,7 @@ export default function ReviewPayment() {
       <ModalStatus
         variant="success"
         title="PAGAMENTO AUTORIZADO"
-        route="/home/all-statements"
+        route="/all-statements"
         description="Seu pagamento em lote foi autorizado com sucesso! Acompanhe o status de pagamento pelo extrato."
         titleButton="Ver extrato"
         isOpen={isOpenSuccess}

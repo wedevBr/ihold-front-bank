@@ -21,16 +21,16 @@ export function NavBar() {
       path: '/digital-account',
       icon: <Icon icon="akar-icons:home" color="#21C6DE" width={25} />,
     },
-    {
-      name: 'CARTÕES',
-      path: '',
-      icon: <Icon icon="lucide:credit-card" color="#21C6DE" width={27} />,
-    },
-    {
-      name: 'CRIPTOATIVOS',
-      path: '',
-      icon: <Icon icon="bi:phone" color="#21C6DE" width={26} />,
-    },
+    // {
+    //   name: 'CARTÕES',
+    //   path: '',
+    //   icon: <Icon icon="lucide:credit-card" color="#21C6DE" width={27} />,
+    // },
+    // {
+    //   name: 'CRIPTOATIVOS',
+    //   path: '',
+    //   icon: <Icon icon="bi:phone" color="#21C6DE" width={26} />,
+    // },
     {
       name: 'PAGAMENTOS',
       path: ['/payment', '/payment/review'],
@@ -62,7 +62,13 @@ export function NavBar() {
       //   //   path: '/home/cards',
       //   // },
       // ],
-      icon: <Icon icon="ion:wallet-outline" color="#21C6DE" width={26} />,
+      icon: (
+        <Icon
+          icon="fluent:document-text-extract-20-regular"
+          color="#21C6DE"
+          width={27}
+        />
+      ),
     },
     {
       name: 'API',
