@@ -87,7 +87,8 @@ export async function getAllStatementsOperation(
   page?: number,
   per_page?: number,
   date_start?: string,
-  date_end?: string
+  date_end?: string,
+  statementOperation?: string
 ) {
   try {
     const { data } = await api.get<StatementData>(
@@ -105,6 +106,8 @@ export async function getAllStatementsOperation(
                 : '3'
             }`
           : ''
+      }${
+        !!statementOperation ? `&filter[operation]=${statementOperation}` : ''
       }`,
       {
         params: {
@@ -145,17 +148,22 @@ export function useTransactions(
   per_page?: number,
   statementId?: string,
   date_start?: string,
-  date_end?: string
+  date_end?: string,
+  statementOperation?: string
 ) {
   return useQuery(
-    ['getCustomers', { page, per_page, statementId, date_start, date_end }],
+    [
+      'getCustomers',
+      { page, per_page, statementId, date_start, date_end, statementOperation },
+    ],
     () =>
       getAllStatementsOperation(
         statementId,
         page,
         per_page,
         date_start,
-        date_end
+        date_end,
+        statementOperation
       ),
     {
       staleTime: 1000 * 5,

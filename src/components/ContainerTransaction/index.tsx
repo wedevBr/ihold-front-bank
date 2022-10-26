@@ -8,9 +8,10 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  TabsProps,
 } from '@chakra-ui/react';
 
-interface IContainer {
+interface IContainer extends TabsProps {
   tabName: string[];
   children: ReactNode;
   header?: ReactNode;
@@ -20,10 +21,11 @@ export function ContainerTransaction({
   children,
   tabName,
   header,
+  ...rest
 }: IContainer) {
   return (
     <Box w="full">
-      <Tabs variant="soft-rounded" defaultIndex={0}>
+      <Tabs variant="soft-rounded" defaultIndex={0} {...rest}>
         <Flex align="center" justify="space-between">
           <TabList bg="#F0F0F3" w="min-content" borderRadius="20px" h="35px">
             {tabName &&
