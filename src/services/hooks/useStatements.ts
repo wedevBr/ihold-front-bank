@@ -3,12 +3,14 @@ import {
   ITransaction_type,
   StatementData,
 } from '~/types/statements.types';
+import { useQuery } from 'react-query';
 import { api } from '../api';
+import moment from 'moment';
 
 export async function GetAllStatementsOperation(statementId: number) {
   try {
     const { data } = await api.get<StatementData>(
-      `/statements?include[]=payload&sort[]=completed_at${
+      `/statements?include[]=payload&sort[]=-completed_at${
         statementId !== 0 ? `&filter[transaction_type_id]=${statementId}` : ``
       }`
     );
@@ -24,7 +26,7 @@ export async function GetStatementsOperation(
 ) {
   try {
     const { data } = await api.get<StatementData>(
-      `/statements?include[]=payload&sort[]=completed_at&filter[operation]=${statementOperation}${
+      `/statements?include[]=payload&sort[]=-completed_at&filter[operation]=${statementOperation}${
         statementId !== 0 ? `&filter[transaction_type_id]=${statementId}` : ``
       } `
     );
@@ -78,4 +80,85 @@ export async function GetStatementsDownloadExtract(
   } catch (error) {
     throw error;
   }
+}
+
+export async function getAllStatementsOperation(
+  statementId?: string,
+  page?: number,
+  per_page?: number,
+  date_start?: string,
+  date_end?: string
+) {
+  try {
+    const { data } = await api.get<StatementData>(
+      `/statements?include[]=payload&sort[]=-completed_at${
+        date_start && date_end
+          ? `&filter[between_dates]=${date_start},${date_end}`
+          : ''
+      }${
+        !!statementId
+          ? `&filter[transaction_type_id]=${
+              statementId === 'pix'
+                ? '2'
+                : statementId === 'transfer'
+                ? '1'
+                : '3'
+            }`
+          : ''
+      }`,
+      {
+        params: {
+          'page[size]': per_page,
+          'page[number]': page,
+        },
+      }
+    );
+    const objectData: any = {};
+    data?.data?.map((item) =>
+      objectData[moment(item.completed_at).format('YYYY-MM-DD')]
+        ? (objectData[moment(item.completed_at).format('YYYY-MM-DD')] = [
+            ...objectData[moment(item.completed_at).format('YYYY-MM-DD')],
+            item,
+          ])
+        : (objectData[moment(item.completed_at).format('YYYY-MM-DD')] = [item])
+    );
+
+    const formatData = Object.entries(objectData)?.map((objects) => {
+      const [key, values]: any[] = objects;
+
+      return {
+        date: key,
+        item: values,
+      };
+    });
+    return {
+      ...data,
+      data: formatData,
+    };
+  } catch (error: any) {
+    throw error;
+  }
+}
+
+export function useTransactions(
+  page?: number,
+  per_page?: number,
+  statementId?: string,
+  date_start?: string,
+  date_end?: string
+) {
+  return useQuery(
+    ['getCustomers', { page, per_page, statementId, date_start, date_end }],
+    () =>
+      getAllStatementsOperation(
+        statementId,
+        page,
+        per_page,
+        date_start,
+        date_end
+      ),
+    {
+      staleTime: 1000 * 5,
+    }
+  );
 }

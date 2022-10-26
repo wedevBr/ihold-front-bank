@@ -31,7 +31,7 @@ import {
   GetStatementsOperation,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
-import { routeTransactions } from '..';
+import { routeTransactions } from '../../digital-account';
 
 const dowloadSchema = yup.object().shape({
   date_start: yup.string().required('Período inicial obrigatório'),

@@ -54,7 +54,7 @@ export default function TwoFactor() {
             maxAge: 60 * 60 * 1, // 1 hour
             path: '/',
           });
-          router.push('/home');
+          router.push('/digital-account');
         }
       } else {
         setError({ message: 'Code less than 6 digits!', error: true });
