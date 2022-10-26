@@ -5,6 +5,7 @@ import {
 } from '~/types/statements.types';
 import { useQuery } from 'react-query';
 import { api } from '../api';
+import moment from 'moment';
 
 export async function GetAllStatementsOperation(statementId: number) {
   try {
@@ -112,7 +113,28 @@ export async function getAllStatementsOperation(
         },
       }
     );
-    return data;
+    const objectData: any = {};
+    data?.data?.map((item) =>
+      objectData[moment(item.completed_at).format('YYYY-MM-DD')]
+        ? (objectData[moment(item.completed_at).format('YYYY-MM-DD')] = [
+            ...objectData[moment(item.completed_at).format('YYYY-MM-DD')],
+            item,
+          ])
+        : (objectData[moment(item.completed_at).format('YYYY-MM-DD')] = [item])
+    );
+
+    const formatData = Object.entries(objectData)?.map((objects) => {
+      const [key, values]: any[] = objects;
+
+      return {
+        date: key,
+        item: values,
+      };
+    });
+    return {
+      ...data,
+      data: formatData,
+    };
   } catch (error: any) {
     throw error;
   }
