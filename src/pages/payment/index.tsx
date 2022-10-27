@@ -31,6 +31,8 @@ import {
   IDataTed,
 } from '~/types/scheduledTransactions';
 import { registerPayment } from '~/services/hooks/usePaymentsSchedule';
+import { GetStatementsDownloadVoucher } from '~/services/hooks/useStatements';
+import JSZip from 'jszip';
 
 interface RegisterPayment {
   file: File;
@@ -42,6 +44,7 @@ export const createPaymentFormSchema = yup.object().shape({
 
 export default function Payment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
+  const [statementID, setStatementID] = useState<number[]>([]);
   const [type, setType] = useState('pix');
   const [items, setItems] = useState<IPaginationData<IDataPIX>>();
   const [billPayment, setBillPayment] =
@@ -181,6 +184,38 @@ export default function Payment() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleDownloadVoucher(statementId: number[]) {
+    if (!statementId?.length) {
+      return;
+    }
+    let zip = new JSZip();
+    let files: {
+      name: string;
+      file: any;
+    }[] = [];
+    await Promise.all(
+      statementId?.map((id: any, idx) =>
+        GetStatementsDownloadVoucher(id).then((response) => {
+          files.push({ name: `comprovante${idx + 1}.pdf`, file: response });
+        })
+      )
+    ).finally(() => {
+      // const fileURL = window.URL.createObjectURL(response);
+    });
+
+    files.map((statement, idx) => {
+      zip.file(statement.name, statement.file);
+    });
+    zip.generateAsync({ type: 'blob' }).then((content) => {
+      const fileURL = window.URL.createObjectURL(content);
+      let link = document.createElement('a');
+      link.href = fileURL;
+      link.download = `comprovantes.zip`;
+      link.click();
+    });
+    zip = require('jszip')();
   }
 
   useEffect(() => {
@@ -327,6 +362,29 @@ export default function Payment() {
                   <TabPanels>
                     <TabPanel>
                       <Flex w="full" justify="right" pb="20px">
+                        {scheduleID?.length > 0 && (
+                          <Button
+                            bg="#2E4EFF"
+                            color="#fff"
+                            mr="20px"
+                            fontSize="0.875rem"
+                            borderRadius="20px"
+                            h="38px"
+                            w="155px"
+                            textTransform="uppercase"
+                            fontWeight="600"
+                            padding="8px 1.25rem"
+                            onClick={() => handleDownloadVoucher(statementID)}
+                            // isLoading={loading}
+                          >
+                            <Icon
+                              icon="bx:download"
+                              width={20}
+                              style={{ marginRight: 5 }}
+                            />
+                            Baixar
+                          </Button>
+                        )}
                         <Button
                           bg="#F03D3E"
                           color="#fff"
@@ -357,7 +415,10 @@ export default function Payment() {
                         setPage={setPage}
                         isLoading={loading}
                         items={items}
-                        getScheduleIDS={(ids) => setScheduleID(ids)}
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                        }}
                       />
                     </TabPanel>
                     <TabPanel>
@@ -392,7 +453,10 @@ export default function Payment() {
                         setPage={setPage}
                         isLoading={loading}
                         dataTransfer={transfer}
-                        getScheduleIDS={(ids) => setScheduleID(ids)}
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                        }}
                       />
                     </TabPanel>
                     <TabPanel>
