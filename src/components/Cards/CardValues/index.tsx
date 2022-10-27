@@ -54,7 +54,7 @@ export function CardValue({
   return (
     <Flex
       bg="#FFFFFF"
-      w="358px"
+      w="full"
       h="120px"
       borderRadius="10px"
       boxShadow="sm"
@@ -87,7 +87,7 @@ export function CardValue({
           fontFamily="Lato"
           fontStyle="normal"
           fontWeight="700"
-          fontSize="30px"
+          fontSize="25px"
           color={handleType({ type }).color}
         >
           {value

@@ -4,6 +4,7 @@ import {
   Button,
   Center,
   Flex,
+  Image,
   SimpleGrid,
   Skeleton,
   Table,
@@ -55,6 +56,24 @@ const dowloadSchema = yup.object().shape({
 
 export const routeTransactions = [
   {
+    id: 4,
+    iconName: 'bi:qr-code-scan',
+    title: 'Pagamento em Lote',
+    path: '/payment',
+  },
+  {
+    id: 3,
+    iconName: 'iconoir:wallet',
+    title: 'Extrato',
+    path: '/all-statements',
+  },
+  {
+    id: 6,
+    iconName: 'bi:question-circle',
+    title: 'API',
+    path: 'https://staging.banking.wedev.software/api/documentation',
+  },
+  {
     id: 1,
     iconName: 'ic:baseline-pix',
     title: 'Pix',
@@ -72,12 +91,7 @@ export const routeTransactions = [
     iconName: 'iconoir:wallet',
     title: 'Depositar',
   },
-  {
-    id: 4,
-    iconName: 'bi:qr-code-scan',
-    title: 'Pagamento em Lote',
-    // path: '/payment',
-  },
+
   {
     id: 5,
     iconName: 'bi:credit-card-2-back',
@@ -212,12 +226,35 @@ export default function DigitalAccount() {
           </Flex>
         </Box>
       </SimpleGrid>
+      <SimpleGrid
+        mt="30px"
+        columns={{ base: 1, md: 2, lg: 3 }}
+        w="full"
+        spacingX="45px"
+      >
+        <CardValue
+          percentage={100}
+          type={'cash-in'}
+          value={data ? data?.summary?.cash_in?.amount : '-'}
+        />
+        <CardValue
+          percentage={100}
+          type={'cash-out'}
+          value={data ? data?.summary?.cash_out?.amount : '-'}
+        />
+        <CardValue
+          percentage={100}
+          type={'prevision'}
+          value={data ? formatCalcValue(result.toString()) : '-'}
+          result={result}
+        />
+      </SimpleGrid>
       <Box mt="30px">
         <Flex w="full" justify="space-between">
           <Box w="65%" h="" bg="#FFFFFF" borderRadius="10px" p="20px">
             <Text>REGISTRO DE EVENTOS </Text>
             <Flex my="10px" mb="25px" justify="space-between" w="full">
-              <Flex w="300px" justify="space-between">
+              <Flex w="500px" justify="space-between">
                 {dates.map((day, key) => (
                   <Button
                     key={key}
@@ -247,6 +284,35 @@ export default function DigitalAccount() {
                     {day} dias
                   </Button>
                 ))}
+                {['Pix', 'Ted', 'Boleto'].map((day, key) => (
+                  <Button
+                    key={key}
+                    transition="all linear .55s"
+                    variant="unstyled"
+                    w="67px"
+                    h="26"
+                    fontSize="14px"
+                    borderRadius="52px"
+                    border="1px solid #CBD3E0"
+                    color={type === day ? '#fff' : ''}
+                    bg={type === day ? '#2E4EFF' : ''}
+                    onClick={() => {
+                      setActiveType(!activeType);
+                      if (day !== type) {
+                        setCurrentPage(1);
+                        setType(day);
+                        return;
+                      } else if (!activeType) {
+                        setCurrentPage(1);
+                        setType(day.toString());
+                        return;
+                      }
+                      setType('');
+                    }}
+                  >
+                    {day}
+                  </Button>
+                ))}
               </Flex>
             </Flex>
             <TabletTransaction
@@ -256,32 +322,40 @@ export default function DigitalAccount() {
               isFetching={isFetching}
             />
           </Box>
-          <Flex w="35%" justify="right" flexDir="column" ml="10px">
-            <Text px="20px" mb="10px">
-              MAIS ACESSADOS
-            </Text>
-            <SimpleGrid
-              columns={{ base: 1, md: 2, lg: 3 }}
-              w="full"
-              justifyContent="right"
-              alignItems="flex-end"
-              justifyItems="right"
-              spacing="5px"
-            >
-              {routeTransactions.map((item, idx) => (
-                <CardTransaction
-                  mb="20px"
-                  p="15px"
-                  w="112px"
-                  h="105px"
-                  key={idx}
-                  name={item.title}
-                  icon={
-                    <Icon icon={item.iconName} color="#21C6DE" width={25} />
-                  }
-                />
-              ))}
-            </SimpleGrid>
+          <Flex
+            w="35%"
+            justify="right"
+            flexDir="column"
+            ml="20px"
+            justifyContent="space-between"
+          >
+            <Box>
+              <Text mb="10px">MAIS ACESSADOS</Text>
+              <SimpleGrid
+                columns={{ base: 1, md: 2, lg: 3 }}
+                w="full"
+                justifyContent="right"
+                alignItems="flex-end"
+                justifyItems="right"
+                spacing="25px"
+              >
+                {routeTransactions.map((item, idx) => (
+                  <CardTransaction
+                    p="15px"
+                    w="full"
+                    minH="105px"
+                    h="full"
+                    key={idx}
+                    path={item.path}
+                    name={item.title}
+                    icon={
+                      <Icon icon={item.iconName} color="#21C6DE" width={25} />
+                    }
+                  />
+                ))}
+              </SimpleGrid>
+            </Box>
+            <Image src="/assets/banner.png" alt="banner" mt="20px" />
           </Flex>
         </Flex>
       </Box>
