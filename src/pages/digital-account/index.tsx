@@ -327,7 +327,7 @@ export default function DigitalAccount() {
             justify="right"
             flexDir="column"
             ml="20px"
-            justifyContent="space-between"
+            // justifyContent="space-between"
           >
             <Box>
               <Text mb="10px">MAIS ACESSADOS</Text>
