@@ -139,7 +139,7 @@ export const BatchPaymentTable = ({
           return {
             id: item.id,
             value: true,
-            statement: item?.statement,
+            statement: item?.transaction?.id,
           };
         })
       );
