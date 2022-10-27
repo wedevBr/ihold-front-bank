@@ -43,7 +43,6 @@ import {
   useTransactions,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
-import { routeTransactions } from '../digital-account';
 import { createPagination } from '~/hooks/createPagination';
 import { truncate } from '~/utils/truncate';
 import { TabletTransaction } from '~/components/Tablet';
@@ -53,6 +52,43 @@ const dowloadSchema = yup.object().shape({
   date_end: yup.string().required('Período final obrigatório'),
   type: yup.string(),
 });
+
+export const routeTransactions = [
+  {
+    id: 1,
+    iconName: 'ic:baseline-pix',
+    title: 'Pix',
+    // path: '/home/pix',
+  },
+
+  {
+    id: 2,
+    iconName: 'akar-icons:arrow-repeat',
+    title: 'Transferir',
+    // path: '/home/ted',
+  },
+  {
+    id: 3,
+    iconName: 'iconoir:wallet',
+    title: 'Depositar',
+  },
+  {
+    id: 4,
+    iconName: 'bi:qr-code-scan',
+    title: 'Pagar',
+    // path: '/payment',
+  },
+  {
+    id: 5,
+    iconName: 'bi:credit-card-2-back',
+    title: 'Solicitar cartão',
+  },
+  {
+    id: 6,
+    iconName: 'bi:question-circle',
+    title: 'Dúvidas',
+  },
+];
 
 export default function AllStatements() {
   const { isOpen, onOpen, onClose } = useDisclosure();
