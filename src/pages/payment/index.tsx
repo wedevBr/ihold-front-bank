@@ -43,6 +43,7 @@ export const createPaymentFormSchema = yup.object().shape({
 });
 
 export default function Payment() {
+  const [zipLoad, setZipLoad] = useState(false);
   const [scheduleID, setScheduleID] = useState<number[]>([]);
   const [statementID, setStatementID] = useState<number[]>([]);
   const [type, setType] = useState('pix');
@@ -187,6 +188,7 @@ export default function Payment() {
   }
 
   async function handleDownloadVoucher(statementId: number[]) {
+    setZipLoad(true);
     if (!statementId?.length) {
       return;
     }
@@ -196,14 +198,14 @@ export default function Payment() {
       file: any;
     }[] = [];
     await Promise.all(
-      statementId?.map((id: any, idx) =>
-        GetStatementsDownloadVoucher(id).then((response) => {
-          files.push({ name: `comprovante${idx + 1}.pdf`, file: response });
-        })
-      )
-    ).finally(() => {
-      // const fileURL = window.URL.createObjectURL(response);
-    });
+      statementId?.map((id: any, idx) => {
+        if (id) {
+          return GetStatementsDownloadVoucher(id).then((response) => {
+            files.push({ name: `comprovante${id}.pdf`, file: response });
+          });
+        }
+      })
+    ).finally(() => {});
 
     files.map((statement, idx) => {
       zip.file(statement.name, statement.file);
@@ -216,6 +218,7 @@ export default function Payment() {
       link.click();
     });
     zip = require('jszip')();
+    setZipLoad(false);
   }
 
   useEffect(() => {
@@ -375,7 +378,7 @@ export default function Payment() {
                             fontWeight="600"
                             padding="8px 1.25rem"
                             onClick={() => handleDownloadVoucher(statementID)}
-                            // isLoading={loading}
+                            isLoading={zipLoad}
                           >
                             <Icon
                               icon="bx:download"
