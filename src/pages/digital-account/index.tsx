@@ -47,6 +47,7 @@ import { formatCalcValue } from '~/utils/formatValue';
 import { createPagination } from '~/hooks/createPagination';
 import { truncate } from '~/utils/truncate';
 import { TabletTransaction } from '~/components/Tablet';
+import Link from 'next/link';
 
 const dowloadSchema = yup.object().shape({
   date_start: yup.string().required('Período inicial obrigatório'),
@@ -204,28 +205,78 @@ export default function DigitalAccount() {
 
   return (
     <Layout>
-      <SimpleGrid
-        mt="30px"
-        columns={{ base: 1, md: 2, lg: 3 }}
-        w="full"
-        spacing="45px"
+      <Flex
+        bg="#FFFFFF"
+        boxShadow="base"
+        mt="20px"
+        borderRadius="6px"
+        p="20px"
+        align="center"
       >
-        <Box bg="#FFFFFF" borderRadius="10px" h="197px" boxShadow="base">
-          <Flex justify="center" h="full" w="full" align="center">
-            <Text>Pagamento em Lote</Text>
-          </Flex>
-        </Box>
-        <Box bg="#FFFFFF" borderRadius="10px" h="197px" boxShadow="base">
-          <Flex justify="center" h="full" w="full" align="center">
-            <Text>API</Text>
-          </Flex>
-        </Box>
-        <Box bg="#FFFFFF" borderRadius="10px" h="197px" boxShadow="base">
-          <Flex justify="center" h="full" w="full" align="center">
-            <Text>Cripto</Text>
-          </Flex>
-        </Box>
-      </SimpleGrid>
+        <Image src="/assets/banner-digital.png" alt="banner" mr="20px" />
+        <Flex w="full" justify="space-between" align="center">
+          <Link href="/payment">
+            <Box
+              bg="#FFFFFF"
+              borderRadius="10px"
+              h="120px"
+              boxShadow="lg"
+              cursor="pointer"
+              w="265px"
+            >
+              <Flex justify="center" h="full" w="full" align="center">
+                <Icon
+                  icon="fluent:clipboard-bullet-list-ltr-20-regular"
+                  color="#21C6DE"
+                  width={40}
+                />
+                <Text color="#00102A" fontWeight={600} fontSize="18px">
+                  Pagamento em Lote
+                </Text>
+              </Flex>
+            </Box>
+          </Link>
+          <a
+            href="https://staging.banking.wedev.software/api/documentation"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Box
+              bg="#FFFFFF"
+              borderRadius="10px"
+              h="120px"
+              boxShadow="lg"
+              w="265px"
+            >
+              <Flex justify="center" h="full" w="full" align="center">
+                <Icon icon="codicon:code" color="#21C6DE" width={40} />
+                <Text
+                  color="#00102A"
+                  fontWeight={600}
+                  fontSize="18px"
+                  ml="10px"
+                >
+                  API
+                </Text>
+              </Flex>
+            </Box>
+          </a>
+          <Box
+            bg="#FFFFFF"
+            borderRadius="10px"
+            h="120px"
+            boxShadow="lg"
+            w="265px"
+          >
+            <Flex justify="center" h="full" w="full" align="center">
+              <Icon icon="vaadin:coin-piles" color="#21C6DE" width={40} />
+              <Text color="#00102A" fontWeight={600} fontSize="18px" ml="10px">
+                Criptoativos
+              </Text>
+            </Flex>
+          </Box>
+        </Flex>
+      </Flex>
       <SimpleGrid
         mt="30px"
         columns={{ base: 1, md: 2, lg: 3 }}
