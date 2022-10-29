@@ -23,6 +23,8 @@ import { ModalStatus } from '~/components/Modals/ModalStatus';
 import {
   DeleteScheduleTransactions,
   getValidateScheduleTransaction,
+  transaction,
+  useScheduleTransaction,
 } from '~/services/hooks/usePaymentsSchedule';
 import { IPaginationData } from '~/types/pagination';
 import {
@@ -33,6 +35,8 @@ import {
 import { registerPayment } from '~/services/hooks/usePaymentsSchedule';
 import { GetStatementsDownloadVoucher } from '~/services/hooks/useStatements';
 import JSZip from 'jszip';
+import { TabletTransaction } from '~/components/Tablet';
+import { TabletPayments } from '~/components/TabletPyament';
 
 interface RegisterPayment {
   file: File;
@@ -46,7 +50,7 @@ export default function Payment() {
   const [zipLoad, setZipLoad] = useState(false);
   const [scheduleID, setScheduleID] = useState<number[]>([]);
   const [statementID, setStatementID] = useState<number[]>([]);
-  const [type, setType] = useState('pix');
+  const [type, setType] = useState<transaction>('pix');
   const [items, setItems] = useState<IPaginationData<IDataPIX>>();
   const [billPayment, setBillPayment] =
     useState<IPaginationData<IDataBillPayment>>();
@@ -60,6 +64,15 @@ export default function Payment() {
   const [page, setPage] = useState(1);
   const [fileSrc, setFileSrc] = useState<File | any>();
   const [uploadFile, setUploadFile] = useState<File | any>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [per_page, setPerPage] = useState(25);
+
+  const { data: DataPayment, isFetching } = useScheduleTransaction(
+    type,
+    currentPage,
+    per_page
+  );
+
   const toast = useToast();
   const {
     isOpen: isOpenUpload,
@@ -171,15 +184,15 @@ export default function Payment() {
   async function getScheduleTransaction() {
     setLoading(true);
     try {
-      const responsePix = await getValidateScheduleTransaction<IDataPIX>('pix');
-      const responseBillPayment =
-        await getValidateScheduleTransaction<IDataBillPayment>('bill-payment');
-      const responseTransfer = await getValidateScheduleTransaction<IDataTed>(
-        'transfer'
-      );
-      setTransfer(responseTransfer);
-      setBillPayment(responseBillPayment);
-      setItems(responsePix);
+      // const responsePix = await getValidateScheduleTransaction<IDataPIX>('pix');
+      // const responseBillPayment =
+      //   await getValidateScheduleTransaction<IDataBillPayment>('bill-payment');
+      // const responseTransfer = await getValidateScheduleTransaction<IDataTed>(
+      //   'transfer'
+      // );
+      // setTransfer(responseTransfer);
+      // setBillPayment(responseBillPayment);
+      // setItems(responsePix);
     } catch (error) {
       console.log(error);
     } finally {
@@ -201,7 +214,7 @@ export default function Payment() {
       statementId?.map((id: any, idx) => {
         if (id) {
           return GetStatementsDownloadVoucher(id).then((response) => {
-            files.push({ name: `comprovante${id}.pdf`, file: response });
+            files.push({ name: `comprovante-${id}.pdf`, file: response });
           });
         }
       })
@@ -221,9 +234,9 @@ export default function Payment() {
     setZipLoad(false);
   }
 
-  useEffect(() => {
-    getScheduleTransaction();
-  }, [deletSchedule, isSuccess, refreshItems]);
+  // useEffect(() => {
+  //   getScheduleTransaction();
+  // }, [deletSchedule, isSuccess, refreshItems]);
 
   return (
     <Box h="full" overflowX="hidden">
@@ -409,7 +422,18 @@ export default function Payment() {
                           {loading ? 'Excluindo' : 'Excluir'}
                         </Button>
                       </Flex>
-                      <BatchPaymentTable
+                      <TabletPayments
+                        type={type}
+                        CurrentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        data={DataPayment}
+                        isFetching={isFetching}
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                        }}
+                      />
+                      {/* <BatchPaymentTable
                         type="pix"
                         refreshItems={setRefreshItems}
                         loading={setLoading}
@@ -422,7 +446,7 @@ export default function Payment() {
                           setStatementID(ids.statements || []);
                           setScheduleID(ids.id);
                         }}
-                      />
+                      /> */}
                     </TabPanel>
                     <TabPanel>
                       <Flex w="full" justify="right" pb="20px">
@@ -447,7 +471,7 @@ export default function Payment() {
                           {loading ? 'Excluindo' : 'Excluir'}
                         </Button>
                       </Flex>
-                      <BatchPaymentTable
+                      {/* <BatchPaymentTable
                         refreshItems={setRefreshItems}
                         type="transfer"
                         loading={setLoading}
@@ -460,7 +484,7 @@ export default function Payment() {
                           setStatementID(ids.statements || []);
                           setScheduleID(ids.id);
                         }}
-                      />
+                      /> */}
                     </TabPanel>
                     <TabPanel>
                       {/* <BatchPaymentTable
