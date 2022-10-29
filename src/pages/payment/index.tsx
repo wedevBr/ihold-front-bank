@@ -23,6 +23,8 @@ import { ModalStatus } from '~/components/Modals/ModalStatus';
 import {
   DeleteScheduleTransactions,
   getValidateScheduleTransaction,
+  transaction,
+  useScheduleTransaction,
 } from '~/services/hooks/usePaymentsSchedule';
 import { IPaginationData } from '~/types/pagination';
 import {
@@ -31,6 +33,10 @@ import {
   IDataTed,
 } from '~/types/scheduledTransactions';
 import { registerPayment } from '~/services/hooks/usePaymentsSchedule';
+import { GetStatementsDownloadVoucher } from '~/services/hooks/useStatements';
+import JSZip from 'jszip';
+import { TabletTransaction } from '~/components/Tablet';
+import { TabletPayments } from '~/components/TabletPyament';
 
 interface RegisterPayment {
   file: File;
@@ -41,8 +47,10 @@ export const createPaymentFormSchema = yup.object().shape({
 });
 
 export default function Payment() {
+  const [zipLoad, setZipLoad] = useState(false);
   const [scheduleID, setScheduleID] = useState<number[]>([]);
-  const [type, setType] = useState('pix');
+  const [statementID, setStatementID] = useState<number[]>([]);
+  const [type, setType] = useState<transaction>('pix');
   const [items, setItems] = useState<IPaginationData<IDataPIX>>();
   const [billPayment, setBillPayment] =
     useState<IPaginationData<IDataBillPayment>>();
@@ -56,6 +64,15 @@ export default function Payment() {
   const [page, setPage] = useState(1);
   const [fileSrc, setFileSrc] = useState<File | any>();
   const [uploadFile, setUploadFile] = useState<File | any>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [per_page, setPerPage] = useState(25);
+
+  const { data: DataPayment, isFetching } = useScheduleTransaction(
+    type,
+    currentPage,
+    per_page
+  );
+
   const toast = useToast();
   const {
     isOpen: isOpenUpload,
@@ -167,15 +184,15 @@ export default function Payment() {
   async function getScheduleTransaction() {
     setLoading(true);
     try {
-      const responsePix = await getValidateScheduleTransaction<IDataPIX>('pix');
-      const responseBillPayment =
-        await getValidateScheduleTransaction<IDataBillPayment>('bill-payment');
-      const responseTransfer = await getValidateScheduleTransaction<IDataTed>(
-        'transfer'
-      );
-      setTransfer(responseTransfer);
-      setBillPayment(responseBillPayment);
-      setItems(responsePix);
+      // const responsePix = await getValidateScheduleTransaction<IDataPIX>('pix');
+      // const responseBillPayment =
+      //   await getValidateScheduleTransaction<IDataBillPayment>('bill-payment');
+      // const responseTransfer = await getValidateScheduleTransaction<IDataTed>(
+      //   'transfer'
+      // );
+      // setTransfer(responseTransfer);
+      // setBillPayment(responseBillPayment);
+      // setItems(responsePix);
     } catch (error) {
       console.log(error);
     } finally {
@@ -183,9 +200,43 @@ export default function Payment() {
     }
   }
 
-  useEffect(() => {
-    getScheduleTransaction();
-  }, [deletSchedule, isSuccess, refreshItems]);
+  async function handleDownloadVoucher(statementId: number[]) {
+    setZipLoad(true);
+    if (!statementId?.length) {
+      return;
+    }
+    let zip = new JSZip();
+    let files: {
+      name: string;
+      file: any;
+    }[] = [];
+    await Promise.all(
+      statementId?.map((id: any, idx) => {
+        if (id) {
+          return GetStatementsDownloadVoucher(id).then((response) => {
+            files.push({ name: `comprovante-${id}.pdf`, file: response });
+          });
+        }
+      })
+    ).finally(() => {});
+
+    files.map((statement, idx) => {
+      zip.file(statement.name, statement.file);
+    });
+    zip.generateAsync({ type: 'blob' }).then((content) => {
+      const fileURL = window.URL.createObjectURL(content);
+      let link = document.createElement('a');
+      link.href = fileURL;
+      link.download = `comprovantes.zip`;
+      link.click();
+    });
+    zip = require('jszip')();
+    setZipLoad(false);
+  }
+
+  // useEffect(() => {
+  //   getScheduleTransaction();
+  // }, [deletSchedule, isSuccess, refreshItems]);
 
   return (
     <Box h="full" overflowX="hidden">
@@ -327,6 +378,29 @@ export default function Payment() {
                   <TabPanels>
                     <TabPanel>
                       <Flex w="full" justify="right" pb="20px">
+                        {scheduleID?.length > 0 && (
+                          <Button
+                            bg="#2E4EFF"
+                            color="#fff"
+                            mr="20px"
+                            fontSize="0.875rem"
+                            borderRadius="20px"
+                            h="38px"
+                            w="155px"
+                            textTransform="uppercase"
+                            fontWeight="600"
+                            padding="8px 1.25rem"
+                            onClick={() => handleDownloadVoucher(statementID)}
+                            isLoading={zipLoad}
+                          >
+                            <Icon
+                              icon="bx:download"
+                              width={20}
+                              style={{ marginRight: 5 }}
+                            />
+                            Baixar
+                          </Button>
+                        )}
                         <Button
                           bg="#F03D3E"
                           color="#fff"
@@ -348,7 +422,18 @@ export default function Payment() {
                           {loading ? 'Excluindo' : 'Excluir'}
                         </Button>
                       </Flex>
-                      <BatchPaymentTable
+                      <TabletPayments
+                        type={type}
+                        CurrentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        data={DataPayment}
+                        isFetching={isFetching}
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                        }}
+                      />
+                      {/* <BatchPaymentTable
                         type="pix"
                         refreshItems={setRefreshItems}
                         loading={setLoading}
@@ -357,8 +442,11 @@ export default function Payment() {
                         setPage={setPage}
                         isLoading={loading}
                         items={items}
-                        getScheduleIDS={(ids) => setScheduleID(ids)}
-                      />
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                        }}
+                      /> */}
                     </TabPanel>
                     <TabPanel>
                       <Flex w="full" justify="right" pb="20px">
@@ -383,7 +471,7 @@ export default function Payment() {
                           {loading ? 'Excluindo' : 'Excluir'}
                         </Button>
                       </Flex>
-                      <BatchPaymentTable
+                      {/* <BatchPaymentTable
                         refreshItems={setRefreshItems}
                         type="transfer"
                         loading={setLoading}
@@ -392,8 +480,11 @@ export default function Payment() {
                         setPage={setPage}
                         isLoading={loading}
                         dataTransfer={transfer}
-                        getScheduleIDS={(ids) => setScheduleID(ids)}
-                      />
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                        }}
+                      /> */}
                     </TabPanel>
                     <TabPanel>
                       {/* <BatchPaymentTable

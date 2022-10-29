@@ -210,7 +210,7 @@ export default function ReviewPayment() {
             isLoading={loading}
             items={items}
             dataTransfer={items}
-            getScheduleIDS={(ids) => setScheduleID(ids)}
+            getScheduleIDS={(ids) => setScheduleID(ids.id)}
           />
         </Box>
       </Layout>

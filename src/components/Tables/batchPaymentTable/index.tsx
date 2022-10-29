@@ -46,7 +46,7 @@ import { GetScheduleAllTransactionDataApproved } from '~/services/hooks/usePayme
 import { ModalStatus } from '~/components/Modals/ModalStatus';
 import { GetStatementsDownloadVoucher } from '~/services/hooks/useStatements';
 // import { dateFnsFormatDate } from '~/utils/fotmat';
-
+type id = { id: number[]; statements?: number[] };
 type tableProps = {
   type?: 'pix' | 'transfer' | 'bill-payment';
   filterApproved?: 'true' | 'false';
@@ -57,7 +57,7 @@ type tableProps = {
   isLoading?: boolean;
   loading: (state: boolean) => void;
   loadingEdit?: (state: boolean) => void;
-  getScheduleIDS?: (ids: number[]) => void;
+  getScheduleIDS?: (ids: id) => void;
   page?: number;
   setPage: (numberPage: number) => void;
   setState: (item: any) => void;
@@ -69,6 +69,7 @@ type tableProps = {
 
 interface checkBoxsSelected {
   id: number;
+  statement?: number;
   value: boolean;
 }
 export const BatchPaymentTable = ({
@@ -88,8 +89,8 @@ export const BatchPaymentTable = ({
   refetch,
 }: tableProps) => {
   const [allChecked, setAllChecked] = useState(false);
-  const [paymentLoading, setPaymentLoading] = useState(false);
   const [checked, setChecked] = useState<checkBoxsSelected[]>([]);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [password, setPassword] = useState('');
   const [uuid, setUuid] = useState(0);
   const [transaction, setTransaction] = useState<IDataPIX | IDataTed>();
@@ -113,12 +114,12 @@ export const BatchPaymentTable = ({
   } = useDisclosure();
   const toast = useToast();
 
-  const individualCheck = (id: number, state: boolean) => {
+  const individualCheck = (id: number, state: boolean, statement?: number) => {
     if (checked.find((user) => user.id === id)) {
       setChecked(checked.filter((user) => user.id !== id));
       return;
     }
-    setChecked((users) => users.concat({ id, value: state }));
+    setChecked((users) => users.concat({ id, value: state, statement }));
   };
 
   const totalCheck = (all: any) => {
@@ -127,6 +128,7 @@ export const BatchPaymentTable = ({
         return {
           id: item.id,
           value: true,
+          statement: item?.statement,
         };
       })
     );
@@ -137,6 +139,7 @@ export const BatchPaymentTable = ({
           return {
             id: item.id,
             value: true,
+            statement: item?.transaction?.id,
           };
         })
       );
@@ -176,10 +179,10 @@ export const BatchPaymentTable = ({
   }
 
   function handleDownloadVoucher(statementId: number) {
-    // setModalErrorIsOpen(false);
-
     GetStatementsDownloadVoucher(statementId).then((response) => {
       const fileURL = window.URL.createObjectURL(response);
+      console.log({ response });
+
       let link = document.createElement('a');
       link.href = fileURL;
       link.download = `comprovante-${
@@ -196,8 +199,16 @@ export const BatchPaymentTable = ({
   useEffect(() => {
     const format = () => {
       const data_IDs: number[] = [];
+      const statement_IDs: number[] = [];
       checked.length ? checked.map((item) => data_IDs.push(item.id)) : null;
-      getScheduleIDS && getScheduleIDS(data_IDs);
+      checked.length
+        ? checked.map((item) => statement_IDs.push(item?.statement || 0))
+        : null;
+      getScheduleIDS &&
+        getScheduleIDS({
+          id: data_IDs,
+          statements: statement_IDs,
+        });
     };
     format();
   }, [checked]);
@@ -325,7 +336,13 @@ export const BatchPaymentTable = ({
                 >
                   <Checkbox
                     onChange={(e) => {
-                      individualCheck(item.id, e.target.checked);
+                      individualCheck(
+                        item.id,
+                        e.target.checked,
+                        item?.status?.name === 'completed'
+                          ? item?.transaction?.id
+                          : 0
+                      );
                     }}
                     isChecked={
                       checked.find((user) => user.id === item.id)?.value ||
