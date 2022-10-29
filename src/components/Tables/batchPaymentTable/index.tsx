@@ -89,8 +89,8 @@ export const BatchPaymentTable = ({
   refetch,
 }: tableProps) => {
   const [allChecked, setAllChecked] = useState(false);
-  const [paymentLoading, setPaymentLoading] = useState(false);
   const [checked, setChecked] = useState<checkBoxsSelected[]>([]);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [password, setPassword] = useState('');
   const [uuid, setUuid] = useState(0);
   const [transaction, setTransaction] = useState<IDataPIX | IDataTed>();
