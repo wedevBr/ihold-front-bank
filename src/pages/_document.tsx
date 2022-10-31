@@ -7,6 +7,10 @@ export default class MyDocument extends Document {
       <Html>
         <Head>
           <link rel="shortcut icon" href="/favicon.ico" />
+           <meta
+            name="google-site-verification"
+            content="JaOvv4PGZQU2cQeYSzzlbKZNqGIDS7u0rmRzAMMt1_4"
+          />
           <title>iHold Bank</title>
         </Head>
         <body>
