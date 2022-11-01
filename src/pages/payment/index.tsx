@@ -22,6 +22,7 @@ import { BatchPaymentTable, Layout, Loading, Modal } from '~/components';
 import { ModalStatus } from '~/components/Modals/ModalStatus';
 import {
   DeleteScheduleTransactions,
+  GetScheduleAllTransactionDataApproved,
   getValidateScheduleTransaction,
   transaction,
   useScheduleTransaction,
@@ -37,6 +38,7 @@ import { GetStatementsDownloadVoucher } from '~/services/hooks/useStatements';
 import JSZip from 'jszip';
 import { TabletTransaction } from '~/components/Tablet';
 import { TabletPayments } from '~/components/TabletPyament';
+import { ModalAuth } from '~/components/Modals/ModalAuth';
 
 interface RegisterPayment {
   file: File;
@@ -66,14 +68,21 @@ export default function Payment() {
   const [uploadFile, setUploadFile] = useState<File | any>();
   const [currentPage, setCurrentPage] = useState(1);
   const [per_page, setPerPage] = useState(25);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [password, setPassword] = useState('');
 
-  const { data: DataPayment, isFetching } = useScheduleTransaction(
-    type,
-    currentPage,
-    per_page
-  );
+  const {
+    data: DataPayment,
+    isFetching,
+    refetch,
+  } = useScheduleTransaction(type, currentPage, per_page, 'false');
 
   const toast = useToast();
+  const {
+    isOpen: isOpenAuth,
+    onOpen: onOpenAuth,
+    onClose: onCloseAuth,
+  } = useDisclosure();
   const {
     isOpen: isOpenUpload,
     onOpen: onOpenUpload,
@@ -161,6 +170,7 @@ export default function Payment() {
       getScheduleTransaction();
       setLoading(false);
       seIsSuccess(false);
+      refetch();
     }
   };
 
@@ -175,10 +185,12 @@ export default function Payment() {
       .then(() => {
         setDeletSchedule(true);
         setLoading(true);
+        refetch();
       })
       .finally(() => {
         setDeletSchedule(false);
         setLoading(false);
+        refetch();
       });
   }
   async function getScheduleTransaction() {
@@ -234,9 +246,32 @@ export default function Payment() {
     setZipLoad(false);
   }
 
+  async function handleConfirmationPayment(secretPassword: string) {
+    if (scheduleID && secretPassword) {
+      setPaymentLoading(true);
+      return await Promise.all(
+        scheduleID?.map(async (pix: any) => {
+          return await GetScheduleAllTransactionDataApproved(
+            pix,
+            secretPassword
+          )
+            .then((_) => {
+              onCloseAuth();
+              refetch();
+            })
+            .finally(() => {
+              setPaymentLoading(false);
+            });
+        })
+      );
+    }
+  }
+
   // useEffect(() => {
   //   getScheduleTransaction();
   // }, [deletSchedule, isSuccess, refreshItems]);
+
+  console.log({ scheduleID });
 
   return (
     <Box h="full" overflowX="hidden">
@@ -401,6 +436,28 @@ export default function Payment() {
                             Baixar
                           </Button>
                         )}
+
+                        <Button
+                          bg="#2E4EFF"
+                          color="#fff"
+                          w="255px"
+                          mr="15px"
+                          fontSize="0.875rem"
+                          borderRadius="20px"
+                          h="38px"
+                          textTransform="uppercase"
+                          fontWeight="600"
+                          padding="8px 1.25rem"
+                          disabled={scheduleID?.length === 0}
+                          onClick={() => onOpenAuth()}
+                        >
+                          <Icon
+                            icon="bx:check-shield"
+                            width={20}
+                            style={{ marginRight: 5 }}
+                          />
+                          EXECUTAR PAGAMENTO
+                        </Button>
                         <Button
                           bg="#F03D3E"
                           color="#fff"
@@ -451,6 +508,27 @@ export default function Payment() {
                     <TabPanel>
                       <Flex w="full" justify="right" pb="20px">
                         <Button
+                          bg="#2E4EFF"
+                          color="#fff"
+                          w="255px"
+                          mr="15px"
+                          fontSize="0.875rem"
+                          borderRadius="20px"
+                          h="38px"
+                          textTransform="uppercase"
+                          fontWeight="600"
+                          padding="8px 1.25rem"
+                          disabled={scheduleID?.length === 0}
+                          onClick={() => onOpenAuth()}
+                        >
+                          <Icon
+                            icon="bx:check-shield"
+                            width={20}
+                            style={{ marginRight: 5 }}
+                          />
+                          EXECUTAR PAGAMENTO
+                        </Button>
+                        <Button
                           bg="#F03D3E"
                           color="#fff"
                           fontSize="0.875rem"
@@ -471,6 +549,18 @@ export default function Payment() {
                           {loading ? 'Excluindo' : 'Excluir'}
                         </Button>
                       </Flex>
+
+                      <TabletPayments
+                        type={type}
+                        CurrentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        data={DataPayment}
+                        isFetching={isFetching}
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                        }}
+                      />
                       {/* <BatchPaymentTable
                         refreshItems={setRefreshItems}
                         type="transfer"
@@ -504,6 +594,13 @@ export default function Payment() {
           </Box>
         </Flex>
       </Layout>
+      <ModalAuth
+        handlePassword={(pass) => setPassword(pass)}
+        loading={paymentLoading}
+        isOpen={isOpenAuth}
+        onClose={onCloseAuth}
+        handleClick={() => handleConfirmationPayment(password)}
+      />
       <ModalStatus
         variant="error"
         title="Error"
