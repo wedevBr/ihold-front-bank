@@ -79,7 +79,7 @@ export const getValidateScheduleTransaction = async (
 ) => {
   try {
     const { data } = await api.get(
-      `/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&&sort[]=-completed_at&filter[transaction_type_id]=${
+      `/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&&sort[]=-created_at&filter[transaction_type_id]=${
         type === 'pix' ? '2' : type === 'transfer' ? '1' : '3'
       }${!!filterApproved ? `&filter[approved]=${filterApproved}` : ''}`,
       {
