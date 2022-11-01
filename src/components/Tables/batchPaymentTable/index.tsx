@@ -369,7 +369,7 @@ export const BatchPaymentTable = ({
                           item?.payload?.key,
                           item?.payload?.key.length === 11 ? 'cpf' : 'cnpj'
                         )
-                      : item?.payload.key
+                      : item?.payload?.key
                     : type === 'transfer'
                     ? item?.payload?.recipient?.name
                     : ''}
@@ -431,14 +431,14 @@ export const BatchPaymentTable = ({
                     <Badge
                       variant="solid"
                       colorScheme={
-                        item?.status.name === 'pending'
+                        item?.status?.name === 'pending'
                           ? 'yellow'
-                          : item?.status.name === 'waiting' ||
-                            item?.status.name === 'canceled'
+                          : item?.status?.name === 'waiting' ||
+                            item?.status?.name === 'canceled'
                           ? 'red'
-                          : item?.status.name === 'processing'
+                          : item?.status?.name === 'processing'
                           ? 'blue.200'
-                          : item?.status.name === 'completed'
+                          : item?.status?.name === 'completed'
                           ? 'green'
                           : ''
                       }
@@ -460,10 +460,10 @@ export const BatchPaymentTable = ({
                     <Badge
                       variant="solid"
                       colorScheme={
-                        item?.status.name === 'pending' ? 'yellow' : 'green'
+                        item?.status?.name === 'pending' ? 'yellow' : 'green'
                       }
                     >
-                      {item?.status.name}
+                      {item?.status?.name}
                     </Badge>
                   </Td>
                 )}

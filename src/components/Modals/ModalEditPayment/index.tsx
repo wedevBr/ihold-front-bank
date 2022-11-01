@@ -81,8 +81,8 @@ export function ModalEditPayment({
   });
   async function handleEditData(data: any) {
     const transfer = {
-      is_approved: dataTransfer?.is_approved,
-      status_id: dataTransfer?.status.id,
+      // is_approved: dataTransfer?.is_approved,
+      // status_id: dataTransfer?.status.id,
       scheduled_date: data.scheduled_date_transfer,
       payload: {
         amount: data.amount_transfer,
@@ -100,8 +100,8 @@ export function ModalEditPayment({
       },
     };
     const pix = {
-      is_approved: dataPix?.is_approved,
-      status_id: 1,
+      // is_approved: dataPix?.is_approved,
+      // status_id: dataPix?.id,
       scheduled_date: data.scheduled_date,
       payload: {
         key_type: data.key_type,
