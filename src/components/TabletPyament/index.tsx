@@ -100,26 +100,30 @@ export function TabletPayments({
   };
 
   const totalCheck = (all: any) => {
-    setChecked(
-      all?.map((item: any) => {
-        return {
-          id: item.id,
-          value: true,
-          statement: item?.statement,
-        };
-      })
-    );
-    setAllChecked(!allChecked);
-    if (data) {
+    all?.map((item: any) => {
       setChecked(
-        data?.data?.map((item: any) => {
+        item?.map((transactions: any) => {
           return {
-            id: item.id,
+            id: transactions?.id,
             value: true,
-            statement: item?.transaction?.id,
+            statement: transactions.statement,
           };
         })
       );
+    });
+    setAllChecked(!allChecked);
+    if (data) {
+      data?.data?.map((item: any) => {
+        setChecked(
+          item?.item?.map((transactions: any) => {
+            return {
+              id: transactions?.id,
+              value: true,
+              statement: transactions.statement,
+            };
+          })
+        );
+      });
     }
   };
 
@@ -145,7 +149,7 @@ export function TabletPayments({
     const format = () => {
       const data_IDs: number[] = [];
       const statement_IDs: number[] = [];
-      checked.length ? checked.map((item) => data_IDs.push(item.id)) : null;
+      checked.length ? checked.map((item) => data_IDs.push(item?.id)) : null;
       checked.length
         ? checked.map((item) => statement_IDs.push(item?.statement || 0))
         : null;
@@ -166,7 +170,6 @@ export function TabletPayments({
     }
     setChecked([]);
   }, [data, dataTransfer]);
-  console.log({ data });
 
   return (
     <Box>
@@ -192,7 +195,7 @@ export function TabletPayments({
                   pos="sticky"
                   bg="#F0F0F3"
                 >
-                  <Th w="10px" minW="10px">
+                  <Th maxW="10px" w="10px" minW="10px">
                     <Checkbox
                       isChecked={allChecked}
                       onChange={() => {
@@ -209,12 +212,38 @@ export function TabletPayments({
                       }}
                     />
                   </Th>
-                  <Th>AGENDAMENTO</Th>
-                  <Th>TIPO</Th>
-                  <Th>CHAVE</Th>
-                  <Th>VALOR</Th>
-                  <Th>EMAIL</Th>
-                  <Th>DESCRIÇÃO</Th>
+                  <Th maxW="110px">AGENDAMENTO</Th>
+                  {/* <Th>TIPO</Th> */}
+                  <Th>
+                    {' '}
+                    {type === 'pix'
+                      ? 'CHAVE'
+                      : type === 'transfer'
+                      ? 'TIPO DE CONTA'
+                      : 'LINHA DIGITÁVEL'}
+                  </Th>
+                  <Th>
+                    {type === 'pix'
+                      ? 'VALOR'
+                      : type === 'transfer'
+                      ? 'VALOR'
+                      : ''}
+                  </Th>
+                  <Th>
+                    {type === 'pix'
+                      ? 'EMAIL'
+                      : type === 'transfer'
+                      ? 'AGÊNCIA'
+                      : ''}
+                  </Th>
+                  <Th>
+                    {type === 'pix'
+                      ? 'DESCRIÇÃO'
+                      : type === 'transfer'
+                      ? 'CONTA'
+                      : ''}
+                  </Th>
+                  {type === 'transfer' && <Th>EMPRESA</Th>}
                   <Th>STATUS</Th>
                   <Th>COMPROVANTE</Th>
                   {edit && <Th>ACÕES</Th>}
@@ -234,8 +263,8 @@ export function TabletPayments({
                         <Td>
                           <></>
                         </Td>
-                        <Td w="20px">
-                          <Text>
+                        <Td maxW="20px" w="20px" whiteSpace="pre-wrap">
+                          <Text maxW="80px" fontWeight="bold">
                             {moment(new Date(item?.date))
                               .add(1, 'days')
                               .format('DD MMM')
@@ -251,7 +280,7 @@ export function TabletPayments({
 
                         return (
                           <Tr key={idx}>
-                            <Td>
+                            <Td maxW="10px">
                               <Checkbox
                                 onChange={(e) => {
                                   console.log(
@@ -272,16 +301,14 @@ export function TabletPayments({
                                 }}
                                 isChecked={
                                   checked.find(
-                                    (user) => user.id === transaction.id
+                                    (user) => user?.id === transaction?.id
                                   )?.value || false
                                 }
                               />
                             </Td>
                             <Td>
-                              <></>
-                            </Td>
-                            <Td maxW="20px" w="10px">
                               <Box
+                                w="31px"
                                 borderRadius="5px"
                                 p="8px"
                                 background={
@@ -305,9 +332,38 @@ export function TabletPayments({
                                 )}
                               </Box>
                             </Td>
-                            <Td minW="200px" w="100px">
+                            {/* <Td maxW="20px" w="10px">
+                              <Box
+                                borderRadius="5px"
+                                p="8px"
+                                background={
+                                  transaction?.operation === 'cash-in'
+                                    ? '#27ae6033'
+                                    : '#ff313b33'
+                                }
+                              >
+                                {transaction?.operation === 'cash-in' ? (
+                                  <Icon
+                                    icon="bi:arrow-90deg-up"
+                                    color="#27AE60"
+                                    width={16}
+                                  />
+                                ) : (
+                                  <Icon
+                                    icon="bi:arrow-90deg-down"
+                                    color="#F03D3E"
+                                    width={16}
+                                  />
+                                )}
+                              </Box>
+                            </Td> */}
+                            <Td maxW="170px" whiteSpace="pre-wrap">
                               <Box>
-                                <Text color="#070A0E" fontWeight={600}>
+                                <Text
+                                  color="#070A0E"
+                                  fontWeight={600}
+                                  textTransform="uppercase"
+                                >
                                   {type === 'pix'
                                     ? transaction?.payload?.key_type
                                     : type === 'transfer'
@@ -327,10 +383,13 @@ export function TabletPayments({
                                       : transaction?.payload?.key_type === 'CPF'
                                       ? nifFormat(
                                           transaction?.payload?.key,
-                                          transaction?.payload?.key.length ===
-                                            11
-                                            ? 'cpf'
-                                            : 'cnpj'
+                                          'cpf'
+                                        )
+                                      : transaction?.payload?.key_type ===
+                                        'CNPJ'
+                                      ? nifFormat(
+                                          transaction?.payload?.key,
+                                          'cnpj'
                                         )
                                       : transaction?.payload.key
                                     : type === 'transfer'
@@ -346,6 +405,8 @@ export function TabletPayments({
                               </Box>
                             </Td>
                             <Td
+                              maxW="200px"
+                              whiteSpace="pre-wrap"
                               color={
                                 transaction?.operation === 'cash-in'
                                   ? '#27AE60'
@@ -357,28 +418,28 @@ export function TabletPayments({
                                     transaction?.payload?.amount
                                   )}`
                                 : type === 'transfer'
-                                ? transaction?.payload?.recipient?.account
+                                ? formatCalcValue(transaction.payload?.amount)
                                 : ''}
                             </Td>
-                            <Td px="0px">
+                            <Td maxW="190px" whiteSpace="pre-wrap">
                               {type === 'pix' ? (
                                 <Text>{transaction?.payload?.email}</Text>
                               ) : type === 'transfer' ? (
-                                transaction?.payload?.recipient?.bank_name
+                                transaction?.payload?.recipient?.bank_code
                               ) : (
                                 'Não Informado'
                               )}
                             </Td>
-                            <Td>
+                            <Td maxW="170px" whiteSpace="pre-wrap">
                               {type === 'pix' ? (
                                 <Text>{transaction?.payload?.description}</Text>
                               ) : type === 'transfer' ? (
-                                transaction?.payload?.recipient?.bank_code
+                                transaction?.payload?.recipient?.account
                               ) : (
                                 ''
                               )}
                             </Td>
-                            <Td>
+                            <Td maxW="150px" whiteSpace="pre-wrap">
                               {type === 'pix' ? (
                                 <Badge
                                   variant="solid"
@@ -409,11 +470,43 @@ export function TabletPayments({
                                     'Em processos'}
                                 </Badge>
                               ) : type === 'transfer' ? (
-                                formatCalcValue(transaction.payload?.amount)
+                                transaction?.payload?.recipient?.bank_name
                               ) : (
                                 ''
                               )}
                             </Td>
+                            {type === 'transfer' && (
+                              <Td minW="180px">
+                                <Badge
+                                  variant="solid"
+                                  colorScheme={
+                                    transaction?.status.name === 'pending'
+                                      ? 'yellow'
+                                      : transaction?.status.name ===
+                                          'waiting' ||
+                                        transaction?.status.name === 'canceled'
+                                      ? 'red'
+                                      : transaction?.status.name ===
+                                        'processing'
+                                      ? 'blue.200'
+                                      : transaction?.status.name === 'completed'
+                                      ? 'green'
+                                      : ''
+                                  }
+                                >
+                                  {transaction?.status?.name === 'pending' &&
+                                    'Pendente'}
+                                  {transaction?.status?.name === 'waiting' &&
+                                    'Em espera'}
+                                  {transaction?.status?.name === 'canceled' &&
+                                    'Cancelado'}
+                                  {transaction?.status?.name === 'completed' &&
+                                    'Completo'}
+                                  {transaction?.status?.name === 'processing' &&
+                                    'Em processos'}
+                                </Badge>
+                              </Td>
+                            )}
                             <Td minW="20px">
                               {(transaction?.status?.name === 'completed' && (
                                 <Flex align="center" justifyContent="center">
@@ -462,14 +555,6 @@ export function TabletPayments({
                                       />{' '}
                                       <Text ml={2}>Editar</Text>
                                     </MenuItem>
-                                    <ModalEditPayment
-                                      dataTransfer={transaction as any}
-                                      dataPix={transaction as any}
-                                      isOpen={isOpenEditPix}
-                                      onClose={onCloseEditPix}
-                                      type={type}
-                                      // setLoading={loadingEdit && loadingEdit}
-                                    />
                                   </MenuList>
                                 </Menu>
                               </Td>
@@ -484,6 +569,14 @@ export function TabletPayments({
           </TableContainer>
         </Box>
       )}
+      <ModalEditPayment
+        dataTransfer={transaction as any}
+        dataPix={transaction as any}
+        isOpen={isOpenEditPix}
+        onClose={onCloseEditPix}
+        type={type}
+        // setLoading={loadingEdit && loadingEdit}
+      />
       <Flex align="center" w="full" justify="center" mt="40px">
         <Box cursor={!!data?.links?.prev ? 'pointer' : 'not-allowed'}>
           <Icon
