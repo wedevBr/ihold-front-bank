@@ -22,6 +22,7 @@ import {
   DeleteScheduleTransactions,
   GetScheduleAllTransactionDataApproved,
   getValidateScheduleTransaction,
+  useScheduleTransaction,
 } from '~/services/hooks/usePaymentsSchedule';
 import { IDataPIX } from '~/types/scheduledTransactions';
 import { IPaginationData } from '~/types/pagination';
@@ -29,6 +30,7 @@ import { ModalStatus } from '~/components/Modals/ModalStatus';
 import { ModalAuth } from '~/components/Modals/ModalAuth';
 import { setLocalStorage } from '~/utils/localStorageFormat';
 import { useRouter } from 'next/router';
+import { TabletPayments } from '~/components/TabletPyament';
 
 export default function ReviewPayment() {
   const [scheduleID, setScheduleID] = useState<number[]>([]);
@@ -40,6 +42,23 @@ export default function ReviewPayment() {
   const [deletSchedule, setDeletSchedule] = useState(false);
   const [edit, setEdit] = useState<IDataPIX>();
   const [password, setPassword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [per_page, setPerPage] = useState(25);
+  const [statementID, setStatementID] = useState<number[]>([]);
+
+  const { query } = useRouter();
+
+  const {
+    data: DataPayment,
+    isFetching,
+    refetch,
+  } = useScheduleTransaction(
+    query.transaction as 'pix' | 'transfer' | 'bill-payment',
+    currentPage,
+    per_page,
+    'false'
+  );
+
   const {
     isOpen: isOpenAuth,
     onOpen: onOpenAuth,
@@ -57,20 +76,19 @@ export default function ReviewPayment() {
     onClose: onCloseSuccess,
   } = useDisclosure();
 
-  const { query } = useRouter();
-
   async function handleConfirmationPayment(secretPassword: string) {
-    if (items && secretPassword) {
+    if (scheduleID && secretPassword) {
       setPaymentLoading(true);
       return await Promise.all(
-        items?.data?.map(async (pix) => {
+        scheduleID?.map(async (pix) => {
           return await GetScheduleAllTransactionDataApproved(
-            pix.id,
+            pix,
             secretPassword
           )
             .then((_) => {
               onCloseAuth();
               onPenSuccess();
+              refetch();
             })
             .finally(() => setPaymentLoading(false));
         })
@@ -78,21 +96,22 @@ export default function ReviewPayment() {
     }
   }
 
-  async function getScheduleTransaction() {
-    setLoading(true);
-    try {
-      const response = await getValidateScheduleTransaction<IDataPIX>(
-        query.transaction as 'pix' | 'transfer' | 'bill-payment',
-        70,
-        'false'
-      );
-      setItems(response);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  }
+  // async function getScheduleTransaction() {
+  //   setLoading(true);
+  //   try {
+  //     const response = await getValidateScheduleTransaction(
+  //       query.transaction as 'pix' | 'transfer' | 'bill-payment',
+  //       70,
+  //       1,
+  //       'false'
+  //     );
+  //     setItems(response);
+  //   } catch (error) {
+  //     console.log(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
   async function deletScheduleTrasanction(checkIDS: number[]) {
     if (!checkIDS.length) {
@@ -105,6 +124,7 @@ export default function ReviewPayment() {
       .then(() => {
         setDeletSchedule(true);
         setLoading(true);
+        refetch();
       })
       .finally(() => {
         setDeletSchedule(false);
@@ -112,9 +132,9 @@ export default function ReviewPayment() {
       });
   }
 
-  useEffect(() => {
-    getScheduleTransaction();
-  }, [deletSchedule, loadingEdit, paymentLoading]);
+  // useEffect(() => {
+  //   getScheduleTransaction();
+  // }, [deletSchedule, loadingEdit, paymentLoading]);
 
   return (
     <Box h="full" w="full">
@@ -199,7 +219,19 @@ export default function ReviewPayment() {
           p="20px"
           mt="30px"
         >
-          <BatchPaymentTable
+          <TabletPayments
+            edit
+            type={query.transaction as 'pix' | 'transfer' | 'bill-payment'}
+            CurrentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            data={DataPayment}
+            isFetching={isFetching}
+            getScheduleIDS={(ids) => {
+              setStatementID(ids.statements || []);
+              setScheduleID(ids.id);
+            }}
+          />
+          {/* <BatchPaymentTable
             type={query.transaction as 'pix' | 'transfer' | 'bill-payment'}
             filterApproved="false"
             edit
@@ -211,7 +243,7 @@ export default function ReviewPayment() {
             items={items}
             dataTransfer={items}
             getScheduleIDS={(ids) => setScheduleID(ids.id)}
-          />
+          /> */}
         </Box>
       </Layout>
       <ModalStatus

@@ -7,6 +7,7 @@ import {
   IDataTed,
 } from '~/types/scheduledTransactions';
 import { useQuery } from 'react-query';
+import moment from 'moment';
 
 export async function registerPayment(transactionData: FormData) {
   try {
@@ -18,32 +19,6 @@ export async function registerPayment(transactionData: FormData) {
     throw err;
   }
 }
-export const getValidateScheduleTransaction = async <T>(
-  type?: 'pix' | 'transfer' | 'bill-payment',
-  per_page?: number,
-  filterApproved?: 'true' | 'false'
-): Promise<IPaginationData<T>> => {
-  try {
-    const { data } = await api.get(
-      `/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&filter[transaction_type_id]=${
-        type === 'pix' ? '2' : type === 'transfer' ? '1' : '3'
-      }${!!filterApproved ? `&filter[approved]=${filterApproved}` : ''}`,
-      {
-        params: {
-          'page[size]': per_page || 50,
-          // 'page[number]': 1,
-        },
-      }
-    );
-    return {
-      data: data?.data,
-      links: data?.links,
-      meta: data?.meta,
-    };
-  } catch (err: any) {
-    throw new HandleError(err.response);
-  }
-};
 
 // export function useScheduleTransactions(page?: number) {
 //   return useQuery(
@@ -94,4 +69,73 @@ export async function UpdateScheduleTransactions(
   } catch (error: any) {
     throw error;
   }
+}
+export type transaction = 'pix' | 'transfer' | 'bill-payment';
+export const getValidateScheduleTransaction = async (
+  type?: transaction,
+  per_page?: number,
+  page?: number,
+  filterApproved?: 'true' | 'false'
+) => {
+  try {
+    const { data } = await api.get(
+      `/schedule_transactions?include[]=transactionType&include[]=status&include[]=transaction&include[]=account&&sort[]=-created_at&filter[transaction_type_id]=${
+        type === 'pix' ? '2' : type === 'transfer' ? '1' : '3'
+      }${!!filterApproved ? `&filter[approved]=${filterApproved}` : ''}`,
+      {
+        params: {
+          'page[size]': per_page || 50,
+          'page[number]': page,
+        },
+      }
+    );
+    const objectData: any = {};
+    data?.data?.map((item: any) =>
+      objectData[moment(item.created_at).format('YYYY-MM-DD')]
+        ? (objectData[moment(item.created_at).format('YYYY-MM-DD')] = [
+            ...objectData[moment(item.created_at).format('YYYY-MM-DD')],
+            item,
+          ])
+        : (objectData[moment(item.created_at).format('YYYY-MM-DD')] = [item])
+    );
+
+    const formatData = Object.entries(objectData)?.map((objects) => {
+      const [key, values]: any[] = objects;
+
+      return {
+        date: key,
+        item: values,
+      };
+    });
+    return {
+      ...data,
+      data: formatData,
+    };
+  } catch (err: any) {
+    throw new HandleError(err.response);
+  }
+};
+
+export function useScheduleTransaction(
+  type?: transaction,
+  page?: number,
+  per_page?: number,
+  filterApproved?: 'true' | 'false'
+) {
+  return useQuery(
+    [
+      'getScheduleTransaction',
+      {
+        type,
+        page,
+        filterApproved,
+        per_page,
+      },
+    ],
+    () => getValidateScheduleTransaction(type, per_page, page, filterApproved),
+    {
+      staleTime: 1000 * 10,
+      refetchOnWindowFocus: false,
+    }
+  );
 }
