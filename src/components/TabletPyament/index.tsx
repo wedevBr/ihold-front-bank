@@ -108,37 +108,35 @@ export function TabletPayments({
   };
 
   const totalCheck = (all: any) => {
-    all?.map((item: any) => {
+    let newData: any = [];
+    all.map((itemData: any) => itemData.map((data: any) => newData.push(data)));
+    console.log({ newData });
+
+    console.log({ all });
+
+    setChecked(
+      newData?.map((item: any) => {
+        return {
+          id: +item?.id,
+          value: true,
+          statement: item?.statement,
+          payment: item?.is_approved === false ? item?.id : null,
+        };
+      })
+    );
+
+    setAllChecked(!allChecked);
+    if (data) {
       setChecked(
-        item?.map((transactions: any) => {
+        newData?.map((item: any) => {
           return {
-            id: transactions?.id,
+            id: +item?.id,
             value: true,
-            statement: transactions?.statement,
-            payment:
-              transactions?.is_approved === false ? transactions?.id : null,
+            statement: item?.statement,
+            payment: item?.is_approved === false ? item?.id : null,
           };
         })
       );
-    });
-    setAllChecked(!allChecked);
-    if (data) {
-      data?.data?.map((item: any) => {
-        setChecked(
-          item?.item?.map((transactions: any) => {
-            return {
-              id: transactions?.id,
-              value: true,
-              statement:
-                transactions?.status?.name === 'completed'
-                  ? transactions?.transaction?.id
-                  : 0,
-              payment:
-                transactions?.is_approved === false ? transactions?.id : null,
-            };
-          })
-        );
-      });
       console.log({ checked });
     }
   };
@@ -227,11 +225,11 @@ export function TabletPayments({
                           setChecked([]);
                           return;
                         }
-                        totalCheck(
+                        let allData =
                           data?.data?.map((newData: any) => newData.item) ||
-                            dataTransfer?.data ||
-                            []
-                        );
+                          dataTransfer?.data ||
+                          [];
+                        totalCheck(allData);
                       }}
                     />
                   </Th>
