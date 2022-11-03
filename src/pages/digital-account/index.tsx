@@ -406,7 +406,7 @@ export default function DigitalAccount() {
                 ))}
               </SimpleGrid>
             </Box>
-            <Image src="/assets/banner.png" alt="banner" mt="20px" />
+            {/* <Image src="/assets/banner.png" alt="banner" mt="20px" /> */}
           </Flex>
         </Flex>
       </Box>
