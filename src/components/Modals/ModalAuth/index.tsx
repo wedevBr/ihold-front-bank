@@ -87,7 +87,7 @@ export function ModalAuth({
               }}
               isLoading={loading}
               mt="25px"
-              mb="30px"
+              mb="10px"
               w="full"
               color="#fff"
               bg="#2E4EFF"
@@ -95,6 +95,12 @@ export function ModalAuth({
             >
               CONFIRMAR
             </Button>
+            <Flex align="center" color="#F03D3E">
+              <Icon icon="akar-icons:circle-alert" />
+              <Text ml="5px" fontSize="14px">
+                Pagamento para transações pendentes.
+              </Text>
+            </Flex>
           </Box>
         </ModalBody>
       </ModalContent>

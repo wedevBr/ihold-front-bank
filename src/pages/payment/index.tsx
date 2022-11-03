@@ -50,6 +50,7 @@ export const createPaymentFormSchema = yup.object().shape({
 
 export default function Payment() {
   const [zipLoad, setZipLoad] = useState(false);
+  const [paymentsID, setPaymentsID] = useState<number[]>([]);
   const [scheduleID, setScheduleID] = useState<number[]>([]);
   const [statementID, setStatementID] = useState<number[]>([]);
   const [type, setType] = useState<transaction>('pix');
@@ -75,7 +76,7 @@ export default function Payment() {
     data: DataPayment,
     isFetching,
     refetch,
-  } = useScheduleTransaction(type, currentPage, per_page, 'false');
+  } = useScheduleTransaction(type, currentPage, per_page);
 
   const toast = useToast();
   const {
@@ -102,6 +103,11 @@ export default function Payment() {
     isOpen: isOpenSuccess,
     onOpen: onPenSuccess,
     onClose: onCloseSuccess,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenSuccessPayment,
+    onOpen: onPenSuccessPayment,
+    onClose: onCloseSuccessPayment,
   } = useDisclosure();
 
   const file = useRef<HTMLInputElement | null>(null);
@@ -213,17 +219,19 @@ export default function Payment() {
   }
 
   async function handleDownloadVoucher(statementId: number[]) {
-    setZipLoad(true);
+    console.log({ statementId });
+
     if (!statementId?.length) {
       return;
     }
+    setZipLoad(true);
     let zip = new JSZip();
     let files: {
       name: string;
       file: any;
     }[] = [];
     await Promise.all(
-      statementId?.map((id: any, idx) => {
+      statementId?.map((id: any) => {
         if (id) {
           return GetStatementsDownloadVoucher(id).then((response) => {
             files.push({ name: `comprovante-${id}.pdf`, file: response });
@@ -232,14 +240,14 @@ export default function Payment() {
       })
     ).finally(() => {});
 
-    files.map((statement, idx) => {
+    files.map((statement) => {
       zip.file(statement.name, statement.file);
     });
     zip.generateAsync({ type: 'blob' }).then((content) => {
       const fileURL = window.URL.createObjectURL(content);
       let link = document.createElement('a');
       link.href = fileURL;
-      link.download = `comprovantes.zip`;
+      link.download = `comprovantes_${type}.zip`;
       link.click();
     });
     zip = require('jszip')();
@@ -247,21 +255,26 @@ export default function Payment() {
   }
 
   async function handleConfirmationPayment(secretPassword: string) {
-    if (scheduleID && secretPassword) {
+    console.log({ paymentsID });
+
+    if (paymentsID?.length && secretPassword) {
       setPaymentLoading(true);
       return await Promise.all(
-        scheduleID?.map(async (pix: any) => {
-          return await GetScheduleAllTransactionDataApproved(
-            pix,
-            secretPassword
-          )
-            .then((_) => {
-              onCloseAuth();
-              refetch();
-            })
-            .finally(() => {
-              setPaymentLoading(false);
-            });
+        paymentsID?.map(async (pix: any) => {
+          if (pix) {
+            return await GetScheduleAllTransactionDataApproved(
+              pix,
+              secretPassword
+            )
+              .then((_) => {
+                onCloseAuth();
+                refetch();
+                onPenSuccessPayment();
+              })
+              .finally(() => {
+                setPaymentLoading(false);
+              });
+          }
         })
       );
     }
@@ -488,6 +501,8 @@ export default function Payment() {
                         getScheduleIDS={(ids) => {
                           setStatementID(ids.statements || []);
                           setScheduleID(ids.id);
+                          setPaymentsID(ids.payments || []);
+                          console.log({ ids });
                         }}
                       />
                       {/* <BatchPaymentTable
@@ -559,6 +574,8 @@ export default function Payment() {
                         getScheduleIDS={(ids) => {
                           setStatementID(ids.statements || []);
                           setScheduleID(ids.id);
+                          setPaymentsID(ids.payments || []);
+                          console.log({ ids });
                         }}
                       />
                       {/* <BatchPaymentTable
@@ -716,6 +733,15 @@ export default function Payment() {
           )}
         </>
       </Modal>
+      <ModalStatus
+        variant="success"
+        title="PAGAMENTO AUTORIZADO"
+        route="/all-statements"
+        description="Seu pagamento em lote foi autorizado com sucesso! Acompanhe o status de pagamento pelo extrato."
+        titleButton="Ver extrato"
+        isOpen={isOpenSuccessPayment}
+        onClose={onCloseSuccessPayment}
+      />
     </Box>
   );
 }
