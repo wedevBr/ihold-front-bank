@@ -38,7 +38,7 @@ import {
   RefetchQueryFilters,
 } from 'react-query';
 
-type id = { id: number[]; statements?: number[] };
+type id = { id: number[]; statements?: number[]; payments?: number[] };
 interface ITabletTransactionProps {
   type: transaction;
   isFetching: boolean;
@@ -56,6 +56,7 @@ interface ITabletTransactionProps {
 interface checkBoxsSelected {
   id: number;
   statement?: number;
+  payment?: number;
   value: boolean;
 }
 
@@ -91,12 +92,19 @@ export function TabletPayments({
     onClose: onCloseEditPix,
   } = useDisclosure();
 
-  const individualCheck = (id: number, state: boolean, statement?: number) => {
+  const individualCheck = (
+    id: number,
+    state: boolean,
+    statement?: number,
+    payment?: number
+  ) => {
     if (checked.find((user) => user.id === id)) {
       setChecked(checked.filter((user) => user.id !== id));
       return;
     }
-    setChecked((users) => users.concat({ id, value: state, statement }));
+    setChecked((users) =>
+      users.concat({ id, value: state, statement, payment })
+    );
   };
 
   const totalCheck = (all: any) => {
@@ -106,7 +114,9 @@ export function TabletPayments({
           return {
             id: transactions?.id,
             value: true,
-            statement: transactions.statement,
+            statement: transactions?.statement,
+            payment:
+              transactions?.is_approved === false ? transactions?.id : null,
           };
         })
       );
@@ -119,11 +129,17 @@ export function TabletPayments({
             return {
               id: transactions?.id,
               value: true,
-              statement: transactions.statement,
+              statement:
+                transactions?.status?.name === 'completed'
+                  ? transactions?.transaction?.id
+                  : 0,
+              payment:
+                transactions?.is_approved === false ? transactions?.id : null,
             };
           })
         );
       });
+      console.log({ checked });
     }
   };
 
@@ -148,15 +164,22 @@ export function TabletPayments({
   useEffect(() => {
     const format = () => {
       const data_IDs: number[] = [];
-      const statement_IDs: number[] = [];
+      const statement_IDs: any[] = [];
+      const payments_ids: any[] = [];
       checked.length ? checked.map((item) => data_IDs.push(item?.id)) : null;
       checked.length
-        ? checked.map((item) => statement_IDs.push(item?.statement || 0))
+        ? checked.map((item) => statement_IDs.push(item?.statement))
         : null;
+      checked.length
+        ? checked.map((item) => payments_ids.push(item?.payment))
+        : null;
+      console.log('OIII', checked);
+
       getScheduleIDS &&
         getScheduleIDS({
           id: data_IDs,
           statements: statement_IDs,
+          payments: payments_ids,
         });
     };
     format();
@@ -296,7 +319,10 @@ export function TabletPayments({
                                     e.target.checked,
                                     transaction?.status?.name === 'completed'
                                       ? transaction?.transaction?.id
-                                      : 0
+                                      : 0,
+                                    transaction?.is_approved === false
+                                      ? transaction?.id
+                                      : null
                                   );
                                 }}
                                 isChecked={
@@ -325,7 +351,11 @@ export function TabletPayments({
                                   />
                                 ) : (
                                   <Icon
-                                    icon="bi:arrow-90deg-down"
+                                    icon={
+                                      transaction?.status.name === 'canceled'
+                                        ? 'material-symbols:cancel-outline'
+                                        : 'bi:arrow-90deg-down'
+                                    }
                                     color="#F03D3E"
                                     width={16}
                                   />
