@@ -43,7 +43,6 @@ import {
   useTransactions,
 } from '~/services/hooks/useStatements';
 import { formatCalcValue } from '~/utils/formatValue';
-import { routeTransactions } from '../digital-account';
 import { createPagination } from '~/hooks/createPagination';
 import { truncate } from '~/utils/truncate';
 import { TabletTransaction } from '~/components/Tablet';
@@ -53,6 +52,43 @@ const dowloadSchema = yup.object().shape({
   date_end: yup.string().required('Período final obrigatório'),
   type: yup.string(),
 });
+
+export const routeTransactions = [
+  {
+    id: 1,
+    iconName: 'ic:baseline-pix',
+    title: 'Pix',
+    // path: '/home/pix',
+  },
+
+  {
+    id: 2,
+    iconName: 'akar-icons:arrow-repeat',
+    title: 'Transferir',
+    // path: '/home/ted',
+  },
+  {
+    id: 3,
+    iconName: 'iconoir:wallet',
+    title: 'Depositar',
+  },
+  {
+    id: 4,
+    iconName: 'bi:qr-code-scan',
+    title: 'Pagar',
+    // path: '/payment',
+  },
+  {
+    id: 5,
+    iconName: 'bi:credit-card-2-back',
+    title: 'Solicitar cartão',
+  },
+  {
+    id: 6,
+    iconName: 'bi:question-circle',
+    title: 'Dúvidas',
+  },
+];
 
 export default function AllStatements() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -179,38 +215,11 @@ export default function AllStatements() {
       </SimpleGrid>
       <Box bg="#FFFFFF" p="50px" mt="30px" borderRadius="10px">
         <Box w="full" borderRadius="6px" h="">
-          <Text>Extrato: iHold Bank </Text>
+          <Text fontWeight="bold" fontSize="18px" textTransform="uppercase">
+            Extrato
+          </Text>
           <Flex my="10px" mb="25px" justify="space-between" w="full">
-            <Flex w="500px" justify="space-between">
-              {dates.map((day, key) => (
-                <Button
-                  key={key}
-                  transition="all linear .55s"
-                  variant="unstyled"
-                  w="67px"
-                  h="26"
-                  fontSize="14px"
-                  borderRadius="52px"
-                  border="1px solid #CBD3E0"
-                  color={+filterDate === day ? '#fff' : ''}
-                  bg={+filterDate === day ? '#2E4EFF' : ''}
-                  onClick={() => {
-                    setActiveFilter(!activeFilter);
-                    if (+day !== +filterDate) {
-                      setCurrentPage(1);
-                      setFilterDate(day.toString());
-                      return;
-                    } else if (!activeFilter) {
-                      setCurrentPage(1);
-                      setFilterDate(day.toString());
-                      return;
-                    }
-                    setFilterDate('');
-                  }}
-                >
-                  {day} dias
-                </Button>
-              ))}
+            <Flex w="220px" justify="space-between">
               {['Pix', 'Ted', 'Boleto'].map((day, key) => (
                 <Button
                   key={key}
@@ -241,10 +250,49 @@ export default function AllStatements() {
                 </Button>
               ))}
             </Flex>
-            <Flex align="center" cursor="pointer" onClick={onOpenFilter}>
-              <Icon icon="akar-icons:calendar" color="#21C6DE" width={20} />
-              <Text ml="5px">Filtrar por data</Text>
-            </Flex>
+            <Box>
+              <Flex w="430px" justify="space-between">
+                {dates.map((day, key) => (
+                  <Button
+                    key={key}
+                    transition="all linear .55s"
+                    variant="unstyled"
+                    w="67px"
+                    h="26"
+                    fontSize="14px"
+                    borderRadius="52px"
+                    border="1px solid #CBD3E0"
+                    color={+filterDate === day ? '#fff' : ''}
+                    bg={+filterDate === day ? '#2E4EFF' : ''}
+                    onClick={() => {
+                      setActiveFilter(!activeFilter);
+                      if (+day !== +filterDate) {
+                        setCurrentPage(1);
+                        setFilterDate(day.toString());
+                        return;
+                      } else if (!activeFilter) {
+                        setCurrentPage(1);
+                        setFilterDate(day.toString());
+                        return;
+                      }
+                      setFilterDate('');
+                    }}
+                  >
+                    {day} dias
+                  </Button>
+                ))}
+                <Flex
+                  // mt="10px"
+                  align="center"
+                  justify="right"
+                  cursor="pointer"
+                  onClick={onOpenFilter}
+                >
+                  <Icon icon="akar-icons:calendar" color="#21C6DE" width={20} />
+                  <Text ml="5px">Filtrar por data</Text>
+                </Flex>
+              </Flex>
+            </Box>
           </Flex>
 
           <ContainerTransaction

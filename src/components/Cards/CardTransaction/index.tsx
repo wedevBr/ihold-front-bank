@@ -1,22 +1,20 @@
-import React, { ReactElement } from 'react';
-import {
-  CircularProgress,
-  CircularProgressLabel,
-  Flex,
-  Text,
-  Box,
-} from '@chakra-ui/react';
-import { Icon } from '@iconify/react';
-import { formatCalcValue } from '~/utils/formatValue';
+import React from 'react';
+import { Text, Box, BoxProps } from '@chakra-ui/react';
+
 import Link from 'next/link';
 
-interface ICardTransaction {
+interface ICardTransaction extends BoxProps {
   icon: any;
   name: string;
   path?: string;
 }
 
-export function CardTransaction({ name, icon, path }: ICardTransaction) {
+export function CardTransaction({
+  name,
+  icon,
+  path,
+  ...rest
+}: ICardTransaction) {
   if (!path) {
     return (
       <Box
@@ -30,6 +28,7 @@ export function CardTransaction({ name, icon, path }: ICardTransaction) {
         borderRadius="10px"
         boxShadow="base"
         p="20px"
+        {...rest}
       >
         {icon}
         <Text mt="5px">{name}</Text>
@@ -49,9 +48,12 @@ export function CardTransaction({ name, icon, path }: ICardTransaction) {
         borderRadius="10px"
         boxShadow="base"
         p="20px"
+        {...rest}
       >
         {icon}
-        <Text mt="5px">{name}</Text>
+        <Text mt="5px" fontSize="15px">
+          {name}
+        </Text>
       </Box>
     </Link>
   );

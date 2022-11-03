@@ -22,7 +22,10 @@ import { BatchPaymentTable, Layout, Loading, Modal } from '~/components';
 import { ModalStatus } from '~/components/Modals/ModalStatus';
 import {
   DeleteScheduleTransactions,
+  GetScheduleAllTransactionDataApproved,
   getValidateScheduleTransaction,
+  transaction,
+  useScheduleTransaction,
 } from '~/services/hooks/usePaymentsSchedule';
 import { IPaginationData } from '~/types/pagination';
 import {
@@ -33,6 +36,9 @@ import {
 import { registerPayment } from '~/services/hooks/usePaymentsSchedule';
 import { GetStatementsDownloadVoucher } from '~/services/hooks/useStatements';
 import JSZip from 'jszip';
+import { TabletTransaction } from '~/components/Tablet';
+import { TabletPayments } from '~/components/TabletPyament';
+import { ModalAuth } from '~/components/Modals/ModalAuth';
 
 interface RegisterPayment {
   file: File;
@@ -44,9 +50,10 @@ export const createPaymentFormSchema = yup.object().shape({
 
 export default function Payment() {
   const [zipLoad, setZipLoad] = useState(false);
+  const [paymentsID, setPaymentsID] = useState<number[]>([]);
   const [scheduleID, setScheduleID] = useState<number[]>([]);
   const [statementID, setStatementID] = useState<number[]>([]);
-  const [type, setType] = useState('pix');
+  const [type, setType] = useState<transaction>('pix');
   const [items, setItems] = useState<IPaginationData<IDataPIX>>();
   const [billPayment, setBillPayment] =
     useState<IPaginationData<IDataBillPayment>>();
@@ -60,7 +67,23 @@ export default function Payment() {
   const [page, setPage] = useState(1);
   const [fileSrc, setFileSrc] = useState<File | any>();
   const [uploadFile, setUploadFile] = useState<File | any>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [per_page, setPerPage] = useState(25);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [password, setPassword] = useState('');
+
+  const {
+    data: DataPayment,
+    isFetching,
+    refetch,
+  } = useScheduleTransaction(type, currentPage, per_page);
+
   const toast = useToast();
+  const {
+    isOpen: isOpenAuth,
+    onOpen: onOpenAuth,
+    onClose: onCloseAuth,
+  } = useDisclosure();
   const {
     isOpen: isOpenUpload,
     onOpen: onOpenUpload,
@@ -80,6 +103,11 @@ export default function Payment() {
     isOpen: isOpenSuccess,
     onOpen: onPenSuccess,
     onClose: onCloseSuccess,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenSuccessPayment,
+    onOpen: onPenSuccessPayment,
+    onClose: onCloseSuccessPayment,
   } = useDisclosure();
 
   const file = useRef<HTMLInputElement | null>(null);
@@ -148,6 +176,7 @@ export default function Payment() {
       getScheduleTransaction();
       setLoading(false);
       seIsSuccess(false);
+      refetch();
     }
   };
 
@@ -162,24 +191,26 @@ export default function Payment() {
       .then(() => {
         setDeletSchedule(true);
         setLoading(true);
+        refetch();
       })
       .finally(() => {
         setDeletSchedule(false);
         setLoading(false);
+        refetch();
       });
   }
   async function getScheduleTransaction() {
     setLoading(true);
     try {
-      const responsePix = await getValidateScheduleTransaction<IDataPIX>('pix');
-      const responseBillPayment =
-        await getValidateScheduleTransaction<IDataBillPayment>('bill-payment');
-      const responseTransfer = await getValidateScheduleTransaction<IDataTed>(
-        'transfer'
-      );
-      setTransfer(responseTransfer);
-      setBillPayment(responseBillPayment);
-      setItems(responsePix);
+      // const responsePix = await getValidateScheduleTransaction<IDataPIX>('pix');
+      // const responseBillPayment =
+      //   await getValidateScheduleTransaction<IDataBillPayment>('bill-payment');
+      // const responseTransfer = await getValidateScheduleTransaction<IDataTed>(
+      //   'transfer'
+      // );
+      // setTransfer(responseTransfer);
+      // setBillPayment(responseBillPayment);
+      // setItems(responsePix);
     } catch (error) {
       console.log(error);
     } finally {
@@ -188,42 +219,72 @@ export default function Payment() {
   }
 
   async function handleDownloadVoucher(statementId: number[]) {
-    setZipLoad(true);
+    console.log({ statementId });
+
     if (!statementId?.length) {
       return;
     }
+    setZipLoad(true);
     let zip = new JSZip();
     let files: {
       name: string;
       file: any;
     }[] = [];
     await Promise.all(
-      statementId?.map((id: any, idx) => {
+      statementId?.map((id: any) => {
         if (id) {
           return GetStatementsDownloadVoucher(id).then((response) => {
-            files.push({ name: `comprovante${id}.pdf`, file: response });
+            files.push({ name: `comprovante-${id}.pdf`, file: response });
           });
         }
       })
     ).finally(() => {});
 
-    files.map((statement, idx) => {
+    files.map((statement) => {
       zip.file(statement.name, statement.file);
     });
     zip.generateAsync({ type: 'blob' }).then((content) => {
       const fileURL = window.URL.createObjectURL(content);
       let link = document.createElement('a');
       link.href = fileURL;
-      link.download = `comprovantes.zip`;
+      link.download = `comprovantes_${type}.zip`;
       link.click();
     });
     zip = require('jszip')();
     setZipLoad(false);
   }
 
-  useEffect(() => {
-    getScheduleTransaction();
-  }, [deletSchedule, isSuccess, refreshItems]);
+  async function handleConfirmationPayment(secretPassword: string) {
+    console.log({ paymentsID });
+
+    if (paymentsID?.length && secretPassword) {
+      setPaymentLoading(true);
+      return await Promise.all(
+        paymentsID?.map(async (pix: any) => {
+          if (pix) {
+            return await GetScheduleAllTransactionDataApproved(
+              pix,
+              secretPassword
+            )
+              .then((_) => {
+                onCloseAuth();
+                refetch();
+                onPenSuccessPayment();
+              })
+              .finally(() => {
+                setPaymentLoading(false);
+              });
+          }
+        })
+      );
+    }
+  }
+
+  // useEffect(() => {
+  //   getScheduleTransaction();
+  // }, [deletSchedule, isSuccess, refreshItems]);
+
+  console.log({ scheduleID });
 
   return (
     <Box h="full" overflowX="hidden">
@@ -388,6 +449,28 @@ export default function Payment() {
                             Baixar
                           </Button>
                         )}
+
+                        <Button
+                          bg="#2E4EFF"
+                          color="#fff"
+                          w="255px"
+                          mr="15px"
+                          fontSize="0.875rem"
+                          borderRadius="20px"
+                          h="38px"
+                          textTransform="uppercase"
+                          fontWeight="600"
+                          padding="8px 1.25rem"
+                          disabled={scheduleID?.length === 0}
+                          onClick={() => onOpenAuth()}
+                        >
+                          <Icon
+                            icon="bx:check-shield"
+                            width={20}
+                            style={{ marginRight: 5 }}
+                          />
+                          EXECUTAR PAGAMENTO
+                        </Button>
                         <Button
                           bg="#F03D3E"
                           color="#fff"
@@ -409,7 +492,20 @@ export default function Payment() {
                           {loading ? 'Excluindo' : 'Excluir'}
                         </Button>
                       </Flex>
-                      <BatchPaymentTable
+                      <TabletPayments
+                        type={type}
+                        CurrentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        data={DataPayment}
+                        isFetching={isFetching}
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                          setPaymentsID(ids.payments || []);
+                          console.log({ ids });
+                        }}
+                      />
+                      {/* <BatchPaymentTable
                         type="pix"
                         refreshItems={setRefreshItems}
                         loading={setLoading}
@@ -422,10 +518,31 @@ export default function Payment() {
                           setStatementID(ids.statements || []);
                           setScheduleID(ids.id);
                         }}
-                      />
+                      /> */}
                     </TabPanel>
                     <TabPanel>
                       <Flex w="full" justify="right" pb="20px">
+                        <Button
+                          bg="#2E4EFF"
+                          color="#fff"
+                          w="255px"
+                          mr="15px"
+                          fontSize="0.875rem"
+                          borderRadius="20px"
+                          h="38px"
+                          textTransform="uppercase"
+                          fontWeight="600"
+                          padding="8px 1.25rem"
+                          disabled={scheduleID?.length === 0}
+                          onClick={() => onOpenAuth()}
+                        >
+                          <Icon
+                            icon="bx:check-shield"
+                            width={20}
+                            style={{ marginRight: 5 }}
+                          />
+                          EXECUTAR PAGAMENTO
+                        </Button>
                         <Button
                           bg="#F03D3E"
                           color="#fff"
@@ -447,7 +564,21 @@ export default function Payment() {
                           {loading ? 'Excluindo' : 'Excluir'}
                         </Button>
                       </Flex>
-                      <BatchPaymentTable
+
+                      <TabletPayments
+                        type={type}
+                        CurrentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        data={DataPayment}
+                        isFetching={isFetching}
+                        getScheduleIDS={(ids) => {
+                          setStatementID(ids.statements || []);
+                          setScheduleID(ids.id);
+                          setPaymentsID(ids.payments || []);
+                          console.log({ ids });
+                        }}
+                      />
+                      {/* <BatchPaymentTable
                         refreshItems={setRefreshItems}
                         type="transfer"
                         loading={setLoading}
@@ -460,7 +591,7 @@ export default function Payment() {
                           setStatementID(ids.statements || []);
                           setScheduleID(ids.id);
                         }}
-                      />
+                      /> */}
                     </TabPanel>
                     <TabPanel>
                       {/* <BatchPaymentTable
@@ -480,6 +611,13 @@ export default function Payment() {
           </Box>
         </Flex>
       </Layout>
+      <ModalAuth
+        handlePassword={(pass) => setPassword(pass)}
+        loading={paymentLoading}
+        isOpen={isOpenAuth}
+        onClose={onCloseAuth}
+        handleClick={() => handleConfirmationPayment(password)}
+      />
       <ModalStatus
         variant="error"
         title="Error"
@@ -595,6 +733,15 @@ export default function Payment() {
           )}
         </>
       </Modal>
+      <ModalStatus
+        variant="success"
+        title="PAGAMENTO AUTORIZADO"
+        route="/all-statements"
+        description="Seu pagamento em lote foi autorizado com sucesso! Acompanhe o status de pagamento pelo extrato."
+        titleButton="Ver extrato"
+        isOpen={isOpenSuccessPayment}
+        onClose={onCloseSuccessPayment}
+      />
     </Box>
   );
 }
