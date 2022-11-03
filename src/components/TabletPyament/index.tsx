@@ -119,7 +119,7 @@ export function TabletPayments({
         return {
           id: +item?.id,
           value: true,
-          statement: item?.statement,
+          statement: item?.transaction?.id,
           payment: item?.is_approved === false ? item?.id : null,
         };
       })
@@ -132,7 +132,7 @@ export function TabletPayments({
           return {
             id: +item?.id,
             value: true,
-            statement: item?.statement,
+            statement: item?.transaction?.id,
             payment: item?.is_approved === false ? item?.id : null,
           };
         })
