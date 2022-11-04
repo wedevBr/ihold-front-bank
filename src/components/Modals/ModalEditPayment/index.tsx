@@ -27,11 +27,19 @@ import { formatMask } from '~/utils/formatMask';
 import { nifFormat } from '~/utils/nifFormat';
 import { formatCalcValue } from '~/utils/formatValue';
 import { UpdateScheduleTransactions } from '~/services/hooks/usePaymentsSchedule';
+import {
+  QueryObserverBaseResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from 'react-query';
 interface PropsModalEdit extends Omit<ModalProps, 'children'> {
   type?: 'pix' | 'transfer' | 'bill-payment';
   dataPix: IDataPIX;
   dataTransfer: IDataTed;
   setLoading?: (loading: boolean) => void;
+  refetch?: (
+    options?: RefetchOptions & RefetchQueryFilters
+  ) => Promise<QueryObserverBaseResult>;
 }
 interface Pix {
   key_type: string;
@@ -69,6 +77,7 @@ export function ModalEditPayment({
   dataPix,
   dataTransfer,
   isOpen,
+  refetch,
   onClose,
   setLoading,
 }: PropsModalEdit) {
@@ -82,7 +91,8 @@ export function ModalEditPayment({
   async function handleEditData(data: any) {
     const transfer = {
       // is_approved: dataTransfer?.is_approved,
-      // status_id: dataTransfer?.status.id,
+      status_id: dataTransfer?.status?.id,
+      ...dataTransfer,
       scheduled_date: data.scheduled_date_transfer,
       payload: {
         amount: data.amount_transfer,
@@ -101,7 +111,8 @@ export function ModalEditPayment({
     };
     const pix = {
       // is_approved: dataPix?.is_approved,
-      // status_id: dataPix?.id,
+      status_id: dataPix?.status?.id,
+      // ...dataPix,
       scheduled_date: data.scheduled_date,
       payload: {
         key_type: data.key_type,
@@ -112,6 +123,8 @@ export function ModalEditPayment({
         email: data.email,
       },
     };
+    console.log({ dataPix });
+
     setLoadingEdit(true);
 
     try {
@@ -141,10 +154,10 @@ export function ModalEditPayment({
       });
       console.log(error);
     } finally {
+      refetch && refetch();
       setLoading && setLoading(false);
       setLoadingEdit(false);
     }
-    console.log({ data });
   }
   useEffect(() => {
     if (dataPix && type === 'pix') {
