@@ -40,7 +40,7 @@ export function CardValue({
         return {
           color: '#21C6DE',
           name: 'Saldo',
-          icon: '',
+          icon: 'et:wallet',
         };
 
       default:
