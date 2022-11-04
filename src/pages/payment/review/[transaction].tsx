@@ -77,7 +77,7 @@ export default function ReviewPayment() {
   } = useDisclosure();
 
   async function handleConfirmationPayment(secretPassword: string) {
-    if (scheduleID && secretPassword) {
+    if (scheduleID?.length && secretPassword) {
       setPaymentLoading(true);
       return await Promise.all(
         scheduleID?.map(async (pix) => {
@@ -226,6 +226,7 @@ export default function ReviewPayment() {
             setCurrentPage={setCurrentPage}
             data={DataPayment}
             isFetching={isFetching}
+            refetch={refetch}
             getScheduleIDS={(ids) => {
               setStatementID(ids.statements || []);
               setScheduleID(ids.id);
