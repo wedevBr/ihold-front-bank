@@ -37,6 +37,7 @@ export default function SharePixPayment() {
         <>
           <Box mx="auto" pt="30px" w={{ base: 'full', lg: '100%', xl: '85%' }}>
             <Flex
+              // w={{ base: 'full', lg: '' }}
               bg="#FFFFFF"
               boxShadow="base"
               mt="20px"
@@ -49,15 +50,25 @@ export default function SharePixPayment() {
             >
               <Flex
                 flexDir={{ base: 'column', lg: 'row' }}
+                w={{ base: 'full', lg: '' }}
                 align={{ base: 'center', lg: '' }}
               >
-                <Image
-                  src="/assets/logo-preta.svg"
-                  alt="Logo_iHold"
-                  width="150px"
-                  objectFit="contain"
-                />
-                <Box pl={{ base: '', lg: '60px' }}>
+                <Flex w={{ base: 'full', lg: '200px' }} justify="space-between">
+                  <Image
+                    src="/assets/logo-preta.svg"
+                    alt="Logo_iHold"
+                    width={{ base: '100px', md: '150px' }}
+                    objectFit="contain"
+                  />
+                  <Image
+                    src="/assets/banner-pix.png"
+                    alt="banner"
+                    width={{ base: '70px', md: '150px' }}
+                    mr={{ base: '', md: '20px' }}
+                    display={{ base: 'flex', lg: 'none' }}
+                  />
+                </Flex>
+                <Box pl={{ base: '', lg: '60px' }} w={{ base: 'full', lg: '' }}>
                   <Text
                     color="#00102A"
                     fontWeight={700}
@@ -76,7 +87,12 @@ export default function SharePixPayment() {
                   </Text>
                 </Box>
               </Flex>
-              <Image src="/assets/banner-pix.png" alt="banner" mr="20px" />
+              <Image
+                src="/assets/banner-pix.png"
+                alt="banner"
+                mr="20px"
+                display={{ base: 'none', lg: 'flex' }}
+              />
             </Flex>
           </Box>
           <SimpleGrid
