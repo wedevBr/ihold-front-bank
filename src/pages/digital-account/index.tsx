@@ -48,6 +48,7 @@ import { createPagination } from '~/hooks/createPagination';
 import { truncate } from '~/utils/truncate';
 import { TabletTransaction } from '~/components/Tablet';
 import Link from 'next/link';
+import { GetUserAccountBalanceData } from '~/services/hooks/useAccount';
 
 const dowloadSchema = yup.object().shape({
   date_start: yup.string().required('Período inicial obrigatório'),
@@ -127,6 +128,14 @@ export default function DigitalAccount() {
   const formatPrevDate = (days: number) => {
     return moment(date).subtract(days, 'days').format('YYYY-MM-DD');
   };
+
+  const { data: dataBalance, isLoading: IsloadingBalance } = useQuery(
+    'balance-user',
+    GetUserAccountBalanceData,
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
 
   const { data: DataPix, isFetching } = useTransactions(
     currentPage,
@@ -296,7 +305,11 @@ export default function DigitalAccount() {
         <CardValue
           percentage={100}
           type={'prevision'}
-          value={data ? formatCalcValue(result.toString()) : '-'}
+          value={
+            dataBalance
+              ? formatCalcValue(dataBalance?.data?.amount.toString())
+              : '-'
+          }
           result={result}
         />
       </SimpleGrid>
