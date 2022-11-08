@@ -603,7 +603,7 @@ export function TabletPayments({
         isOpen={isOpenEditPix}
         onClose={onCloseEditPix}
         type={type}
-        refetch={refetch}
+        refetch={refetch && refetch}
         // setLoading={loadingEdit && loadingEdit}
       />
       <Flex align="center" w="full" justify="center" mt="40px">
