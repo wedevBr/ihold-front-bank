@@ -185,6 +185,7 @@ export default function ReviewPayment() {
                 fontWeight="600"
                 padding="8px 1.25rem"
                 onClick={() => onOpenAuth()}
+                disabled={scheduleID?.length === 0}
               >
                 <Icon
                   icon="bx:check-shield"

@@ -58,7 +58,7 @@ export async function GetStatementsDownloadExtract(
 ) {
   try {
     const { data } = await api.get(
-      `/statements/downloads/extract/${type}?filter[between_dates]=${date_start},${date_end}${
+      `/statements/downloads/extract/${type}?sort[]=completed_at&filter[between_dates]=${date_start},${date_end}${
         !!typeTrasanction
           ? `&filter[transaction_type_id]=${
               typeTrasanction === 'pix'

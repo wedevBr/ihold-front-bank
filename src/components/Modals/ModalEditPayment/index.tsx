@@ -95,7 +95,8 @@ export function ModalEditPayment({
       ...dataTransfer,
       scheduled_date: data.scheduled_date_transfer,
       payload: {
-        amount: data.amount_transfer,
+        amount: String(data.amount_transfer).replace(',', '.'),
+        // amount: data.amount_transfer,
         description: data.description,
         nif_number: data.nif_number,
         recipient: {
@@ -109,6 +110,12 @@ export function ModalEditPayment({
         },
       },
     };
+
+    function formatDobleFloatValue(value: string, fixed?: number) {
+      let formatValue = +String(value).replace(/\D/g, '');
+      return parseFloat(formatValue.toFixed(fixed || 2)) / 100;
+    }
+
     const pix = {
       // is_approved: dataPix?.is_approved,
       status_id: dataPix?.status?.id,
@@ -117,13 +124,12 @@ export function ModalEditPayment({
       payload: {
         key_type: data.key_type,
         key: data.key,
-        amount: data.amount,
+        amount: String(formatDobleFloatValue(data.amount, 2)),
         description: data.description,
         nif_number: data.nif_number,
         email: data.email,
       },
     };
-    console.log({ dataPix });
 
     setLoadingEdit(true);
 
@@ -141,6 +147,7 @@ export function ModalEditPayment({
         isClosable: true,
       });
 
+      refetch && refetch();
       onClose();
     } catch (error: any) {
       toast({

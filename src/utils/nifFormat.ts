@@ -1,5 +1,5 @@
 type FormatProps = {
-  format: 'cpf' | 'cnpj';
+  format: 'cpf' | 'cnpj' | 'CPF' | 'CNPJ';
   regex: RegExp;
   replace: string;
 };
@@ -11,7 +11,17 @@ const formats: FormatProps[] = [
     replace: '$1.$2.$3-$4',
   },
   {
+    format: 'CPF',
+    regex: /(\d{3})?(\d{3})?(\d{3})?(\d{2})/,
+    replace: '$1.$2.$3-$4',
+  },
+  {
     format: 'cnpj',
+    regex: /(\d{2})?(\d{3})?(\d{3})?(\d{4})?(\d{2})/,
+    replace: '$1.$2.$3/$4-$5',
+  },
+  {
+    format: 'CNPJ',
     regex: /(\d{2})?(\d{3})?(\d{3})?(\d{4})?(\d{2})/,
     replace: '$1.$2.$3/$4-$5',
   },
