@@ -75,9 +75,13 @@ export default function SharePixPayment() {
                     fontSize="26px"
                     textAlign="left"
                   >
-                    Transfira R$
-                    {formatCalcValue(
-                      data.data.decoded.payment.totalValue.toString()
+                    Transfira {' '}
+                    {data.data.decoded.payment.totalValue.toLocaleString(
+                      'pt-br',
+                      {
+                        style: 'currency',
+                        currency: 'BRL',
+                      }
                     )}{' '}
                     para {data.data.decoded.holder.name}
                   </Text>
@@ -125,10 +129,13 @@ export default function SharePixPayment() {
                   py="20px"
                   textAlign="center"
                 >
-                  R$
-                  {formatCalcValue(
-                    data.data.decoded.payment.totalValue.toString()
-                  )}
+                   {data.data.decoded.payment.totalValue.toLocaleString(
+                      'pt-br',
+                      {
+                        style: 'currency',
+                        currency: 'BRL',
+                      }
+                    )}
                 </Text>
                 <Box pb="20px">
                   <Button
