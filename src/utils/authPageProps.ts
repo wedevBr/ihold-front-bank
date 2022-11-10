@@ -6,7 +6,7 @@ import { redirectTo } from './redirectTo';
 export async function authPageProps({ Component, ctx }: any) {
   let pageProps = {};
   const api = getAPIClient();
-  const FREE_ROUTES = ['/login', '/auth/two-factor', '/onboarding'];
+  const FREE_ROUTES = ['/login', '/auth/two-factor', '/onboarding', '/onboarding/type-1', '/onboarding/type-2'];
 
   const {
     '@iHoldBankAccess_token': token,

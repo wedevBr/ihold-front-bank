@@ -50,6 +50,7 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
         <ChakraInput
           pr={rest.type === 'password' ? '35px' : ''}
           name={name}
+          cursor="pointer"
           id={name}
           fontSize="14px"
           variant="filled"
@@ -86,6 +87,22 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
               onClick={() => setVisible((previous) => !previous)}
               icon={
                 visible ? 'ant-design:eye-invisible-outlined' : 'akar-icons:eye'
+              }
+            />
+          </Flex>
+        )}
+        {rest.type === 'file' && (
+          <Flex
+            position="absolute"
+            right="10px"
+            top={error ? '53%' : label ? '60%' : '35%'}
+            mb="25px"
+          >
+            <Icon
+              width="20px"
+              color={iconColor || '#21C6DE'}
+              icon={
+               'fa6-solid:paperclip'
               }
             />
           </Flex>
