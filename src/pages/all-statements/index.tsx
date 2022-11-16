@@ -220,7 +220,10 @@ export default function AllStatements() {
           type={'prevision'}
           value={
             dataBalance
-              ? formatCalcValue(dataBalance?.data?.amount.toString())
+              ? dataBalance?.data?.amount.toLocaleString('pt-br', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })
               : '-'
           }
           result={result}
