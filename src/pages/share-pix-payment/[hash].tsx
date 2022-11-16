@@ -164,7 +164,7 @@ export default function SharePixPayment() {
                       }
                     }}
                   >
-                    COPIAR CÓDIGO DO QR CODE
+                    Copiar Pix copia e cola
                   </Button>
                 </Box>
               </Box>
@@ -187,11 +187,20 @@ export default function SharePixPayment() {
                   </Text>
                   <Flex
                     cursor="pointer"
-                    onClick={() =>
-                      navigator.clipboard.writeText(
-                        window.atob(data.data.qr_code)
-                      )
-                    }
+                    onClick={() => {
+                      if (data?.data?.qr_code) {
+                        navigator.clipboard.writeText(
+                          window.atob(data.data.qr_code)
+                        );
+                        toast({
+                          title: 'CÓDIGO QRCODE.',
+                          description: 'Copiado com sucesso! 🥳',
+                          status: 'success',
+                          duration: 9000,
+                          isClosable: true,
+                        });
+                      }
+                    }}
                   >
                     <Text color="#070A0E" fontWeight={700}>
                       Chave Aleatória
