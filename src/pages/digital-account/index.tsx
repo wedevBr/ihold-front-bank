@@ -307,7 +307,10 @@ export default function DigitalAccount() {
           type={'prevision'}
           value={
             dataBalance
-              ? formatCalcValue(dataBalance?.data?.amount.toString())
+              ? dataBalance?.data?.amount.toLocaleString('pt-br', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })
               : '-'
           }
           result={result}
@@ -316,67 +319,73 @@ export default function DigitalAccount() {
       <Box mt="30px">
         <Flex w="full" justify="space-between">
           <Box w="65%" h="" bg="#FFFFFF" borderRadius="10px" p="20px">
-            <Text>REGISTRO DE EVENTOS </Text>
+            <Text fontWeight="bold" fontSize="18px" textTransform="uppercase">
+              REGISTRO DE EVENTOS{' '}
+            </Text>
             <Flex my="10px" mb="25px" justify="space-between" w="full">
-              <Flex w="500px" justify="space-between">
-                {dates.map((day, key) => (
-                  <Button
-                    key={key}
-                    transition="all linear .55s"
-                    variant="unstyled"
-                    w="67px"
-                    h="26"
-                    fontSize="14px"
-                    borderRadius="52px"
-                    border="1px solid #CBD3E0"
-                    color={+filterDate === day ? '#fff' : ''}
-                    bg={+filterDate === day ? '#2E4EFF' : ''}
-                    onClick={() => {
-                      setActiveFilter(!activeFilter);
-                      if (+day !== +filterDate) {
-                        setCurrentPage(1);
-                        setFilterDate(day.toString());
-                        return;
-                      } else if (!activeFilter) {
-                        setCurrentPage(1);
-                        setFilterDate(day.toString());
-                        return;
-                      }
-                      setFilterDate('');
-                    }}
-                  >
-                    {day} dias
-                  </Button>
-                ))}
-                {['Pix', 'Ted', 'Boleto'].map((day, key) => (
-                  <Button
-                    key={key}
-                    transition="all linear .55s"
-                    variant="unstyled"
-                    w="67px"
-                    h="26"
-                    fontSize="14px"
-                    borderRadius="52px"
-                    border="1px solid #CBD3E0"
-                    color={type === day ? '#fff' : ''}
-                    bg={type === day ? '#2E4EFF' : ''}
-                    onClick={() => {
-                      setActiveType(!activeType);
-                      if (day !== type) {
-                        setCurrentPage(1);
-                        setType(day);
-                        return;
-                      } else if (!activeType) {
-                        setCurrentPage(1);
-                        setType(day.toString());
-                        return;
-                      }
-                      setType('');
-                    }}
-                  >
-                    {day}
-                  </Button>
-                ))}
+              <Flex w="full" justify="space-between">
+                <Flex w="300px" justify="space-between">
+                  {dates.map((day, key) => (
+                    <Button
+                      key={key}
+                      transition="all linear .55s"
+                      variant="unstyled"
+                      w="67px"
+                      h="26"
+                      fontSize="14px"
+                      borderRadius="52px"
+                      border="1px solid #CBD3E0"
+                      color={+filterDate === day ? '#fff' : ''}
+                      bg={+filterDate === day ? '#2E4EFF' : ''}
+                      onClick={() => {
+                        setActiveFilter(!activeFilter);
+                        if (+day !== +filterDate) {
+                          setCurrentPage(1);
+                          setFilterDate(day.toString());
+                          return;
+                        } else if (!activeFilter) {
+                          setCurrentPage(1);
+                          setFilterDate(day.toString());
+                          return;
+                        }
+                        setFilterDate('');
+                      }}
+                    >
+                      {day} dias
+                    </Button>
+                  ))}
+                </Flex>
+                <Flex w="215px" justify="space-between">
+                  {['Pix', 'Ted', 'Boleto'].map((day, key) => (
+                    <Button
+                      key={key}
+                      transition="all linear .55s"
+                      variant="unstyled"
+                      w="67px"
+                      h="26"
+                      fontSize="14px"
+                      borderRadius="52px"
+                      border="1px solid #CBD3E0"
+                      color={type === day ? '#fff' : ''}
+                      bg={type === day ? '#2E4EFF' : ''}
+                      onClick={() => {
+                        setActiveType(!activeType);
+                        if (day !== type) {
+                          setCurrentPage(1);
+                          setType(day);
+                          return;
+                        } else if (!activeType) {
+                          setCurrentPage(1);
+                          setType(day.toString());
+                          return;
+                        }
+                        setType('');
+                      }}
+                    >
+                      {day}
+                    </Button>
+                  ))}
+                </Flex>
               </Flex>
             </Flex>
             <TabletTransaction
