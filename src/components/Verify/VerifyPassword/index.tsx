@@ -5,7 +5,7 @@ import {
 } from "@chakra-ui/react";
 
 interface VerifyPasswordProps {
-  verify: string
+  verify: any
 }
 
 export const VerifyPassword = ({ verify }: VerifyPasswordProps) => {

@@ -42,7 +42,7 @@ export interface Address {
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
-}export function FormAddress({
+}export function FormPersonalAddress({
   error,
   register,
   currentTab,
