@@ -18,6 +18,13 @@ import { ExtractHomeTable } from './Tables/extractHomeTable';
 import { BatchPaymentTable } from './Tables/batchPaymentTable';
 import { ModalUploadPayment } from './Modals/ModalUploadPayment';
 import { ModalEditPayment } from './Modals/ModalEditPayment';
+import { FormPersonalAddress } from './Forms/Onboarding/type_1/PersonalAddress';
+import { FormPersonalData } from './Forms/Onboarding/type_1/PersonalData';
+import { FormComercialData } from './Forms/Onboarding/type_1/ComercialData';
+import { FormCompanyAddress } from './Forms/Onboarding/type_1/ComercialAddress';
+import { FormDocuments } from './Forms/Onboarding/type_1/Documents';
+import { FormPassword } from './Forms/Onboarding/type_1/Password';
+import { FormAuthentication } from './Forms/Onboarding/type_1/Authentication';
 
 export {
   Button,
@@ -40,4 +47,11 @@ export {
   BatchPaymentTable,
   ModalUploadPayment,
   ModalEditPayment,
+  FormPersonalAddress,
+  FormPersonalData,
+  FormComercialData,
+  FormCompanyAddress,
+  FormDocuments,
+  FormPassword,
+  FormAuthentication,
 };
