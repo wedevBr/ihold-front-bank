@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -13,6 +13,7 @@ import {
   PinInputField,
   Radio,
   RadioGroup,
+  Select,
   SimpleGrid,
   Stack,
   Tab,
@@ -29,27 +30,105 @@ import { useForm } from 'react-hook-form';
 import { Input, Layout } from '~/components';
 import { Icon } from '@iconify/react';
 import { VerifyPassword } from '~/components/Verify/VerifyPassword';
+import { useQuery } from 'react-query';
+import { generateToken, generateTokenProps, infoPersonProps, personalData, postPersonalInfo } from '~/services/hooks/useCreateAccount';
+import { getLocalStorage } from '~/utils/localStorageFormat';
+import { AuthTwoFactors, GetAuthTwoFactors } from '~/services/hooks/useAuth';
+import { parseCookies, setCookie } from 'nookies';
+import { Address, FormAddress } from '~/components/Forms/Onboarding/type_1/Address'
 
-// const onboardingSchema = yup.object().shape({
-// document_typet: yup.string().required('Período inicial obrigatório'),
-// birth: yup.string().required('Data de nascimento obrigatório'),
-// social_name: yup.string().required('Nome completo obrigatório'),
-// nif_number: yup.string().required('CPF obrigatório'),
-// email: yup.string().email('Email inválido').required('email obrigatório'),
-// mother_name: yup.string().required('Nome da mãe obrigatório'),
-// number: yup.string().required('Numero  obrigatório'),
-// address: yup.string().required('Endereço obrigatório'),
-// });
+
+type onBoardingProps = {
+  infoPersonProps: {
+    document_type: string,
+    nif_number: string,
+    register_name: string,
+    social_name: string,
+    birth_date: Date,
+    mother_name: string,
+    email: string,
+    member_type: string,
+    member_qualification: string,
+    proxy_date: Date,
+    percentual: number,
+    presumed_income: number,
+    pep: true,
+    inform: true,
+
+    address: {
+      id: number,
+      is_mailing_address: boolean,
+      address_line_one: string,
+      address_line_two: string,
+      building_number: number,
+      complement: string,
+      zip_code: string,
+      neighborhood: string,
+      city: string,
+      state: string,
+      country: string
+    },
+    phone: {
+      number: string
+    }
+  }
+
+  infoCompanyProps: {
+    nif_number: string,
+    register_name: string,
+    social_name: string,
+    phone_number: string,
+    email: string,
+    size: 'MEI' | 'ME' | 'EPP' | 'SMALL' | 'MEDIUM' | 'LARGE',
+    business_type_id: string,
+    legal_nature_id: 0,
+    site: string,
+    cnae: string,
+    joint_stock: 0,
+    annual_billing: 0,
+    address: {
+      id: number,
+      is_mailing_address: boolean,
+      address_line_one: string,
+      address_line_two: string,
+      building_number: number,
+      complement: string,
+      zip_code: string,
+      neighborhood: string,
+      city: string,
+      state: string,
+      country: string
+    }
+  }
+  passwordProps: {
+    name: string,
+    nif_number: string,
+    cell_phone: string,
+    email: string,
+    password: string,
+    password_confirmation: string,
+    user_identifier: string,
+    client_id: string,
+    client_secret: string
+  }
+}
+
+
+type ErrorMessage = {
+  message?: any;
+  error?: boolean;
+};
 
 export default function OnBoarding() {
   const [currentTab, setCurrentTab] = useState(0);
   const [permissionTab, setPermissionTab] = useState([0]);
   const [code, setCode] = useState('');
   const dateRef = useRef<HTMLInputElement>(null);
-  const { register, handleSubmit, formState, trigger, watch } = useForm({
+  const { register, handleSubmit, formState, trigger, watch, setValue, getValues } = useForm<onBoardingProps>({
     // resolver: yupResolver(onboardingSchema),
-    mode: 'onBlur',
+    // mode: 'onBlur',
   });
+  const token = getLocalStorage('clientToken')
   const steps = [
     {
       title: 'Dados Pessoais',
@@ -94,8 +173,66 @@ export default function OnBoarding() {
       step: 6,
     },
   ];
-  let dataPersonal = false;
-  let data = [0];
+  // console.log(getLocalStorage('clientToken'))
+  const [error, setError] = useState<ErrorMessage | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [counter, setCounter] = useState(10);
+
+  async function handleAuthTwoFactors() {
+    const authCode = {
+      code,
+    };
+    try {
+      if (code?.length === 6) {
+        setLoading(true);
+        const response = await AuthTwoFactors(authCode);
+        if (response) {
+          setCookie(undefined, '@two-factor', 'TRUE', {
+            maxAge: 60 * 60 * 1, // 1 hour
+            path: '/',
+          });
+        }
+      } else {
+        setError({ message: 'Code less than 6 digits!', error: true });
+      }
+    } catch (error: any) {
+      if ([401, 400, 500, 422].includes(error?.response?.status)) {
+        setError({ message: error?.response?.data?.message, error: true });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  function ResendCodeAuthFactor() {
+    GetAuthTwoFactors().then(() => {
+      setCounter(10);
+    });
+  }
+  useEffect(() => {
+    const timer: any =
+      counter > 0 && setInterval(() => setCounter(counter - 1), 1000);
+
+    return () => clearInterval(timer);
+  }, [counter]);
+
+  async function SendPersonalInfo() {
+    setValue('infoPersonProps.document_type', 'CPF')
+    setValue('infoPersonProps.member_type', 'OWNER')
+    setValue('infoPersonProps.pep', true)
+    setValue('infoPersonProps.inform', true)
+    const personalData = getValues('infoPersonProps')
+    if (personalData && token) {
+      try {
+        const response = await postPersonalInfo({ personalData: personalData, token: token.replace(/["]/g, '') })
+      } catch (err: any) {
+        console.log(err)
+      }
+    }
+  };
+
+  console.log(watch('infoCompanyProps.address.city'))
   return (
     <Box bg="#F0F0F3" h="full" minH="100vh">
       <Box h="full" w="full" maxW="1200px" mx="auto">
@@ -115,34 +252,25 @@ export default function OnBoarding() {
           mt="30px"
           index={currentTab}
           onChange={async (tab) => {
-            const result = await trigger([
-              'social_name',
-              'nif_number',
-              'mother_name',
-              'birth',
-              'email',
-            ]);
-            const tab2 = await trigger(['number']);
-            const tab3 = await trigger(['address']);
-            if (result && currentTab === 0) {
+            if (currentTab === 0) {
               setCurrentTab(tab);
             }
-            if (tab2 && currentTab === 1) {
+            else if (currentTab === 1) {
               setCurrentTab(tab);
             }
-            if (tab3 && currentTab === 2) {
+            else if (currentTab === 2) {
               setCurrentTab(tab);
             }
-            if (currentTab === 3) {
+            else if (currentTab === 3) {
               setCurrentTab(tab);
             }
-            if (currentTab === 4) {
+            else if (currentTab === 4) {
               setCurrentTab(tab);
             }
-            if (currentTab === 5) {
+            else if (currentTab === 5) {
               setCurrentTab(tab);
             }
-            if (currentTab === 6) {
+            else if (currentTab === 6) {
               setCurrentTab(tab);
             }
           }}
@@ -231,8 +359,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('social_name')}
-                      error={formState?.errors?.social_name}
+                      {...register('infoPersonProps.register_name')}
+                      error={formState?.errors?.infoPersonProps?.register_name}
                     />
                   </Box>
                   <Box w="full">
@@ -250,8 +378,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('nif_number')}
-                      error={formState?.errors?.nif_number}
+                      {...register('infoPersonProps.nif_number')}
+                      error={formState?.errors?.infoPersonProps?.nif_number}
                     />
                   </Box>
                 </Flex>
@@ -281,8 +409,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('birth')}
-                      error={formState?.errors?.birth}
+                      {...register('infoPersonProps.birth_date')}
+                      error={formState?.errors?.infoPersonProps?.birth_date}
                     />
                   </Box>
                   <Box w="full">
@@ -300,13 +428,13 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('mother_name')}
-                      error={formState?.errors?.mother_name}
+                      {...register('infoPersonProps.mother_name')}
+                      error={formState?.errors?.infoPersonProps?.mother_name}
                     />
                   </Box>
                 </Flex>
                 <Flex w="full" justify="space-between" my="20px">
-                  <Box w="full">
+                  {/* <Box w="full">
                     <Input
                       name=""
                       label="DDI"
@@ -325,10 +453,9 @@ export default function OnBoarding() {
                     // {...register('key_type')}
                     // error={formState?.errors?.key_type}
                     />
-                  </Box>
-                  <Box w="full" mx="20px">
+                  </Box> */}
+                  <Box w="full" mr="20px">
                     <Input
-                      name=""
                       label="DDD + Telefone"
                       labelColor="#7F8B9F"
                       size="sm"
@@ -342,11 +469,11 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                    // {...register('key_type')}
-                    // error={formState?.errors?.key_type}
+                      {...register('infoPersonProps.phone.number')}
+                      error={formState?.errors?.infoPersonProps?.phone?.number}
                     />
                   </Box>
-                  <Box w="full">
+                  <Box w="full" >
                     <Input
                       label="Email"
                       labelColor="#7F8B9F"
@@ -362,13 +489,13 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('email')}
-                      error={formState?.errors?.email}
+                      {...register('infoPersonProps.email')}
+                      error={formState?.errors?.infoPersonProps?.email}
                     />
                   </Box>
                 </Flex>
                 <Text>Documento de identificação:</Text>
-                <Flex w="full" justify="space-between" my="20px">
+                {/* <Flex w="full" justify="space-between" my="20px">
                   <RadioGroup defaultValue="1">
                     <Flex w="full">
                       <Flex
@@ -394,8 +521,8 @@ export default function OnBoarding() {
                       </Flex>
                     </Flex>
                   </RadioGroup>
-                </Flex>
-                <Flex w="full" justify="space-between" my="40px">
+                </Flex> */}
+                <Flex w="full" justify="space-between" my="20px">
                   <Box w="full" mr="20px">
                     <Input
                       name=""
@@ -472,20 +599,9 @@ export default function OnBoarding() {
                       borderRadius="40px"
                       _hover={{ background: '#2E4EFF', color: '#FFF' }}
                       onClick={async () => {
-                        console.log(formState.errors);
+                        setCurrentTab((current) => current + 1);
+                        setPermissionTab((prev) => [...prev, 1]);
 
-                        const result = await trigger([
-                          'social_name',
-                          'nif_number',
-                          'mother_name',
-                          'birth',
-                          'email',
-                        ]);
-                        if (result) {
-                          setCurrentTab((current) => current + 1);
-                          setPermissionTab((prev) => [...prev, 1]);
-                        }
-                        console.log({ result });
                       }}
                     >
                       SALVAR
@@ -519,11 +635,10 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('zip_code')}
-                      error={formState?.errors?.zip_code}
+                      {...register('infoPersonProps.address.zip_code')}
+                      error={formState?.errors?.infoPersonProps?.address?.zip_code}
                     />
                   </GridItem>
-                  <GridItem colSpan={2} />
                   <GridItem colSpan={2}>
                     <Input
                       label="Logradouro"
@@ -539,27 +654,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('address')}
-                      error={formState?.errors?.address}
-                    />
-                  </GridItem>
-                  <GridItem colSpan={1}>
-                    <Input
-                      label="Número"
-                      labelColor="#7F8B9F"
-                      size="sm"
-                      w="full"
-                      bg="transparent"
-                      fontSize="16px"
-                      border="0px"
-                      borderBottom="1px solid #7F8B9F"
-                      borderRadius={0}
-                      placeholder="0000"
-                      _focus={{
-                        borderBottom: '1px solid #2E4EFF',
-                      }}
-                      {...register('number')}
-                      error={formState?.errors?.number}
+                      {...register('infoPersonProps.address.address_line_one')}
+                      error={formState?.errors?.infoPersonProps?.address?.address_line_one}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -577,11 +673,31 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('neighborhood')}
-                      error={formState?.errors?.neighborhood}
+                      {...register('infoPersonProps.address.neighborhood')}
+                      error={formState?.errors?.infoPersonProps?.address?.neighborhood}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
+                    <Input
+                      label="Número"
+                      labelColor="#7F8B9F"
+                      size="sm"
+                      w="full"
+                      bg="transparent"
+                      fontSize="16px"
+                      border="0px"
+                      borderBottom="1px solid #7F8B9F"
+                      borderRadius={0}
+                      placeholder="0000"
+                      _focus={{
+                        borderBottom: '1px solid #2E4EFF',
+                      }}
+                      {...register('infoPersonProps.address.building_number')}
+                      error={formState?.errors?.infoPersonProps?.address?.building_number}
+                    />
+                  </GridItem>
+
+                  {/* <GridItem colSpan={2}>
                     <Input
                       label="Complemento"
                       labelColor="#7F8B9F"
@@ -618,7 +734,7 @@ export default function OnBoarding() {
                       {...register('country')}
                       error={formState?.errors?.country}
                     />
-                  </GridItem>
+                  </GridItem> */}
                   <GridItem colSpan={1}>
                     <Input
                       label="Estado"
@@ -634,11 +750,11 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('state')}
-                      error={formState?.errors?.state}
+                      {...register('infoPersonProps.address.state')}
+                      error={formState?.errors?.infoPersonProps?.address?.state}
                     />
                   </GridItem>
-                  <GridItem colSpan={2}>
+                  <GridItem colSpan={1}>
                     <Input
                       label="Cidade"
                       labelColor="#7F8B9F"
@@ -653,8 +769,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('city')}
-                      error={formState?.errors?.city}
+                      {...register('infoPersonProps.address.city')}
+                      error={formState?.errors?.infoPersonProps?.address?.city}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -704,24 +820,12 @@ export default function OnBoarding() {
                       w="100%"
                       border="0"
                       color="#070A0E"
-                      type="submit"
                       borderRadius="40px"
                       _hover={{ background: '#2E4EFF', color: '#FFF' }}
                       onClick={async () => {
-                        console.log(formState.errors);
-
-                        const result = await trigger([
-                          'social_name',
-                          'nif_number',
-                          'mother_name',
-                          'birth',
-                          'email',
-                        ]);
-                        if (result) {
-                          setCurrentTab((current) => current + 1);
-                          setPermissionTab((prev) => [...prev, 2]);
-                        }
-                        console.log({ result });
+                        setCurrentTab((current) => current + 1);
+                        setPermissionTab((prev) => [...prev, 2]);
+                        SendPersonalInfo()
                       }}
                     >
                       SALVAR
@@ -731,79 +835,7 @@ export default function OnBoarding() {
               </Box>
             </TabPanel>
             <TabPanel py="0">
-              <Box
-                p="30px"
-                bg="#FFFFFF"
-                borderRadius="6px"
-                borderTop="11px solid #00102A"
-              >
-                <Text fontSize="18px" fontWeight="600" >Passo {currentTab + 1}/7</Text>
-                <Text pt="10px" pb="30px" color="#7F8B9F">Agora, insira abaixo o código de 6 dígitos que enviamos para  jo*********va@gmail.com</Text>
-                <Flex w="100%">
-                  <HStack>
-                    <PinInput
-                      autoFocus
-                      type="number"
-                      errorBorderColor="red"
-                      size="lg"
-                      value={code}
-                      onChange={(value) => setCode(value)}
-                    >
-                      {Array.from({ length: 6 }).map((_, key) => (
-                        <PinInputField key={key} />
-                      ))}
-                    </PinInput>
-                  </HStack>
-                  <Box pl="20px">
-                    <Text color="#7F8B9F">Insira o código do e-mail</Text>
-                    <Text fontWeight={700} color="#2E4EFF">REENVIAR CÓDIGO</Text>
-                  </Box>
-                </Flex>
-                <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
-                  <Box w="25%">
-                    <Button
-                      bg="#FFF"
-                      w="100%"
-                      border="1px"
-                      borderColor="#2E4EFF"
-                      color="#2E4EFF"
-                      borderRadius="40px"
-                      onClick={() => currentTab !== 0 && setCurrentTab(currentTab - 1)}
-                    >
-                      VOLTAR
-                    </Button>
-                  </Box>
-                  <Box w="25%">
-                    <Button
-                      bg="#CBD3E0"
-                      w="100%"
-                      border="0"
-                      color="#070A0E"
-                      type="submit"
-                      borderRadius="40px"
-                      _hover={{ background: '#2E4EFF', color: '#FFF' }}
-                      onClick={async () => {
-                        console.log(formState.errors);
-
-                        const result = await trigger([
-                          'social_name',
-                          'nif_number',
-                          'mother_name',
-                          'birth',
-                          'email',
-                        ]);
-                        if (result) {
-                          setCurrentTab((current) => current + 1);
-                          setPermissionTab((prev) => [...prev, 3]);
-                        }
-                        console.log({ result });
-                      }}
-                    >
-                      SALVAR
-                    </Button>
-                  </Box>
-                </Flex>
-              </Box>
+              <FormAddress currentTab={currentTab} error={formState} register={register} setCurrentTab={setCurrentTab} setPermissionTab={setPermissionTab} />
             </TabPanel>
             <TabPanel py="0">
               <Box
@@ -831,11 +863,10 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('zip_code')}
-                      error={formState?.errors?.zip_code}
+                      {...register('infoCompanyProps.nif_number')}
+                      error={formState?.errors?.infoCompanyProps?.nif_number}
                     />
                   </GridItem>
-                  <GridItem colSpan={2} />
                   <GridItem colSpan={2}>
                     <Input
                       label="Razão social"
@@ -851,8 +882,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('address')}
-                      error={formState?.errors?.address}
+                      {...register('infoCompanyProps.register_name')}
+                      error={formState?.errors?.infoCompanyProps?.register_name}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -870,8 +901,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('number')}
-                      error={formState?.errors?.number}
+                      {...register('infoCompanyProps.social_name')}
+                      error={formState?.errors?.infoCompanyProps?.social_name}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -889,8 +920,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('neighborhood')}
-                      error={formState?.errors?.neighborhood}
+                      {...register('infoCompanyProps.email')}
+                      error={formState?.errors?.infoCompanyProps?.email}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -908,30 +939,11 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('complement')}
-                      error={formState?.errors?.complement}
+                      {...register('infoCompanyProps.site')}
+                      error={formState?.errors?.infoCompanyProps?.site}
                     />
                   </GridItem>
-                  <GridItem colSpan={1}>
-                    <Input
-                      label="DDI"
-                      labelColor="#7F8B9F"
-                      size="sm"
-                      w="full"
-                      bg="transparent"
-                      fontSize="16px"
-                      border="0px"
-                      borderBottom="1px solid #7F8B9F"
-                      borderRadius={0}
-                      placeholder="00"
-                      _focus={{
-                        borderBottom: '1px solid #2E4EFF',
-                      }}
-                      {...register('country')}
-                      error={formState?.errors?.country}
-                    />
-                  </GridItem>
-                  <GridItem colSpan={1}>
+                  <GridItem colSpan={2}>
                     <Input
                       label="DDD + Telefone "
                       labelColor="#7F8B9F"
@@ -946,11 +958,10 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('state')}
-                      error={formState?.errors?.state}
+                      {...register('infoCompanyProps.phone_number')}
+                      error={formState?.errors?.infoCompanyProps?.phone_number}
                     />
                   </GridItem>
-                  <GridItem colSpan={2} />
                   <GridItem colSpan={2}>
                     <Input
                       label="Tipo de empresa"
@@ -966,12 +977,29 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('address')}
-                      error={formState?.errors?.address}
+                      {...register('infoCompanyProps.business_type_id')}
+                      error={formState?.errors?.infoCompanyProps?.business_type_id}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
-                    <Input
+                    <Box>
+                      <Text color="#7F8B9F" w="full" size="sm" pb="8px">Porte da empresa</Text>
+                      <Select
+                        size="sm"
+                        w="full"
+                        bg="transparent"
+                        border="0px"
+                        borderBottom="1px solid #7F8B9F"
+                        defaultValue='MEI' {...register('infoCompanyProps.size')} >
+                        <option value='MEI'>MEI</option>
+                        <option value='ME'>ME</option>
+                        <option value='EPP'>EPP</option>
+                        <option value='SMALL'>SMALL</option>
+                        <option value='MEDIUM'>MEDIUM</option>
+                        <option value='LARGE'>LARGE</option>
+                      </Select>
+                    </Box>
+                    {/* <Input
                       label="Porte da empresa"
                       labelColor="#7F8B9F"
                       size="sm"
@@ -985,9 +1013,9 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('address')}
+                      {...register('compan')}
                       error={formState?.errors?.address}
-                    />
+                    /> */}
                   </GridItem>
                   <GridItem colSpan={2}>
                     <Input
@@ -1004,37 +1032,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('address')}
-                      error={formState?.errors?.address}
-                    />
-                  </GridItem>
-                  <GridItem colSpan={2}>
-                    <Input
-                      css={{
-                        '&::-webkit-calendar-picker-indicator': {
-                          background:
-                            ' url(/assets/calendar.png) center/80% no-repeat',
-                        },
-                      }}
-                      cursor="pointer"
-                      // ref={dateRef}
-                      onClick={() => dateRef.current?.showPicker()}
-                      label="Data de nascimento"
-                      labelColor="#7F8B9F"
-                      size="sm"
-                      bg="transparent"
-                      color="#7F8B9F"
-                      type="date"
-                      fontSize="16px"
-                      border="0px"
-                      borderBottom="1px solid #7F8B9F"
-                      borderRadius={0}
-                      placeholder="dd/mm/aaaa"
-                      _focus={{
-                        borderBottom: '1px solid #2E4EFF',
-                      }}
-                      {...register('birth')}
-                      error={formState?.errors?.birth}
+                      {...register('infoCompanyProps.legal_nature_id')}
+                      error={formState?.errors?.infoCompanyProps?.legal_nature_id}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -1052,8 +1051,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('address')}
-                      error={formState?.errors?.address}
+                      {...register('infoCompanyProps.annual_billing')}
+                      error={formState?.errors?.infoCompanyProps?.annual_billing}
                     />
                   </GridItem>
                   <GridItem colSpan={4}>
@@ -1071,8 +1070,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('address')}
-                      error={formState?.errors?.address}
+                      {...register('infoCompanyProps.cnae')}
+                      error={formState?.errors?.infoCompanyProps?.cnae}
                     />
                   </GridItem>
                 </SimpleGrid>
@@ -1100,20 +1099,9 @@ export default function OnBoarding() {
                       borderRadius="40px"
                       _hover={{ background: '#2E4EFF', color: '#FFF' }}
                       onClick={async () => {
-                        console.log(formState.errors);
+                        setCurrentTab((current) => current + 1);
+                        setPermissionTab((prev) => [...prev, 4]);
 
-                        const result = await trigger([
-                          'social_name',
-                          'nif_number',
-                          'mother_name',
-                          'birth',
-                          'email',
-                        ]);
-                        if (result) {
-                          setCurrentTab((current) => current + 1);
-                          setPermissionTab((prev) => [...prev, 4]);
-                        }
-                        console.log({ result });
                       }}
                     >
                       SALVAR
@@ -1132,6 +1120,10 @@ export default function OnBoarding() {
                 <Text fontSize="18px" fontWeight="600" >Passo {currentTab + 1}/7</Text>
                 <Text pt="10px" pb="30px" color="#7F8B9F">Queremos saber mais sobre o seu negócio. Nos informe alguns dados pra identificar a sua empresa</Text>
                 <SimpleGrid columns={4} gap={5}>
+                  <GridItem colSpan={2} >
+                    <Text color="#7F8B9F" w="full" size="sm" pb="8px">Endereço da empresa</Text>
+                    <Checkbox defaultChecked textColor="#7F8B9F" {...register('infoCompanyProps.address.is_mailing_address')}>Também é meu endereço físico</Checkbox>
+                  </GridItem>
                   <GridItem colSpan={2}>
                     <Input
                       label="CEP"
@@ -1147,11 +1139,11 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('zip_code')}
-                      error={formState?.errors?.zip_code}
+                      {...register('infoCompanyProps.address.zip_code')}
+                      error={formState?.errors?.infoCompanyProps?.address?.zip_code}
                     />
                   </GridItem>
-                  <GridItem colSpan={2} />
+
                   <GridItem colSpan={2}>
                     <Input
                       label="Logradouro"
@@ -1167,8 +1159,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('address')}
-                      error={formState?.errors?.address}
+                      {...register('infoCompanyProps.address.address_line_one')}
+                      error={formState?.errors?.infoCompanyProps?.address?.address_line_one}
                     />
                   </GridItem>
                   <GridItem colSpan={1}>
@@ -1186,8 +1178,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('number')}
-                      error={formState?.errors?.number}
+                      {...register('infoCompanyProps.address.building_number')}
+                      error={formState?.errors?.infoCompanyProps?.address?.building_number}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -1205,8 +1197,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('neighborhood')}
-                      error={formState?.errors?.neighborhood}
+                      {...register('infoCompanyProps.address.neighborhood')}
+                      error={formState?.errors?.infoCompanyProps?.address?.neighborhood}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -1224,8 +1216,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('complement')}
-                      error={formState?.errors?.complement}
+                      {...register('infoCompanyProps.address.complement')}
+                      error={formState?.errors?.infoCompanyProps?.address?.complement}
                     />
                   </GridItem>
                   <GridItem colSpan={1}>
@@ -1243,8 +1235,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('country')}
-                      error={formState?.errors?.country}
+                      {...register('infoCompanyProps.address.country')}
+                      error={formState?.errors?.infoCompanyProps?.address?.country}
                     />
                   </GridItem>
                   <GridItem colSpan={1}>
@@ -1262,8 +1254,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('state')}
-                      error={formState?.errors?.state}
+                      {...register('infoCompanyProps.address.state')}
+                      error={formState?.errors?.infoCompanyProps?.address?.state}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -1281,8 +1273,8 @@ export default function OnBoarding() {
                       _focus={{
                         borderBottom: '1px solid #2E4EFF',
                       }}
-                      {...register('city')}
-                      error={formState?.errors?.city}
+                      {...register('infoCompanyProps.address.city')}
+                      error={formState?.errors?.infoCompanyProps?.address?.city}
                     />
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -1336,20 +1328,8 @@ export default function OnBoarding() {
                       borderRadius="40px"
                       _hover={{ background: '#2E4EFF', color: '#FFF' }}
                       onClick={async () => {
-                        console.log(formState.errors);
-
-                        const result = await trigger([
-                          'social_name',
-                          'nif_number',
-                          'mother_name',
-                          'birth',
-                          'email',
-                        ]);
-                        if (result) {
-                          setCurrentTab((current) => current + 1);
-                          setPermissionTab((prev) => [...prev, 5]);
-                        }
-                        console.log({ result });
+                        setCurrentTab((current) => current + 1);
+                        setPermissionTab((prev) => [...prev, 5]);
                       }}
                     >
                       SALVAR
@@ -1358,7 +1338,7 @@ export default function OnBoarding() {
                 </Flex>
               </Box>
             </TabPanel>
-            <TabPanel py="0">
+            {/*<TabPanel py="0">
               <Box
                 p="30px"
                 bg="#FFFFFF"
@@ -1471,29 +1451,18 @@ export default function OnBoarding() {
                       borderRadius="40px"
                       _hover={{ background: '#2E4EFF', color: '#FFF' }}
                       onClick={async () => {
-                        console.log(formState.errors);
-
-                        const result = await trigger([
-                          'social_name',
-                          'nif_number',
-                          'mother_name',
-                          'birth',
-                          'email',
-                        ]);
-                        if (result) {
-                          setCurrentTab((current) => current + 1);
-                          setPermissionTab((prev) => [...prev, 6]);
-                        }
-                        console.log({ result });
-                      }}
+                        setCurrentTab((current) => current + 1);
+                        setPermissionTab((prev) => [...prev, 6]);
+                      }
+                      }
                     >
                       SALVAR
                     </Button>
                   </Box>
                 </Flex>
               </Box>
-            </TabPanel>
-            <TabPanel py="0">
+            </TabPanel> */}
+            {/* <TabPanel py="0">
               <Box
                 p="30px"
                 bg="#FFFFFF"
@@ -1551,21 +1520,9 @@ export default function OnBoarding() {
                       type="submit"
                       borderRadius="40px"
                       _hover={{ background: '#2E4EFF', color: '#FFF' }}
-                      onClick={async () => {
-                        console.log(formState.errors);
-
-                        const result = await trigger([
-                          'social_name',
-                          'nif_number',
-                          'mother_name',
-                          'birth',
-                          'email',
-                        ]);
-                        if (result) {
-                          setCurrentTab((current) => current + 1);
-                          setPermissionTab((prev) => [...prev, 3]);
-                        }
-                        console.log({ result });
+                      onClick={() => {
+                        setCurrentTab((current) => current + 1);
+                        setPermissionTab((prev) => [...prev, 3]);
                       }}
                     >
                       SALVAR
@@ -1573,7 +1530,7 @@ export default function OnBoarding() {
                   </Box>
                 </Flex>
               </Box>
-            </TabPanel>
+            </TabPanel> */}
             {/* <TabPanel py="0">
               <Box
                 p="20px"
@@ -1586,7 +1543,7 @@ export default function OnBoarding() {
             </TabPanel> */}
           </TabPanels>
         </Tabs>
-      </Box>
-    </Box>
+      </Box >
+    </Box >
   );
 }

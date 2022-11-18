@@ -107,11 +107,11 @@ export function getAPIClient(ctx?: any) {
       //   // process.browser ? signOut() : Promise.reject(error);
       //   return Promise.reject(error);
       // }
-      if (error.response.status === 401) {
-        clearLocalStorage();
-        signOut();
-        return Promise.reject(error);
-      }
+      // if (error.response.status === 401) {
+      //   clearLocalStorage();
+      //   signOut();
+      //   return Promise.reject(error);
+      // }
 
       // Error Request
       if ([404, 405, 408, 428].includes(error.response.status)) {

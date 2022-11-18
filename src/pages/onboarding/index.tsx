@@ -8,49 +8,35 @@ import {
   useToast,
   Button,
   Link,
+  Center,
 } from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useAuthContext } from '~/context/AuthContext';
-import { SignInRequestData } from '~/types/auth';
-import { Input } from '~/components';
-
-const signInFormSchema = yup.object().shape({
-  username: yup.string().required('Usuário Obrigatório'),
-  password: yup.string().required('Senha Obrigatória'),
-});
+import { generateToken } from '~/services/hooks/useCreateAccount';
+import router from 'next/router';
+import { setLocalStorage } from '~/utils/localStorageFormat';
+import { Loading } from '~/components';
 
 export default function OnBoarding() {
   const [loading, setLoading] = useState(false);
-  let ref = React.createRef<HTMLButtonElement>();
-  const { signIn } = useAuthContext();
-  const { register, handleSubmit, formState } = useForm({
-  });
-  const toast = useToast();
-  async function handleSignIn(data: SignInRequestData) {
-    setLoading(true);
-    await signIn(data)
-      .catch((err) => {
-        toast({
-          title: err.message,
-          status: 'error',
-          variant: 'solid',
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }
+  const { v4: uuidv4 } = require('uuid');
 
-  useEffect(() => {
-    document.addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
-        ref?.current?.click();
+  async function getToken(type: number) {
+    setLoading(true);
+    try {
+      const data = await generateToken({ device_id: uuidv4().toString(), fcm_token: 'string' });
+      setLocalStorage('clientToken', data.data.access_token)
+    } catch (err: any) {
+      console.log(err)
+    } finally {
+      {
+        type === 1 ? router.push({ pathname: '/onboarding/type-1' }) :
+          <>
+            {type === 2 ? router.push({ pathname: '/onboarding/type-2' }) :
+              router.push({ pathname: '/' })
+            }
+          </>
       }
-    });
-  }, [ref]);
+    }
+  };
 
   return (
     <SimpleGrid columns={[1, 1, 2]}>
@@ -63,39 +49,42 @@ export default function OnBoarding() {
             objectFit="contain"
           />
         </Flex>
-        <Box pt="60px" w="90%" as="form" >
-          
-        
-          <Box mt="18px">
-         
-            <Box mt="18px"></Box>
-            <Link href="/onboarding/type-1">
-              <Button
-                bg="#FFF"
-                border="1px"
-                borderColor="#2E4EFF"
-                color="#2E4EFF"
-                w="100%"
-                borderRadius="40px"
-              >
-                Tipo 1
-              </Button>
-            </Link>
-            <Box mt="18px"></Box>
-            <Link href="/onboarding/type-2">
-              <Button
-                bg="#FFF"
-                border="1px"
-                borderColor="#2E4EFF"
-                color="#2E4EFF"
-                w="100%"
-                borderRadius="40px"
-              >
-                Tipo 2
-              </Button>
-            </Link>
+        {loading ?
+          <Center h="500px" mt="30px">
+            <Loading />
+          </Center> :
+          <Box pt="60px" w="90%" >
+            <Box mt="18px">
+              <Box mt="18px">
+                <Button
+                  bg="#FFF"
+                  border="1px"
+                  borderColor="#2E4EFF"
+                  color="#2E4EFF"
+                  w="100%"
+                  borderRadius="40px"
+                  onClick={() => getToken(1)}
+                  isLoading={loading}
+                >
+                  Tipo 1
+                </Button>
+              </Box>
+              <Box mt="18px">
+                <Button
+                  bg="#FFF"
+                  border="1px"
+                  borderColor="#2E4EFF"
+                  color="#2E4EFF"
+                  w="100%"
+                  borderRadius="40px"
+                  onClick={() => getToken(2)}
+                >
+                  Tipo 2
+                </Button>
+              </Box>
+            </Box>
           </Box>
-        </Box>
+        }
       </Box>
       <Flex
         backgroundImage="/assets/banner-app.png"
