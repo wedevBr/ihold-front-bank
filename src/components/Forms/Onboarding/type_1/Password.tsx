@@ -13,9 +13,6 @@ import { FormState, UseFormRegister } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { VerifyPassword } from '~/components/Verify/VerifyPassword';
 
-export interface Password {
-  password: string;
-}
 interface IPasswordProps {
   // register: UseFormRegister<Address>;
   // error: FormState<Address>;

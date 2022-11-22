@@ -10,31 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { FormState, UseFormRegister } from 'react-hook-form';
 import { Input } from '~/components/input';
-export type FileProps = {
-  path: string;
-  lastModified: number;
-  slice: () => void;
-  stream: () => void;
-  text: () => void;
-  arrayBuffer: ArrayBuffer;
-  name: string;
-  size: number;
-  type: string;
-};
-export interface CompanyAddress {
-  id: number;
-  is_mailing_address: boolean;
-  address_line_one: string;
-  address_line_two: string;
-  building_number: number;
-  complement: string;
-  zip_code: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  country: string;
-  proof_of_residency: FileProps | string;
-}
+
 interface ICompanyAddressProps {
   // register: UseFormRegister<Address>;
   // error: FormState<Address>;

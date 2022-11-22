@@ -51,13 +51,7 @@ import {
 import { getLocalStorage } from '~/utils/localStorageFormat';
 import { AuthTwoFactors, GetAuthTwoFactors } from '~/services/hooks/useAuth';
 import { parseCookies, setCookie } from 'nookies';
-import { Client } from '~/components/Forms/Onboarding/type_1/PersonalData';
-import { Address } from '~/components/Forms/Onboarding/type_1/PersonalAddress';
-import { Auth } from '~/components/Forms/Onboarding/type_1/Authentication';
-import { ComercialData } from '~/components/Forms/Onboarding/type_1/ComercialData';
-import { CompanyAddress } from '~/components/Forms/Onboarding/type_1/ComercialAddress';
-import { Documents } from '~/components/Forms/Onboarding/type_1/Documents';
-import { Password } from '~/components/Forms/Onboarding/type_1/Password';
+import { Client, Address, Auth, ComercialData, CompanyAddress, Documents, Password } from '~/types/onBoarding';
 
 export interface ISchemaCredentials {
   PersonalData: Client;

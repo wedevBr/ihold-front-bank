@@ -11,20 +11,6 @@ import {
 import { FormState, UseFormRegister, FieldValues } from 'react-hook-form';
 import { Input } from '~/components/input';
 
-export interface ComercialData {
-  nif_number: string;
-  register_name: string;
-  social_name: string;
-  phone_number: string;
-  email: string;
-  size: 'MEI' | 'ME' | 'EPP' | 'SMALL' | 'MEDIUM' | 'LARGE';
-  business_type_id: string;
-  legal_nature_id: 0;
-  site: string;
-  cnae: string;
-  joint_stock: 0;
-  annual_billing: 0;
-}
 interface IComercialDataProps {
   // register: UseFormRegister<Address>;
   // error: FormState<Address>;

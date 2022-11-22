@@ -15,36 +15,8 @@ import {
 } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
-export type FileProps = {
-  path: string;
-  lastModified: number;
-  slice: () => void;
-  stream: () => void;
-  text: () => void;
-  arrayBuffer: ArrayBuffer;
-  name: string;
-  size: number;
-  type: string;
-};
-export interface Client {
-  document_type: string;
-  nif_number: string;
-  register_name: string;
-  social_name: string;
-  birth_date: Date;
-  mother_name: string;
-  email: string;
-  member_type: string;
-  member_qualification: string;
-  proxy_date: Date;
-  percentual: number;
-  presumed_income: number;
-  pep: true;
-  inform: true;
-  phone: {
-    number: string;
-  };
-}
+
+
 interface IClientProps {
   register: UseFormRegister<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;

@@ -26,20 +26,6 @@ export type FileProps = {
   size: number;
   type: string;
 };
-export interface Auth {
-  id: number;
-  is_mailing_address: boolean;
-  address_line_one: string;
-  address_line_two: string;
-  building_number: number;
-  complement: string;
-  zip_code: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  country: string;
-  key_type: FileProps | string;
-}
 interface IAddressProps {
   // register: UseFormRegister<Address>;
   // error: FormState<Address>;
