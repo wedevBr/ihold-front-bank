@@ -8,38 +8,14 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormRegister } from 'react-hook-form';
+import { FormState, UseFormRegister, UseFormTrigger } from 'react-hook-form';
 import { Input } from '~/components/input';
-export type FileProps = {
-  path: string;
-  lastModified: number;
-  slice: () => void;
-  stream: () => void;
-  text: () => void;
-  arrayBuffer: ArrayBuffer;
-  name: string;
-  size: number;
-  type: string;
-};
-export interface CompanyAddress {
-  id: number;
-  is_mailing_address: boolean;
-  address_line_one: string;
-  address_line_two: string;
-  building_number: number;
-  complement: string;
-  zip_code: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  country: string;
-  proof_of_residency: FileProps | string;
-}
+import { ISchemaCredentials } from '~/pages/onboarding/type-1';
+
 interface ICompanyAddressProps {
-  // register: UseFormRegister<Address>;
-  // error: FormState<Address>;
-  register: any;
-  error: any;
+  register: UseFormRegister<ISchemaCredentials>;
+  error: FormState<ISchemaCredentials>;
+  trigger: UseFormTrigger<ISchemaCredentials>;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
@@ -48,6 +24,7 @@ export function FormCompanyAddress({
   error,
   register,
   currentTab,
+  trigger,
   setCurrentTab,
   setPermissionTab,
 }: ICompanyAddressProps) {
@@ -73,7 +50,7 @@ export function FormCompanyAddress({
           <Checkbox
             defaultChecked
             textColor="#7F8B9F"
-            {...register('is_mailing_address')}
+            {...register('CompanyAddress.is_mailing_address')}
           >
             Também é meu endereço físico
           </Checkbox>
@@ -93,8 +70,8 @@ export function FormCompanyAddress({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('zip_code')}
-            error={error.errors.zip_code}
+            {...register('CompanyAddress.zip_code')}
+            error={error.errors?.CompanyAddress?.zip_code}
           />
         </GridItem>
 
@@ -113,27 +90,8 @@ export function FormCompanyAddress({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('address_line_one')}
-            error={error.errors.address_line_one}
-          />
-        </GridItem>
-        <GridItem colSpan={1}>
-          <Input
-            label="Número"
-            labelColor="#7F8B9F"
-            size="sm"
-            w="full"
-            bg="transparent"
-            fontSize="16px"
-            border="0px"
-            borderBottom="1px solid #7F8B9F"
-            borderRadius={0}
-            placeholder="0000"
-            _focus={{
-              borderBottom: '1px solid #2E4EFF',
-            }}
-            {...register('building_number')}
-            error={error.errors.building_number}
+            {...register('CompanyAddress.address_line_one')}
+            error={error.errors?.CompanyAddress?.address_line_one}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -151,13 +109,13 @@ export function FormCompanyAddress({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('neighborhood')}
-            error={error.errors.neighborhood}
+            {...register('CompanyAddress.neighborhood')}
+            error={error.errors?.CompanyAddress?.neighborhood}
           />
         </GridItem>
         <GridItem colSpan={2}>
           <Input
-            label="Complemento"
+            label="Número"
             labelColor="#7F8B9F"
             size="sm"
             w="full"
@@ -166,31 +124,12 @@ export function FormCompanyAddress({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Complemento"
+            placeholder="0000"
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('complement')}
-            error={error.errors.complement}
-          />
-        </GridItem>
-        <GridItem colSpan={1}>
-          <Input
-            label="País"
-            labelColor="#7F8B9F"
-            size="sm"
-            w="full"
-            bg="transparent"
-            fontSize="16px"
-            border="0px"
-            borderBottom="1px solid #7F8B9F"
-            borderRadius={0}
-            placeholder="Lorem"
-            _focus={{
-              borderBottom: '1px solid #2E4EFF',
-            }}
-            {...register('country')}
-            error={error.errors.country}
+            {...register('CompanyAddress.building_number')}
+            error={error.errors?.CompanyAddress?.building_number}
           />
         </GridItem>
         <GridItem colSpan={1}>
@@ -208,11 +147,11 @@ export function FormCompanyAddress({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('state')}
-            error={error.errors.state}
+            {...register('CompanyAddress.state')}
+            error={error.errors?.CompanyAddress?.state}
           />
         </GridItem>
-        <GridItem colSpan={2}>
+        <GridItem colSpan={1}>
           <Input
             label="Cidade"
             labelColor="#7F8B9F"
@@ -227,8 +166,8 @@ export function FormCompanyAddress({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('city')}
-            error={error.errors.city}
+            {...register('CompanyAddress.city')}
+            error={error.errors?.CompanyAddress?.city}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -253,8 +192,8 @@ export function FormCompanyAddress({
                 display: 'none',
               },
             }}
-            {...register('proof_of_residency')}
-            error={error.errors.proof_of_residency}
+            // {...register('CompanyAddress.proof_of_residency')}
+            // error={error.errors.proof_of_residency}
           />
         </GridItem>
       </SimpleGrid>
@@ -282,8 +221,19 @@ export function FormCompanyAddress({
             borderRadius="40px"
             _hover={{ background: '#2E4EFF', color: '#FFF' }}
             onClick={async () => {
-              setCurrentTab((current: any) => current + 1);
-              setPermissionTab((prev: any) => [...prev, 5]);
+              const validation = await trigger([
+                'CompanyAddress.address_line_one',
+                'CompanyAddress.building_number',
+                'CompanyAddress.zip_code',
+                'CompanyAddress.neighborhood',
+                'CompanyAddress.city',
+                'CompanyAddress.state'
+              ]);
+              console.log(validation);
+              if (validation) {
+                setCurrentTab((current: any) => current + 1);
+                setPermissionTab((prev: any) => [...prev, 5]);
+              }
             }}
           >
             SALVAR

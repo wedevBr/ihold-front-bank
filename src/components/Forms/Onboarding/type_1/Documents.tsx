@@ -9,22 +9,7 @@ import {
 } from '@chakra-ui/react';
 import { FormState, UseFormRegister } from 'react-hook-form';
 import { Input } from '~/components/input';
-export type FileProps = {
-  path: string;
-  lastModified: number;
-  slice: () => void;
-  stream: () => void;
-  text: () => void;
-  arrayBuffer: ArrayBuffer;
-  name: string;
-  size: number;
-  type: string;
-};
-export interface Documents {
-  balance: FileProps | string;
-  billing: FileProps | string;
-  dre: FileProps | string;
-}
+
 interface IDocumentsProps {
   // register: UseFormRegister<Address>;
   // error: FormState<Address>;

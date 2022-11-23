@@ -8,28 +8,14 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormRegister, FieldValues } from 'react-hook-form';
+import { FormState, UseFormRegister, FieldValues, UseFormTrigger } from 'react-hook-form';
 import { Input } from '~/components/input';
+import { ISchemaCredentials } from '~/pages/onboarding/type-1';
 
-export interface ComercialData {
-  nif_number: string;
-  register_name: string;
-  social_name: string;
-  phone_number: string;
-  email: string;
-  size: 'MEI' | 'ME' | 'EPP' | 'SMALL' | 'MEDIUM' | 'LARGE';
-  business_type_id: string;
-  legal_nature_id: 0;
-  site: string;
-  cnae: string;
-  joint_stock: 0;
-  annual_billing: 0;
-}
 interface IComercialDataProps {
-  // register: UseFormRegister<Address>;
-  // error: FormState<Address>;
-  register: any;
-  error: any;
+  register: UseFormRegister<ISchemaCredentials>;
+  error: FormState<ISchemaCredentials>;
+  trigger: UseFormTrigger<ISchemaCredentials>;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
@@ -38,6 +24,7 @@ export function FormComercialData({
   error,
   register,
   currentTab,
+  trigger,
   setCurrentTab,
   setPermissionTab,
 }: IComercialDataProps) {
@@ -72,8 +59,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('nif_number')}
-            error={error.errors.nif_number}
+            {...register('ComercialData.nif_number')}
+            error={error.errors?.ComercialData?.nif_number}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -91,8 +78,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('register_name1')}
-            error={error.errors.register_name}
+            {...register('ComercialData.register_name')}
+            error={error.errors?.ComercialData?.register_name}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -110,8 +97,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('social_name')}
-            error={error.errors.social_name}
+            {...register('ComercialData.social_name')}
+            error={error.errors?.ComercialData?.social_name}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -129,8 +116,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('email')}
-            error={error.errors.email}
+            {...register('ComercialData.email')}
+            error={error.errors?.ComercialData?.email}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -148,8 +135,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('site')}
-            error={error.errors.site}
+            {...register('ComercialData.site')}
+            error={error.errors?.ComercialData?.site}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -167,8 +154,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('phone_number')}
-            error={error.errors.phone_number}
+            {...register('ComercialData.phone_number')}
+            error={error.errors?.ComercialData?.phone_number}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -186,8 +173,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('business_type_id')}
-            error={error.errors.business_type_id}
+            {...register('ComercialData.business_type_id')}
+            error={error.errors?.ComercialData?.business_type_id}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -202,7 +189,7 @@ export function FormComercialData({
               border="0px"
               borderBottom="1px solid #7F8B9F"
               defaultValue="MEI"
-              {...register('infoCompanyProps.size')}
+              {...register('ComercialData.size')}
             >
               <option value="MEI">MEI</option>
               <option value="ME">ME</option>
@@ -245,8 +232,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('legal_nature_id')}
-            error={error.errors.legal_nature_id}
+            {...register('ComercialData.legal_nature_id')}
+            error={error.errors?.ComercialData?.legal_nature_id}
           />
         </GridItem>
         <GridItem colSpan={2}>
@@ -264,8 +251,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('annual_billing')}
-            error={error.errors.annual_billing}
+            {...register('ComercialData.annual_billing')}
+            error={error.errors?.ComercialData?.annual_billing}
           />
         </GridItem>
         <GridItem colSpan={4}>
@@ -283,8 +270,8 @@ export function FormComercialData({
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
-            {...register('cnae')}
-            error={error.errors.cnae}
+            {...register('ComercialData.cnae')}
+            error={error.errors?.ComercialData?.cnae}
           />
         </GridItem>
       </SimpleGrid>
@@ -311,15 +298,32 @@ export function FormComercialData({
             type="submit"
             borderRadius="40px"
             _hover={{ background: '#2E4EFF', color: '#FFF' }}
+
             onClick={async () => {
-              setCurrentTab((current: any) => current + 1);
-              setPermissionTab((prev: any) => [...prev, 4]);
+              const validation = await trigger([
+                'ComercialData.nif_number',
+                'ComercialData.register_name',
+                'ComercialData.social_name',
+                'ComercialData.phone_number',
+                'ComercialData.email',
+                'ComercialData.size',
+                'ComercialData.business_type_id',
+                'ComercialData.legal_nature_id',
+                'ComercialData.site',
+                'ComercialData.cnae',
+                'ComercialData.annual_billing'
+              ]);
+              console.log(validation);
+              if (validation) {
+                setCurrentTab((current: any) => current + 1);
+                setPermissionTab((prev: any) => [...prev, 4]);
+              }
             }}
           >
             SALVAR
           </Button>
         </Box>
-      </Flex>
-    </Box>
+      </Flex >
+    </Box >
   );
 }

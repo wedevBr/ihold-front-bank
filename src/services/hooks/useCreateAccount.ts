@@ -106,3 +106,22 @@ export async function postPersonalInfo({
     throw err;
   }
 }
+
+
+export async function postComercialInfo({
+  personalData,
+  token,
+}: infoPersonProps) {
+  try {
+    const { data } = await api.post('/business_members', personalData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+}
+

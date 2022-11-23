@@ -15,36 +15,7 @@ import {
 } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
-export type FileProps = {
-  path: string;
-  lastModified: number;
-  slice: () => void;
-  stream: () => void;
-  text: () => void;
-  arrayBuffer: ArrayBuffer;
-  name: string;
-  size: number;
-  type: string;
-};
-export interface Client {
-  document_type: string;
-  nif_number: string;
-  register_name: string;
-  social_name: string;
-  birth_date: Date;
-  mother_name: string;
-  email: string;
-  member_type: string;
-  member_qualification: string;
-  proxy_date: Date;
-  percentual: number;
-  presumed_income: number;
-  pep: true;
-  inform: true;
-  phone: {
-    number: string;
-  };
-}
+
 interface IClientProps {
   register: UseFormRegister<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
@@ -251,8 +222,8 @@ export function FormPersonalData({
                 display: 'none',
               },
             }}
-            // {...register('key_type')}
-            // error={formState?.errors?.PersonalData??.key_type}
+          // {...register('key_type')}
+          // error={formState?.errors?.PersonalData??.key_type}
           />
         </Box>
         <Box w="full">
@@ -276,8 +247,8 @@ export function FormPersonalData({
                 display: 'none',
               },
             }}
-            // {...register('key_type')}
-            // error={formState?.errors?.PersonalData??.key_type}
+          // {...register('key_type')}
+          // error={formState?.errors?.PersonalData??.key_type}
           />
         </Box>
       </Flex>
@@ -305,7 +276,14 @@ export function FormPersonalData({
             borderRadius="40px"
             _hover={{ background: '#2E4EFF', color: '#FFF' }}
             onClick={async () => {
-              const validation = await trigger();
+              const validation = await trigger([
+                'PersonalData.register_name',
+                'PersonalData.nif_number',
+                'PersonalData.birth_date',
+                'PersonalData.mother_name',
+                'PersonalData.email',
+                'PersonalData.phone.number'
+              ]);
               console.log(validation);
               if (validation) {
                 setCurrentTab((current: any) => current + 1);
@@ -316,7 +294,7 @@ export function FormPersonalData({
             SALVAR
           </Button>
         </Box>
-      </Flex>
-    </Box>
+      </Flex >
+    </Box >
   );
 }
