@@ -44,7 +44,6 @@ import { useQuery } from 'react-query';
 import {
   generateToken,
   generateTokenProps,
-  infoPersonProps,
   personalData,
   postComercialInfo,
   postPersonalInfo,
@@ -57,10 +56,10 @@ import { Address, Auth, Client, ComercialData, ComercialProps, CompanyAddress, D
 export interface ISchemaCredentials {
   PersonalData: Client;
   AddressPersonal: Address;
-  Authentication: Auth;
+  // Authentication: Auth;
   ComercialData: ComercialData;
   CompanyAddress: CompanyAddress;
-  Documents: Documents;
+  // Documents: Documents;
   Password: Password;
 }
 
@@ -104,7 +103,7 @@ const onboardingSchema = yup.object().shape({
   CompanyAddress: yup.object().shape({
     address_line_one: yup.string().required('Endereço Obrigatório'),
     building_number: yup.string().required('Número Obrigatório'),
-    zip_code: yup.string().required('CEP Obrigatório'),
+    zip_code: yup.number().required('CEP Obrigatório'),
     neighborhood: yup.string().required('Bairro Obrigatório'),
     city: yup.string().required('Cidade Obrigatória'),
     state: yup.string().required('Estado Obrigatório'),
@@ -134,7 +133,6 @@ export default function OnBoarding() {
     resolver: yupResolver(onboardingSchema),
     // mode: 'onBlur',
   });
-  const token = getLocalStorage('clientToken');
   const steps = [
     {
       title: 'Dados Pessoais',
@@ -223,19 +221,35 @@ export default function OnBoarding() {
     return () => clearInterval(timer);
   }, [counter]);
 
-  async function SendPersonalInfo() {
-
-    const sendComercialData = useState<ComercialProps>()
-   
-    if (ComercialData && ComercialAddress && token) {
-      try {
+  async function SendInfo() {
+    console.log("AQUI")
+    const token = getLocalStorage('clientToken');
+    const comercialInfo = getValues('ComercialData');
+    const comercialAddress = getValues('CompanyAddress')
+    try {
+      if (token) {
         const response = await postComercialInfo({
-          personalData: personalData,
+          comercialData: {
+            social_name: comercialInfo.social_name,
+            annual_billing: comercialInfo.annual_billing,
+            // business_type_id: comercialInfo.business_type_id,
+            cnae: comercialInfo.cnae,
+            email: comercialInfo.email,
+            joint_stock: comercialInfo.joint_stock,
+            legal_nature_id: comercialInfo.legal_nature_id,
+            nif_number: comercialInfo.nif_number,
+            phone_number: comercialInfo.phone_number,
+            register_name: comercialInfo.register_name,
+            site: comercialInfo.site,
+            // size: comercialInfo.size,
+            address: comercialAddress
+          },
           token: token.replace(/["]/g, ''),
         });
-      } catch (err: any) {
-        console.log(err);
+        console.log(response)
       }
+    } catch (err: any) {
+      console.log(err);
     }
   }
 
@@ -246,8 +260,8 @@ export default function OnBoarding() {
   console.log(currentTab);
 
   return (
-    <Box bg="#F0F0F3" h="full" minH="100vh">
-      <Box h="full" w="full" maxW="1200px" mx="auto">
+    <Box bg="#F0F0F3" h="full" minH="100vh" >
+      <Box h="full" w="full" maxW="1200px" mx="auto" >
         <Flex justifyContent="space-between" w="full" align="center" py="30px">
           <Image
             src="/assets/logo-preta.svg"
@@ -536,7 +550,7 @@ export default function OnBoarding() {
                       VOLTAR
                     </Button>
                   </Box>
-                  <Box w="25%">
+                  <Box w="25%" as="form" onSubmit={handleSubmit(SendInfo)}>
                     <Button
                       bg="#CBD3E0"
                       w="100%"
@@ -546,6 +560,7 @@ export default function OnBoarding() {
                       borderRadius="40px"
                       disabled={!termsAndPolicy}
                       _hover={{ background: '#2E4EFF', color: '#FFF' }}
+                    // onClick={() =>  console.log(watch('AddressPersonal'))}
                     // onClick={async () => {
                     //   const validation = await trigger([
                     //     'Password.password',

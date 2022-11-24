@@ -1,3 +1,4 @@
+import { infoComercialProps, infoPersonProps } from '~/types/onBoarding';
 import { api } from '../api';
 
 export type dataGenerateTokenProps = {
@@ -11,10 +12,7 @@ export type generateTokenProps = {
   fcm_token: string;
 };
 
-export type infoPersonProps = {
-  token: string;
-  personalData: personalData;
-};
+
 
 export type personalData = {
   document_type: string;
@@ -109,11 +107,11 @@ export async function postPersonalInfo({
 
 
 export async function postComercialInfo({
-  personalData,
+  comercialData,
   token,
-}: infoPersonProps) {
+}: infoComercialProps) {
   try {
-    const { data } = await api.post('/business_members', personalData, {
+    const { data } = await api.post('/business_accounts', comercialData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -70,7 +70,7 @@ export interface CompanyAddress {
   address_line_two: string;
   building_number: number;
   complement: string;
-  zip_code: string;
+  zip_code: number;
   neighborhood: string;
   city: string;
   state: string;
@@ -101,6 +101,27 @@ export type FileProps = {
 };
 
 export interface ComercialProps {
-  data: ComercialData
+  nif_number: string;
+  register_name: string;
+  social_name: string;
+  phone_number: string;
+  email: string;
+  size?: 'MEI' | 'ME' | 'EPP' | 'SMALL' | 'MEDIUM' | 'LARGE';
+  business_type_id?: string;
+  legal_nature_id: 0;
+  site: string;
+  cnae: string;
+  joint_stock: 0;
+  annual_billing: 0;
   address: CompanyAddress
 }
+
+export type infoPersonProps = {
+  token: string;
+  personalData: ComercialProps;
+};
+
+export type infoComercialProps = {
+  token: string;
+  comercialData: ComercialProps;
+};
