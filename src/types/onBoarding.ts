@@ -192,7 +192,7 @@ export type passwordProps = {
 export type documentBody = {
   side: 'front' | 'back',
   document_type: string,
-  file: File,
+  file: FileProps,
   description: string
   file_name: string
 }

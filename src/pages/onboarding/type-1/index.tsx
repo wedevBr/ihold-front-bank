@@ -96,7 +96,7 @@ const onboardingSchema = yup.object().shape({
     phone_number: yup.string().required('Telefone Obrigatório'),
     email: yup.string().required('Email Obrigatório'),
     size: yup.string().required('Porte da Empresa Obrigatório'),
-    business_type_id: yup.string().required('Tipo Obrigatório'),
+    // business_type_id: yup.string().required('Tipo Obrigatório'),
     legal_nature_id: yup.string().required('Natureza Jurídica Obrigatória'),
     site: yup.string().required('Site Obrigatório'),
     cnae: yup.string().required('CNAE Obrigatório'),
@@ -133,7 +133,6 @@ export default function OnBoarding() {
     getValues,
   } = useForm<ISchemaCredentials>({
     resolver: yupResolver(onboardingSchema),
-    // mode: 'onBlur',
   });
   const steps = [
     {
@@ -224,61 +223,61 @@ export default function OnBoarding() {
     const hasMember1 = getValues('ComercialData.hasMember1')
     const hasMember2 = getValues('ComercialData.hasMember2')
     if (token && userIdentifier) {
-      try {
-        const responseComercialInfo = await postComercialInfo({
-          comercialData: {
-            social_name: comercialInfo.social_name,
-            annual_billing: comercialInfo.annual_billing,
-            cnae: comercialInfo.cnae,
-            email: comercialInfo.email,
-            joint_stock: comercialInfo.joint_stock,
-            legal_nature_id: comercialInfo.legal_nature_id,
-            nif_number: comercialInfo.nif_number,
-            business_type_id: 1,
-            birth_date: comercialInfo.birth_date,
-            size: comercialInfo.size,
-            phone_number: comercialInfo.phone_number,
-            register_name: comercialInfo.register_name,
-            site: comercialInfo.site,
-            address: comercialAddress
+      // try {
+      //   const responseComercialInfo = await postComercialInfo({
+      //     comercialData: {
+      //       social_name: comercialInfo.social_name,
+      //       annual_billing: comercialInfo.annual_billing,
+      //       cnae: comercialInfo.cnae,
+      //       email: comercialInfo.email,
+      //       joint_stock: comercialInfo.joint_stock,
+      //       legal_nature_id: comercialInfo.legal_nature_id,
+      //       nif_number: comercialInfo.nif_number,
+      //       business_type_id: 1,
+      //       birth_date: comercialInfo.birth_date,
+      //       size: comercialInfo.size,
+      //       phone_number: comercialInfo.phone_number,
+      //       register_name: comercialInfo.register_name,
+      //       site: comercialInfo.site,
+      //       address: comercialAddress
 
-          },
-          token: token.replace(/["]/g, ''),
-        });
-      }
-      catch (err: any) {
-        console.log(err);
-      }
-      try {
-        const responsePersonalInfo = await postPersonalInfo({
-          personalData: {
-            address: personalAddress,
-            birth_date: personalInfo.birth_date,
-            email: personalInfo.email,
-            mother_name: personalInfo.mother_name,
-            nif_number: personalInfo.nif_number,
-            register_name: personalInfo.register_name,
-            document_type: 'CPF',
-            percentual: 100,
-            presumed_income: 0,
-            pep: false,
-            inform: true,
-            member_type: 'OWNER',
-            phone: personalInfo.phone,
+      //     },
+      //     token: token.replace(/["]/g, ''),
+      //   });
+      // }
+      // catch (err: any) {
+      //   console.log(err);
+      // }
+      // try {
+      //   const responsePersonalInfo = await postPersonalInfo({
+      //     personalData: {
+      //       address: personalAddress,
+      //       birth_date: personalInfo.birth_date,
+      //       email: personalInfo.email,
+      //       mother_name: personalInfo.mother_name,
+      //       nif_number: personalInfo.nif_number,
+      //       register_name: personalInfo.register_name,
+      //       document_type: 'CPF',
+      //       percentual: 100,
+      //       presumed_income: 0,
+      //       pep: false,
+      //       inform: true,
+      //       member_type: 'OWNER',
+      //       phone: personalInfo.phone,
 
-          },
-          token: token.replace(/["]/g, ''),
-        });
-        console.log('responsePersonalInfo', responsePersonalInfo)
-      }
-      catch (err: any) {
-        console.log(err);
-      }
+      //     },
+      //     token: token.replace(/["]/g, ''),
+      //   });
+      //   console.log('responsePersonalInfo', responsePersonalInfo)
+      // }
+      // catch (err: any) {
+      //   console.log(err);
+      // }
       try {
         const responseFrontDocumentInfo = await postDocument({
           DocumentData: {
             description: documentInfo.front_document.description,
-            document_type: document,
+            document_type: 'document',
             file: documentInfo.front_document.file,
             side: 'front',
             file_name: 'Front Document'
@@ -289,110 +288,109 @@ export default function OnBoarding() {
       catch (err: any) {
         console.log(err);
       }
-      try {
-        const responseBackDocumentInfo = await postDocument({
-          DocumentData: {
-            description: documentInfo.back_documment.description,
-            document_type: document,
-            file: documentInfo.back_documment.file,
-            side: 'back',
-            file_name: 'Back Document'
-          },
-          token: token.replace(/["]/g, ''),
-        });
-      }
-      catch (err: any) {
-        console.log(err);
-      }
-      try {
-        const responseSelfieInfo = await postDocument({
-          DocumentData: {
-            description: documentInfo.selfie.description,
-            document_type: 'SELFIE',
-            file: documentInfo.selfie.file,
-            side: 'front',
-            file_name: 'Selfie document'
-          },
-          token: token.replace(/["]/g, ''),
-        });
-      }
-      catch (err: any) {
-        console.log(err);
-      }
-      try {
-        const responsePersonalInfo = await postPassword({
-          passwordData: {
-            name: personalInfo.register_name,
-            nif_number: personalInfo.nif_number,
-            cell_phone: '+55'.concat(personalInfo.phone.number),
-            email: personalInfo.email,
-            password: password.password,
-            password_confirmation: password.password,
-            user_identifier: userIdentifier,
-            client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
-            client_secret: process.env.NEXT_PUBLIC_CLIENT_SECRET
-          },
-          token: token.replace(/["]/g, ''),
-        });
-      }
-      catch (err: any) {
-        console.log(err);
-      }
-      if (hasMember1) {
-        try {
-          const responseHasUser1 = await postPersonalInfo({
-            personalData: {
-              address: hasMember1.address,
-              birth_date: hasMember1.birth_date,
-              email: hasMember1.email,
-              mother_name: hasMember1?.mother_name,
-              nif_number: hasMember1?.nif_number,
-              register_name: hasMember1?.register_name,
-              document_type: 'CPF',
-              percentual: hasMember1?.percentual,
-              presumed_income: 0,
-              pep: false,
-              inform: true,
-              member_type: hasMember1.member_type,
-              phone: hasMember1?.phone,
+      // try {
+      //   const responseBackDocumentInfo = await postDocument({
+      //     DocumentData: {
+      //       description: documentInfo.back_documment.description,
+      //       document_type: document,
+      //       file: documentInfo.back_documment.file,
+      //       side: 'back',
+      //       file_name: 'Back Document'
+      //     },
+      //     token: token.replace(/["]/g, ''),
+      //   });
+      // }
+      // catch (err: any) {
+      //   console.log(err);
+      // }
+      // try {
+      //   const responseSelfieInfo = await postDocument({
+      //     DocumentData: {
+      //       description: documentInfo.selfie.description,
+      //       document_type: 'SELFIE',
+      //       file: documentInfo.selfie.file,
+      //       side: 'front',
+      //       file_name: 'Selfie document'
+      //     },
+      //     token: token.replace(/["]/g, ''),
+      //   });
+      // }
+      // catch (err: any) {
+      //   console.log(err);
+      // }
+      // try {
+      //   const responsePersonalInfo = await postPassword({
+      //     passwordData: {
+      //       name: personalInfo.register_name,
+      //       nif_number: personalInfo.nif_number,
+      //       cell_phone: '+55'.concat(personalInfo.phone.number),
+      //       email: personalInfo.email,
+      //       password: password.password,
+      //       password_confirmation: password.password,
+      //       user_identifier: userIdentifier,
+      //       client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
+      //       client_secret: process.env.NEXT_PUBLIC_CLIENT_SECRET
+      //     },
+      //     token: token.replace(/["]/g, ''),
+      //   });
+      // }
+      // catch (err: any) {
+      //   console.log(err);
+      // }
+      // if (hasMember1) {
+      //   try {
+      //     const responseHasUser1 = await postPersonalInfo({
+      //       personalData: {
+      //         address: hasMember1.address,
+      //         birth_date: hasMember1.birth_date,
+      //         email: hasMember1.email,
+      //         mother_name: hasMember1?.mother_name,
+      //         nif_number: hasMember1?.nif_number,
+      //         register_name: hasMember1?.register_name,
+      //         document_type: 'CPF',
+      //         percentual: hasMember1?.percentual,
+      //         presumed_income: 0,
+      //         pep: false,
+      //         inform: true,
+      //         member_type: hasMember1.member_type,
+      //         phone: hasMember1?.phone,
 
-            },
-            token: token.replace(/["]/g, ''),
-          });
-        }
-        catch (err: any) {
-          console.log(err);
-        }
-      }
-      if (hasMember2) {
-        try {
-          const responseHasUser1 = await postPersonalInfo({
-            personalData: {
-              address: hasMember2.address,
-              birth_date: hasMember2.birth_date,
-              email: hasMember2.email,
-              mother_name: hasMember2?.mother_name,
-              nif_number: hasMember2?.nif_number,
-              register_name: hasMember2?.register_name,
-              document_type: 'CPF',
-              percentual: hasMember2?.percentual,
-              presumed_income: 0,
-              pep: false,
-              inform: true,
-              member_type: hasMember2.member_type,
-              phone: hasMember2?.phone,
+      //       },
+      //       token: token.replace(/["]/g, ''),
+      //     });
+      //   }
+      //   catch (err: any) {
+      //     console.log(err);
+      //   }
+      // }
+      // if (hasMember2) {
+      //   try {
+      //     const responseHasUser1 = await postPersonalInfo({
+      //       personalData: {
+      //         address: hasMember2.address,
+      //         birth_date: hasMember2.birth_date,
+      //         email: hasMember2.email,
+      //         mother_name: hasMember2?.mother_name,
+      //         nif_number: hasMember2?.nif_number,
+      //         register_name: hasMember2?.register_name,
+      //         document_type: 'CPF',
+      //         percentual: hasMember2?.percentual,
+      //         presumed_income: 0,
+      //         pep: false,
+      //         inform: true,
+      //         member_type: hasMember2.member_type,
+      //         phone: hasMember2?.phone,
 
-            },
-            token: token.replace(/["]/g, ''),
-          });
-        }
-        catch (err: any) {
-          console.log(err);
-        }
-      }
+      //       },
+      //       token: token.replace(/["]/g, ''),
+      //     });
+      //   }
+      //   catch (err: any) {
+      //     console.log(err);
+      //   }
+      // }
     }
   }
-  console.log(watch('ComercialData.hasMember1.email'))
   return (
     <Box bg="#F0F0F3" h="full" minH="100vh" >
       <Box h="full" w="full" maxW="1200px" mx="auto" >
@@ -534,6 +532,7 @@ export default function OnBoarding() {
                 trigger={trigger}
                 getValue={getValues}
                 setCurrentTab={setCurrentTab}
+                watch={watch}
                 setPermissionTab={setPermissionTab}
               />
             </TabPanel>
@@ -674,7 +673,8 @@ export default function OnBoarding() {
                   </Text>
                 </Flex>
                 <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
-                  <Box w="25%">
+                  <Box w="25%" onSubmit={handleSubmit(SendInfo)}
+                  >
                     <Button
                       bg="#FFF"
                       w="100%"
@@ -687,7 +687,7 @@ export default function OnBoarding() {
                       VOLTAR
                     </Button>
                   </Box>
-                  <Box w="25%" as="form" onSubmit={handleSubmit(SendInfo)}>
+                  <Box w="25%" as="form" >
                     <Button
                       bg="#CBD3E0"
                       w="100%"
