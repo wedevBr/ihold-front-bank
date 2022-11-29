@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Control, useFieldArray } from 'react-hook-form';
 import {
   Box,
   Button,
@@ -10,32 +11,44 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormRegister, FieldValues, UseFormTrigger, UseFormGetValues, UseFormWatch } from 'react-hook-form';
+import {
+  FormState,
+  UseFormRegister,
+  FieldValues,
+  UseFormTrigger,
+  UseFormGetValues,
+  UseFormWatch,
+} from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
-import { GetBusinessTypes, GetLegalNature } from '~/services/hooks/useCreateAccount';
+import {
+  GetBusinessTypes,
+  GetLegalNature,
+} from '~/services/hooks/useCreateAccount';
 import { useQuery } from 'react-query';
 import { AddMember1 } from './AddMember1';
 import { AddMember2 } from './AddMember2';
 
 interface legalNatureProps {
-  id: number,
-  code: string,
-  name: string,
-  full_name: string
+  id: number;
+  code: string;
+  name: string;
+  full_name: string;
 }
 
 interface IComercialDataProps {
+  control: Control<ISchemaCredentials, any>;
   register: UseFormRegister<ISchemaCredentials>;
   error: FormState<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
   watch: UseFormWatch<ISchemaCredentials>;
-  getValue: UseFormGetValues<ISchemaCredentials>
+  getValue: UseFormGetValues<ISchemaCredentials>;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
 }
 export function FormComercialData({
+  control,
   error,
   register,
   currentTab,
@@ -46,20 +59,21 @@ export function FormComercialData({
   setPermissionTab,
 }: IComercialDataProps) {
   const dateRef = useRef<HTMLInputElement>(null);
-  const [value, setValueID] = React.useState('1')
-  const [natureID, setNatureID] = React.useState('1')
+  const [value, setValueID] = React.useState('1');
+  const [natureID, setNatureID] = React.useState('1');
 
-  const { data: legalNature } = useQuery(
-    'legal-nature',
-    GetLegalNature,
-    {
-      staleTime: 1000 * 60, // 1 minute
-    }
-  );
-  const lastValue = getValue('ComercialData.legal_nature_id') || '1'
+  const { data: legalNature } = useQuery('legal-nature', GetLegalNature, {
+    staleTime: 1000 * 60, // 1 minute
+  });
+  const lastValue = getValue('ComercialData.legal_nature_id') || '1';
   if (natureID !== lastValue.toString()) {
-    setNatureID(getValue('ComercialData.legal_nature_id').toString())
+    setNatureID(getValue('ComercialData.legal_nature_id').toString());
   }
+
+  const { fields, append, remove } = useFieldArray({
+    name: 'ComercialData.hasMember',
+    control,
+  });
   return (
     <Box
       p="30px"
@@ -255,11 +269,12 @@ export function FormComercialData({
               defaultValue="MEI"
               {...register('ComercialData.size')}
             >
-              {legalNature && legalNature.data.map((item: legalNatureProps, key: number) => (
-                <option value={item.id} key={key}>
-                  {item.name}
-                </option>
-              ))}
+              {legalNature &&
+                legalNature.data.map((item: legalNatureProps, key: number) => (
+                  <option value={item.id} key={key}>
+                    {item.name}
+                  </option>
+                ))}
             </Select>
           </Box>
         </GridItem>
@@ -302,12 +317,12 @@ export function FormComercialData({
           />
         </GridItem>
       </SimpleGrid>
-      {natureID !== '1' &&
+      {natureID !== '1' && (
         <>
           <Text fontSize="18px" pt="40px" pb="20px" fontWeight="600">
             Número de membros
           </Text>
-          <RadioGroup onChange={setValueID} value={value} >
+          <RadioGroup onChange={setValueID} value={value}>
             <Flex w="full">
               <Flex
                 align="center"
@@ -316,42 +331,30 @@ export function FormComercialData({
                 borderRadius="4px"
                 mr="10px"
               >
-                <Radio value="1" p="20px" >
+                <Radio value="1" p="20px">
                   1
                 </Radio>
               </Flex>
-              <Flex
-                align="center"
-                boxShadow="md"
-                h="50px"
-                borderRadius="4px"
-              >
-                <Radio value="2" p="20px" >
+              <Flex align="center" boxShadow="md" h="50px" borderRadius="4px">
+                <Radio value="2" p="20px">
                   2
                 </Radio>
               </Flex>
             </Flex>
           </RadioGroup>
-          {value === "1" &&
+          {value === '1' && (
             <>
-              <AddMember1
-                error={error}
-                register={register}
-              />
-            </>}
-          {value === "2" &&
+              <AddMember1 error={error} register={register} control={control} />
+            </>
+          )}
+          {value === '2' && (
             <>
-              <AddMember1
-                error={error}
-                register={register}
-              />
-              <AddMember2
-                error={error}
-                register={register}
-              />
-            </>}
+              <AddMember1 error={error} register={register} control={control} />
+              <AddMember1 error={error} register={register} control={control} />
+            </>
+          )}
         </>
-      }
+      )}
       <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
         <Box w="25%">
           <Button
@@ -375,7 +378,6 @@ export function FormComercialData({
             type="submit"
             borderRadius="40px"
             _hover={{ background: '#2E4EFF', color: '#FFF' }}
-
             onClick={async () => {
               const validation = await trigger([
                 'ComercialData.nif_number',
@@ -387,7 +389,7 @@ export function FormComercialData({
                 'ComercialData.legal_nature_id',
                 'ComercialData.site',
                 'ComercialData.cnae',
-                'ComercialData.annual_billing'
+                'ComercialData.annual_billing',
               ]);
               console.log(validation);
               if (validation) {
@@ -399,7 +401,7 @@ export function FormComercialData({
             SALVAR
           </Button>
         </Box>
-      </Flex >
-    </Box >
+      </Flex>
+    </Box>
   );
 }
