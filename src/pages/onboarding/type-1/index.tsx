@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
@@ -53,7 +54,17 @@ import {
 import { getLocalStorage } from '~/utils/localStorageFormat';
 import { AuthTwoFactors, GetAuthTwoFactors } from '~/services/hooks/useAuth';
 import { parseCookies, setCookie } from 'nookies';
-import { Address, Auth, Client, ComercialData, ComercialProps, CompanyAddress, Documents, Password } from '~/types/onBoarding';
+import {
+  Address,
+  Auth,
+  Client,
+  ComercialData,
+  ComercialProps,
+  CompanyAddress,
+  Documents,
+  Password,
+} from '~/types/onBoarding';
+import { empatyData } from '~/components/Forms/Onboarding/type_1/AddMember1';
 
 export interface ISchemaCredentials {
   PersonalData: Client;
@@ -79,7 +90,7 @@ const onboardingSchema = yup.object().shape({
     email: yup.string().required('Email Obrigatório'),
     phone: yup.object().shape({
       number: yup.string().required('Telefone Obrigatório'),
-    })
+    }),
   }),
   AddressPersonal: yup.object().shape({
     address_line_one: yup.string().required('Endereço Obrigatório'),
@@ -101,6 +112,28 @@ const onboardingSchema = yup.object().shape({
     site: yup.string().required('Site Obrigatório'),
     cnae: yup.string().required('CNAE Obrigatório'),
     annual_billing: yup.string().required('Faturamento Anual Obrigatório'),
+    hasMember: yup.array().of(
+      yup.object().shape({
+        register_name: yup.string().required('Nome Obrigatório'),
+        nif_number: yup.string().required('CPF Obrigatório'),
+        birth_date: yup.string().required('Data de Nascimento Obrigatório'),
+        mother_name: yup.string().required('Nome Obrigatório'),
+        email: yup.string().required('Email Obrigatório'),
+        phone: yup.object().shape({
+          number: yup.string().required('Telefone Obrigatório'),
+        }),
+        percentual: yup.string().required('Porcentagem Obrigatória'),
+        member_type: yup.string().required('Tipo de Membro Obrigatório'),
+        address: yup.object().shape({
+          address_line_one: yup.string().required('Endereço Obrigatório'),
+          building_number: yup.string().required('Número Obrigatório'),
+          zip_code: yup.string().required('CEP Obrigatório'),
+          neighborhood: yup.string().required('Bairro Obrigatório'),
+          city: yup.string().required('Cidade Obrigatória'),
+          state: yup.string().required('Estado Obrigatório'),
+        }),
+      })
+    ),
   }),
   CompanyAddress: yup.object().shape({
     address_line_one: yup.string().required('Endereço Obrigatório'),
@@ -111,12 +144,12 @@ const onboardingSchema = yup.object().shape({
     state: yup.string().required('Estado Obrigatório'),
   }),
   Password: yup.object().shape({
-    password: yup.string().required('').matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/,
-      ""
-    ),
-  })
-})
+    password: yup
+      .string()
+      .required('')
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/, ''),
+  }),
+});
 
 export default function OnBoarding() {
   const [currentTab, setCurrentTab] = useState(0);
@@ -128,11 +161,17 @@ export default function OnBoarding() {
     handleSubmit,
     formState,
     trigger,
+    control,
     watch,
     setValue,
     getValues,
   } = useForm<ISchemaCredentials>({
     resolver: yupResolver(onboardingSchema),
+    defaultValues: {
+      ComercialData: {
+        hasMember: [empatyData],
+      },
+    },
   });
   const steps = [
     {
@@ -177,14 +216,13 @@ export default function OnBoarding() {
       iconName: 'gg:lock',
       step: 4,
     },
-
   ];
   // console.log(getLocalStorage('clientToken'))
   const [error, setError] = useState<ErrorMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const [counter, setCounter] = useState(10);
-  const [termsAndPolicy, setTermsAndPolicy] = useState(false)
-  const [document, setDocument] = useState('')
+  const [termsAndPolicy, setTermsAndPolicy] = useState(false);
+  const [document, setDocument] = useState('');
   async function handleAuthTwoFactors() {
     const authCode = {
       code,
@@ -213,15 +251,15 @@ export default function OnBoarding() {
 
   async function SendInfo() {
     const token = getLocalStorage('clientToken');
-    const userIdentifier = getLocalStorage('userIdentifier')
+    const userIdentifier = getLocalStorage('userIdentifier');
     const comercialInfo = getValues('ComercialData');
-    const comercialAddress = getValues('CompanyAddress')
-    const personalInfo = getValues('PersonalData')
-    const personalAddress = getValues('AddressPersonal')
-    const password = getValues('Password')
-    const documentInfo = getValues('Documents')
-    const hasMember1 = getValues('ComercialData.hasMember1')
-    const hasMember2 = getValues('ComercialData.hasMember2')
+    const comercialAddress = getValues('CompanyAddress');
+    const personalInfo = getValues('PersonalData');
+    const personalAddress = getValues('AddressPersonal');
+    const password = getValues('Password');
+    const documentInfo = getValues('Documents');
+    const hasMember1 = getValues('ComercialData.hasMember');
+    // const hasMember2 = getValues('ComercialData.hasMember2');
     if (token && userIdentifier) {
       // try {
       //   const responseComercialInfo = await postComercialInfo({
@@ -280,12 +318,11 @@ export default function OnBoarding() {
             document_type: 'document',
             file: documentInfo.front_document.file,
             side: 'front',
-            file_name: 'Front Document'
+            file_name: 'Front Document',
           },
           token: token.replace(/["]/g, ''),
         });
-      }
-      catch (err: any) {
+      } catch (err: any) {
         console.log(err);
       }
       // try {
@@ -391,9 +428,17 @@ export default function OnBoarding() {
       // }
     }
   }
+  useEffect(() => {
+    const PersonalDataLocal = JSON.parse(
+      getLocalStorage('PersonalDataLocal') || ''
+    );
+    if (PersonalDataLocal) {
+      setValue('PersonalData', PersonalDataLocal);
+    }
+  }, []);
   return (
-    <Box bg="#F0F0F3" h="full" minH="100vh" >
-      <Box h="full" w="full" maxW="1200px" mx="auto" >
+    <Box bg="#F0F0F3" h="full" minH="100vh">
+      <Box h="full" w="full" maxW="1200px" mx="auto">
         <Flex justifyContent="space-between" w="full" align="center" py="30px">
           <Image
             src="/assets/logo-preta.svg"
@@ -460,8 +505,8 @@ export default function OnBoarding() {
                         !permissionTab.includes(key)
                           ? '#ccc'
                           : currentTab === key
-                            ? '#2E4EFF'
-                            : '#21C6DE'
+                          ? '#2E4EFF'
+                          : '#21C6DE'
                       }
                       align="center"
                       justify="center"
@@ -526,6 +571,7 @@ export default function OnBoarding() {
             </TabPanel> */}
             <TabPanel>
               <FormComercialData
+                control={control}
                 currentTab={currentTab}
                 error={formState}
                 register={register}
@@ -576,105 +622,149 @@ export default function OnBoarding() {
                 <Text fontSize="18px" fontWeight="600">
                   Revisar Dados
                 </Text>
-                <Flex pt="30px" borderBottom="1px" borderColor="#7F8B9F" justify="space-between">
-                  <Text color="#7F8B9F">
-                    Dados Pessoais
-                  </Text>
+                <Flex
+                  pt="30px"
+                  borderBottom="1px"
+                  borderColor="#7F8B9F"
+                  justify="space-between"
+                >
+                  <Text color="#7F8B9F">Dados Pessoais</Text>
                   <Center cursor="pointer" onClick={() => setCurrentTab(0)}>
                     <Icon color="#21C6DE" icon="material-symbols:edit" />
-                    <Text color="#21C6DE">
-                      Editar
-                    </Text>
+                    <Text color="#21C6DE">Editar</Text>
                   </Center>
                 </Flex>
-                <Box pt="10px" >
+                <Box pt="10px">
                   <SimpleGrid columns={2} gap={2}>
                     <Text>Nome: {watch('PersonalData.register_name')}</Text>
                     <Text>CPF: {watch('PersonalData.nif_number')}</Text>
-                    <Text>Data de Nascimento: {moment(watch('PersonalData.birth_date')).locale('pt-br').format('L')}</Text>
-                    <Text>Nome da Mãe: {watch('PersonalData.mother_name')}</Text>
+                    <Text>
+                      Data de Nascimento:{' '}
+                      {moment(watch('PersonalData.birth_date'))
+                        .locale('pt-br')
+                        .format('L')}
+                    </Text>
+                    <Text>
+                      Nome da Mãe: {watch('PersonalData.mother_name')}
+                    </Text>
                     <Text>Email: {watch('PersonalData.email')}</Text>
                     <Text>Telefone: {watch('PersonalData.phone.number')}</Text>
                   </SimpleGrid>
                 </Box>
-                <Flex pt="20px" borderBottom="1px" borderColor="#7F8B9F" justify="space-between">
-                  <Text color="#7F8B9F">
-                    Endereço Pessoal
-                  </Text>
+                <Flex
+                  pt="20px"
+                  borderBottom="1px"
+                  borderColor="#7F8B9F"
+                  justify="space-between"
+                >
+                  <Text color="#7F8B9F">Endereço Pessoal</Text>
                   <Center cursor="pointer" onClick={() => setCurrentTab(1)}>
                     <Icon color="#21C6DE" icon="material-symbols:edit" />
-                    <Text color="#21C6DE">
-                      Editar
-                    </Text>
+                    <Text color="#21C6DE">Editar</Text>
                   </Center>
                 </Flex>
-                <Box pt="10px" >
+                <Box pt="10px">
                   <SimpleGrid columns={2} gap={2}>
                     <Text>CEP: {watch('AddressPersonal.zip_code')}</Text>
-                    <Text>Logradouro: {watch('AddressPersonal.address_line_one')}</Text>
-                    <Text>Bairro: {moment(watch('AddressPersonal.neighborhood')).locale('pt-br').format('L')}</Text>
-                    <Text>Número: {watch('AddressPersonal.building_number')}</Text>
+                    <Text>
+                      Logradouro: {watch('AddressPersonal.address_line_one')}
+                    </Text>
+                    <Text>
+                      Bairro:{' '}
+                      {moment(watch('AddressPersonal.neighborhood'))
+                        .locale('pt-br')
+                        .format('L')}
+                    </Text>
+                    <Text>
+                      Número: {watch('AddressPersonal.building_number')}
+                    </Text>
                     <Text>Estado: {watch('AddressPersonal.state')}</Text>
                     <Text>Cidade: {watch('AddressPersonal.city')}</Text>
                   </SimpleGrid>
                 </Box>
-                <Flex pt="20px" borderBottom="1px" borderColor="#7F8B9F" justify="space-between">
-                  <Text color="#7F8B9F">
-                    Dados Comerciais
-                  </Text>
+                <Flex
+                  pt="20px"
+                  borderBottom="1px"
+                  borderColor="#7F8B9F"
+                  justify="space-between"
+                >
+                  <Text color="#7F8B9F">Dados Comerciais</Text>
                   <Center cursor="pointer" onClick={() => setCurrentTab(3)}>
                     <Icon color="#21C6DE" icon="material-symbols:edit" />
-                    <Text color="#21C6DE">
-                      Editar
-                    </Text>
+                    <Text color="#21C6DE">Editar</Text>
                   </Center>
                 </Flex>
-                <Box pt="10px" >
+                <Box pt="10px">
                   <SimpleGrid columns={2} gap={2}>
                     <Text>CNPJ: {watch('ComercialData.nif_number')}</Text>
-                    <Text>Razão Social: {watch('ComercialData.register_name')}</Text>
-                    <Text>Nome Fantasia: {watch('ComercialData.social_name')}</Text>
+                    <Text>
+                      Razão Social: {watch('ComercialData.register_name')}
+                    </Text>
+                    <Text>
+                      Nome Fantasia: {watch('ComercialData.social_name')}
+                    </Text>
                     <Text>Email: {watch('ComercialData.email')}</Text>
                     <Text>Telefone: {watch('ComercialData.phone_number')}</Text>
                     <Text>Site: {watch('ComercialData.site')}</Text>
-                    <Text>Tipo de Empresa: {watch('ComercialData.business_type_id')}</Text>
+                    <Text>
+                      Tipo de Empresa: {watch('ComercialData.business_type_id')}
+                    </Text>
                     <Text>Porte da Empresa: {watch('ComercialData.size')}</Text>
-                    <Text>Natureza Jurídica: {watch('ComercialData.legal_nature_id')}</Text>
-                    <Text>Faturamento Anual: {watch('ComercialData.annual_billing')}</Text>
+                    <Text>
+                      Natureza Jurídica:{' '}
+                      {watch('ComercialData.legal_nature_id')}
+                    </Text>
+                    <Text>
+                      Faturamento Anual: {watch('ComercialData.annual_billing')}
+                    </Text>
                     <Text>CNAE principal: {watch('ComercialData.cnae')}</Text>
                   </SimpleGrid>
                 </Box>
-                <Flex pt="20px" borderBottom="1px" borderColor="#7F8B9F" justify="space-between">
-                  <Text color="#7F8B9F">
-                    Endereço Comercial
-                  </Text>
+                <Flex
+                  pt="20px"
+                  borderBottom="1px"
+                  borderColor="#7F8B9F"
+                  justify="space-between"
+                >
+                  <Text color="#7F8B9F">Endereço Comercial</Text>
                   <Center cursor="pointer" onClick={() => setCurrentTab(4)}>
                     <Icon color="#21C6DE" icon="material-symbols:edit" />
-                    <Text color="#21C6DE">
-                      Editar
-                    </Text>
+                    <Text color="#21C6DE">Editar</Text>
                   </Center>
                 </Flex>
-                <Box pt="10px" >
+                <Box pt="10px">
                   <SimpleGrid columns={2} gap={2}>
                     <Text>CEP: {watch('CompanyAddress.zip_code')}</Text>
-                    <Text>Logradouro: {watch('CompanyAddress.address_line_one')}</Text>
-                    <Text>Bairro: {moment(watch('CompanyAddress.neighborhood')).locale('pt-br').format('L')}</Text>
-                    <Text>Número: {watch('CompanyAddress.building_number')}</Text>
+                    <Text>
+                      Logradouro: {watch('CompanyAddress.address_line_one')}
+                    </Text>
+                    <Text>
+                      Bairro:{' '}
+                      {moment(watch('CompanyAddress.neighborhood'))
+                        .locale('pt-br')
+                        .format('L')}
+                    </Text>
+                    <Text>
+                      Número: {watch('CompanyAddress.building_number')}
+                    </Text>
                     <Text>Estado: {watch('CompanyAddress.state')}</Text>
                     <Text>Cidade: {watch('CompanyAddress.city')}</Text>
                   </SimpleGrid>
                 </Box>
                 <Flex gap={2} pt="20px">
-                  <Checkbox size="lg" isChecked={termsAndPolicy} onChange={(e) => setTermsAndPolicy(e.target.checked)} />
+                  <Checkbox
+                    size="lg"
+                    isChecked={termsAndPolicy}
+                    onChange={(e) => setTermsAndPolicy(e.target.checked)}
+                  />
                   <Text color="#7F8B9F">
-                    Eu concordo com os <Link color="#2E4EFF">Termos de Serviço</Link> e
-                    aceito o <Link color="#2E4EFF">Contrato de Credenciamento</Link>
+                    Eu concordo com os{' '}
+                    <Link color="#2E4EFF">Termos de Serviço</Link> e aceito o{' '}
+                    <Link color="#2E4EFF">Contrato de Credenciamento</Link>
                   </Text>
                 </Flex>
                 <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
-                  <Box w="25%" onSubmit={handleSubmit(SendInfo)}
-                  >
+                  <Box w="25%" onSubmit={handleSubmit(SendInfo)}>
                     <Button
                       bg="#FFF"
                       w="100%"
@@ -682,12 +772,14 @@ export default function OnBoarding() {
                       borderColor="#2E4EFF"
                       color="#2E4EFF"
                       borderRadius="40px"
-                      onClick={() => currentTab !== 0 && setCurrentTab(currentTab - 1)}
+                      onClick={() =>
+                        currentTab !== 0 && setCurrentTab(currentTab - 1)
+                      }
                     >
                       VOLTAR
                     </Button>
                   </Box>
-                  <Box w="25%" as="form" >
+                  <Box w="25%" as="form">
                     <Button
                       bg="#CBD3E0"
                       w="100%"
