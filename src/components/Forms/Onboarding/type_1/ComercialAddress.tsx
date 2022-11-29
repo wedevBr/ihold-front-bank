@@ -36,7 +36,7 @@ export function FormCompanyAddress({
       borderTop="11px solid #00102A"
     >
       <Text fontSize="18px" fontWeight="600">
-        Passo {currentTab + 1}/7
+        Passo {currentTab + 1}/5
       </Text>
       <Text pt="10px" pb="30px" color="#7F8B9F">
         Queremos saber mais sobre o seu negócio. Nos informe alguns dados pra
@@ -143,7 +143,7 @@ export function FormCompanyAddress({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -162,7 +162,7 @@ export function FormCompanyAddress({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -170,7 +170,7 @@ export function FormCompanyAddress({
             error={error.errors?.CompanyAddress?.city}
           />
         </GridItem>
-        <GridItem colSpan={2}>
+        {/* <GridItem colSpan={2}>
           <Input
             name=""
             label="Comprovante de endereço da sede"
@@ -195,7 +195,7 @@ export function FormCompanyAddress({
             // {...register('CompanyAddress.proof_of_residency')}
             // error={error.errors.proof_of_residency}
           />
-        </GridItem>
+        </GridItem> */}
       </SimpleGrid>
       <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
         <Box w="25%">
@@ -232,7 +232,7 @@ export function FormCompanyAddress({
               console.log(validation);
               if (validation) {
                 setCurrentTab((current: any) => current + 1);
-                setPermissionTab((prev: any) => [...prev, 5]);
+                setPermissionTab((prev: any) => [...prev, 4]);
               }
             }}
           >

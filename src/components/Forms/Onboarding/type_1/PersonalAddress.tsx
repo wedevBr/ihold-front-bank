@@ -4,6 +4,7 @@ import {
   Button,
   Flex,
   GridItem,
+  Select,
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
@@ -36,7 +37,7 @@ export function FormPersonalAddress({
       borderTop="11px solid #00102A"
     >
       <Text fontSize="18px" fontWeight="600">
-        Passo {currentTab + 1}/7
+        Passo {currentTab + 1}/5
       </Text>
       <Text
         pt="10px"
@@ -122,25 +123,51 @@ export function FormPersonalAddress({
             error={error.errors?.AddressPersonal?.building_number}
           />
         </GridItem>
-
         <GridItem colSpan={1}>
-          <Input
-            label="Estado"
-            labelColor="#7F8B9F"
-            size="sm"
-            w="full"
-            bg="transparent"
-            fontSize="16px"
-            border="0px"
-            borderBottom="1px solid #7F8B9F"
-            borderRadius={0}
-            placeholder="Lorem"
-            _focus={{
-              borderBottom: '1px solid #2E4EFF',
-            }}
-            {...register('AddressPersonal.state')}
-            error={error.errors?.AddressPersonal?.state}
-          />
+          <Box>
+            <Text color="#7F8B9F" w="full" size="sm" pb="8px">
+              Estado
+            </Text>
+            <Select
+              size="sm"
+              w="full"
+              bg="transparent"
+              border="0px"
+              borderBottom="1px solid #7F8B9F"
+              _focus={{
+                borderBottom: '1px solid #2E4EFF',
+              }}
+              {...register('AddressPersonal.state')}
+            >
+              <option value="AC">Acre</option>
+              <option value="AL">Alagoas</option>
+              <option value="AP">Amapá</option>
+              <option value="AM">Amazonas</option>
+              <option value="BA">Bahia</option>
+              <option value="CE">Ceara</option>
+              <option value="DF">Distrito Federal</option>
+              <option value="ES">Espírito Santo</option>
+              <option value="GO">Goiás</option>
+              <option value="MA">Maranhão</option>
+              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul</option>
+              <option value="MG">Minas Gerais</option>
+              <option value="PA">Pará</option>
+              <option value="PB">Paraíba</option>
+              <option value="PR">Paraná</option>
+              <option value="PE">Pernambuco</option>
+              <option value="PI">Piauí</option>
+              <option value="RJ">Rio de Janeiro</option>
+              <option value="RN">Rio Grande do Norte</option>
+              <option value="RS">Rio Grande do Sul</option>
+              <option value="RO">Rondônia</option>
+              <option value="RR">Roraima</option>
+              <option value="SC">Santa Catarina</option>
+              <option value="SP">São Paulo</option>
+              <option value="SE">Sergipe</option>
+              <option value="TO">Tocantins</option>
+            </Select>
+          </Box>
         </GridItem>
         <GridItem colSpan={1}>
           <Input
@@ -153,15 +180,15 @@ export function FormPersonalAddress({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
             {...register('AddressPersonal.city')}
-          error={error?.errors?.AddressPersonal?.city}
+            error={error?.errors?.AddressPersonal?.city}
           />
         </GridItem>
-        <GridItem colSpan={2}>
+        {/* <GridItem colSpan={2}>
           <Input
             label="Comprovante de residência"
             labelColor="#7F8B9F"
@@ -186,7 +213,7 @@ export function FormPersonalAddress({
           // {...register('key_type')}
           // error={error?.errors?.key_type}
           />
-        </GridItem>
+        </GridItem> */}
       </SimpleGrid>
       <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
         <Box w="25%">

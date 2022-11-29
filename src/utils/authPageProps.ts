@@ -12,6 +12,8 @@ export async function authPageProps({ Component, ctx }: any) {
     '/onboarding',
     '/onboarding/type-1',
     '/onboarding/type-2',
+    '/onboarding/underAnalysis',
+    '/onboarding/expiredSession',
     '/share-pix-payment/[hash]',
   ];
 

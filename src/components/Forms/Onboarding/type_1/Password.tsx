@@ -40,7 +40,7 @@ export function FormPassword({
       borderTop="11px solid #00102A"
     >
       <Text fontSize="18px" fontWeight="600">
-        Passo {currentTab + 1}/7
+        Passo {currentTab + 1}/5
       </Text>
       <Text pt="10px" pb="30px" color="#7F8B9F">
         Agora que a gente já te conhece, só falta você cadastrar uma boa senha,
@@ -97,7 +97,7 @@ export function FormPassword({
               console.log(validation);
               if (validation) {
                 setCurrentTab((current: any) => current + 1);
-                setPermissionTab((prev: any) => [...prev, 7]);
+                setPermissionTab((prev: any) => [...prev, 5]);
               }
             }}
           >

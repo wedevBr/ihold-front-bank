@@ -46,6 +46,8 @@ import {
   generateTokenProps,
   personalData,
   postComercialInfo,
+  postDocument,
+  postPassword,
   postPersonalInfo,
 } from '~/services/hooks/useCreateAccount';
 import { getLocalStorage } from '~/utils/localStorageFormat';
@@ -59,7 +61,7 @@ export interface ISchemaCredentials {
   // Authentication: Auth;
   ComercialData: ComercialData;
   CompanyAddress: CompanyAddress;
-  // Documents: Documents;
+  Documents: Documents;
   Password: Password;
 }
 
@@ -110,7 +112,7 @@ const onboardingSchema = yup.object().shape({
   }),
   Password: yup.object().shape({
     password: yup.string().required('').matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,})/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/,
       ""
     ),
   })
@@ -146,35 +148,35 @@ export default function OnBoarding() {
       iconName: 'akar-icons:location',
       step: 1,
     },
-    {
-      title: 'Autenticação',
-      subTitle: 'Lorem ipsum dolor sit amet',
-      iconName: 'lucide:user-check',
-      step: 2,
-    },
+    // {
+    //   title: 'Autenticação',
+    //   subTitle: 'Lorem ipsum dolor sit amet',
+    //   iconName: 'lucide:user-check',
+    //   step: 2,
+    // },
     {
       title: 'Dados Comerciais',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'carbon:enterprise',
-      step: 3,
+      step: 2,
     },
     {
       title: 'ENDEREÇO COMERCIAL',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'bx:map',
-      step: 4,
+      step: 3,
     },
-    {
-      title: 'DOCUMENTAÇÃO',
-      subTitle: 'Lorem ipsum dolor sit amet',
-      iconName: 'ep:document',
-      step: 5,
-    },
+    // {
+    //   title: 'DOCUMENTAÇÃO',
+    //   subTitle: 'Lorem ipsum dolor sit amet',
+    //   iconName: 'ep:document',
+    //   step: 5,
+    // },
     {
       title: 'SENHA',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'gg:lock',
-      step: 6,
+      step: 4,
     },
 
   ];
@@ -183,6 +185,7 @@ export default function OnBoarding() {
   const [loading, setLoading] = useState(false);
   const [counter, setCounter] = useState(10);
   const [termsAndPolicy, setTermsAndPolicy] = useState(false)
+  const [document, setDocument] = useState('')
   async function handleAuthTwoFactors() {
     const authCode = {
       code,
@@ -209,56 +212,187 @@ export default function OnBoarding() {
     }
   }
 
-  function ResendCodeAuthFactor() {
-    GetAuthTwoFactors().then(() => {
-      setCounter(10);
-    });
-  }
-  useEffect(() => {
-    const timer: any =
-      counter > 0 && setInterval(() => setCounter(counter - 1), 1000);
-
-    return () => clearInterval(timer);
-  }, [counter]);
-
   async function SendInfo() {
-    console.log("AQUI")
     const token = getLocalStorage('clientToken');
+    const userIdentifier = getLocalStorage('userIdentifier')
     const comercialInfo = getValues('ComercialData');
     const comercialAddress = getValues('CompanyAddress')
-    try {
-      if (token) {
-        const response = await postComercialInfo({
+    const personalInfo = getValues('PersonalData')
+    const personalAddress = getValues('AddressPersonal')
+    const password = getValues('Password')
+    const documentInfo = getValues('Documents')
+    const hasMember1 = getValues('ComercialData.hasMember1')
+    const hasMember2 = getValues('ComercialData.hasMember2')
+    if (token && userIdentifier) {
+      try {
+        const responseComercialInfo = await postComercialInfo({
           comercialData: {
             social_name: comercialInfo.social_name,
             annual_billing: comercialInfo.annual_billing,
-            // business_type_id: comercialInfo.business_type_id,
             cnae: comercialInfo.cnae,
             email: comercialInfo.email,
             joint_stock: comercialInfo.joint_stock,
             legal_nature_id: comercialInfo.legal_nature_id,
             nif_number: comercialInfo.nif_number,
+            business_type_id: 1,
+            birth_date: comercialInfo.birth_date,
+            size: comercialInfo.size,
             phone_number: comercialInfo.phone_number,
             register_name: comercialInfo.register_name,
             site: comercialInfo.site,
-            // size: comercialInfo.size,
             address: comercialAddress
+
           },
           token: token.replace(/["]/g, ''),
         });
-        console.log(response)
       }
-    } catch (err: any) {
-      console.log(err);
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responsePersonalInfo = await postPersonalInfo({
+          personalData: {
+            address: personalAddress,
+            birth_date: personalInfo.birth_date,
+            email: personalInfo.email,
+            mother_name: personalInfo.mother_name,
+            nif_number: personalInfo.nif_number,
+            register_name: personalInfo.register_name,
+            document_type: 'CPF',
+            percentual: 100,
+            presumed_income: 0,
+            pep: false,
+            inform: true,
+            member_type: 'OWNER',
+            phone: personalInfo.phone,
+
+          },
+          token: token.replace(/["]/g, ''),
+        });
+        console.log('responsePersonalInfo', responsePersonalInfo)
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responseFrontDocumentInfo = await postDocument({
+          DocumentData: {
+            description: documentInfo.front_document.description,
+            document_type: document,
+            file: documentInfo.front_document.file,
+            side: 'front',
+            file_name: 'Front Document'
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responseBackDocumentInfo = await postDocument({
+          DocumentData: {
+            description: documentInfo.back_documment.description,
+            document_type: document,
+            file: documentInfo.back_documment.file,
+            side: 'back',
+            file_name: 'Back Document'
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responseSelfieInfo = await postDocument({
+          DocumentData: {
+            description: documentInfo.selfie.description,
+            document_type: 'SELFIE',
+            file: documentInfo.selfie.file,
+            side: 'front',
+            file_name: 'Selfie document'
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responsePersonalInfo = await postPassword({
+          passwordData: {
+            name: personalInfo.register_name,
+            nif_number: personalInfo.nif_number,
+            cell_phone: '+55'.concat(personalInfo.phone.number),
+            email: personalInfo.email,
+            password: password.password,
+            password_confirmation: password.password,
+            user_identifier: userIdentifier,
+            client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
+            client_secret: process.env.NEXT_PUBLIC_CLIENT_SECRET
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      if (hasMember1) {
+        try {
+          const responseHasUser1 = await postPersonalInfo({
+            personalData: {
+              address: hasMember1.address,
+              birth_date: hasMember1.birth_date,
+              email: hasMember1.email,
+              mother_name: hasMember1?.mother_name,
+              nif_number: hasMember1?.nif_number,
+              register_name: hasMember1?.register_name,
+              document_type: 'CPF',
+              percentual: hasMember1?.percentual,
+              presumed_income: 0,
+              pep: false,
+              inform: true,
+              member_type: hasMember1.member_type,
+              phone: hasMember1?.phone,
+
+            },
+            token: token.replace(/["]/g, ''),
+          });
+        }
+        catch (err: any) {
+          console.log(err);
+        }
+      }
+      if (hasMember2) {
+        try {
+          const responseHasUser1 = await postPersonalInfo({
+            personalData: {
+              address: hasMember2.address,
+              birth_date: hasMember2.birth_date,
+              email: hasMember2.email,
+              mother_name: hasMember2?.mother_name,
+              nif_number: hasMember2?.nif_number,
+              register_name: hasMember2?.register_name,
+              document_type: 'CPF',
+              percentual: hasMember2?.percentual,
+              presumed_income: 0,
+              pep: false,
+              inform: true,
+              member_type: hasMember2.member_type,
+              phone: hasMember2?.phone,
+
+            },
+            token: token.replace(/["]/g, ''),
+          });
+        }
+        catch (err: any) {
+          console.log(err);
+        }
+      }
     }
   }
-
-  // console.log(watch('register_name'));
-  const result = async () => {
-    return await trigger('PersonalData.register_name');
-  };
-  console.log(currentTab);
-
+  console.log(watch('ComercialData.hasMember1.email'))
   return (
     <Box bg="#F0F0F3" h="full" minH="100vh" >
       <Box h="full" w="full" maxW="1200px" mx="auto" >
@@ -269,7 +403,6 @@ export default function OnBoarding() {
             width="150px"
             objectFit="contain"
           />
-          <Text>INTERNET BANKING</Text>
         </Flex>
         <Tabs
           variant="unstyled"
@@ -293,8 +426,8 @@ export default function OnBoarding() {
               setCurrentTab(tab);
             } else if (currentTab === 6) {
               setCurrentTab(tab);
-            } else if (currentTab === 7) {
-              setCurrentTab(tab);
+              // } else if (currentTab === 7) {
+              //   setCurrentTab(tab);
             }
           }}
         >
@@ -366,9 +499,12 @@ export default function OnBoarding() {
                 currentTab={currentTab}
                 error={formState}
                 register={register}
+                getValues={getValues}
+                setValue={setValue}
                 trigger={trigger}
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
+                document={setDocument}
               />
             </TabPanel>
             <TabPanel>
@@ -381,7 +517,7 @@ export default function OnBoarding() {
                 setPermissionTab={setPermissionTab}
               />
             </TabPanel>
-            <TabPanel>
+            {/* <TabPanel>
               <FormAuthentication
                 currentTab={currentTab}
                 error={formState}
@@ -389,13 +525,14 @@ export default function OnBoarding() {
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
-            </TabPanel>
+            </TabPanel> */}
             <TabPanel>
               <FormComercialData
                 currentTab={currentTab}
                 error={formState}
                 register={register}
                 trigger={trigger}
+                getValue={getValues}
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
@@ -410,7 +547,7 @@ export default function OnBoarding() {
                 setPermissionTab={setPermissionTab}
               />
             </TabPanel>
-            <TabPanel>
+            {/* <TabPanel>
               <FormDocuments
                 currentTab={currentTab}
                 error={formState}
@@ -418,7 +555,7 @@ export default function OnBoarding() {
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
-            </TabPanel>
+            </TabPanel> */}
             <TabPanel>
               <FormPassword
                 watch={watch}
@@ -465,7 +602,7 @@ export default function OnBoarding() {
                   <Text color="#7F8B9F">
                     Endereço Pessoal
                   </Text>
-                  <Center cursor="pointer" onClick={() => setCurrentTab(0)}>
+                  <Center cursor="pointer" onClick={() => setCurrentTab(1)}>
                     <Icon color="#21C6DE" icon="material-symbols:edit" />
                     <Text color="#21C6DE">
                       Editar
@@ -486,7 +623,7 @@ export default function OnBoarding() {
                   <Text color="#7F8B9F">
                     Dados Comerciais
                   </Text>
-                  <Center cursor="pointer" onClick={() => setCurrentTab(0)}>
+                  <Center cursor="pointer" onClick={() => setCurrentTab(3)}>
                     <Icon color="#21C6DE" icon="material-symbols:edit" />
                     <Text color="#21C6DE">
                       Editar
@@ -512,7 +649,7 @@ export default function OnBoarding() {
                   <Text color="#7F8B9F">
                     Endereço Comercial
                   </Text>
-                  <Center cursor="pointer" onClick={() => setCurrentTab(0)}>
+                  <Center cursor="pointer" onClick={() => setCurrentTab(4)}>
                     <Icon color="#21C6DE" icon="material-symbols:edit" />
                     <Text color="#21C6DE">
                       Editar
@@ -560,17 +697,6 @@ export default function OnBoarding() {
                       borderRadius="40px"
                       disabled={!termsAndPolicy}
                       _hover={{ background: '#2E4EFF', color: '#FFF' }}
-                    // onClick={() =>  console.log(watch('AddressPersonal'))}
-                    // onClick={async () => {
-                    //   const validation = await trigger([
-                    //     'Password.password',
-                    //   ]);
-                    //   console.log(validation);
-                    //   if (validation) {
-                    //     setCurrentTab((current: any) => current + 1);
-                    //     setPermissionTab((prev: any) => [...prev, 7]);
-                    //   }
-                    // }}
                     >
                       ENVIAR
                     </Button>

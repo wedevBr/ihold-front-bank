@@ -33,6 +33,27 @@ export interface Address {
   // key_type: FileProps | string;
 }
 
+export interface HasMember {
+  document_type: 'CPF';
+  nif_number: string;
+  register_name: string;
+  social_name: string;
+  birth_date: Date;
+  mother_name: string;
+  email: string;
+  member_type: 'OWNER';
+  member_qualification: string;
+  proxy_date: Date;
+  percentual: number;
+  presumed_income: number;
+  pep: true;
+  inform: true;
+  phone: {
+    number: string;
+  };
+  address: Address;
+}
+
 export interface Auth {
   id: number;
   is_mailing_address: boolean;
@@ -54,13 +75,16 @@ export interface ComercialData {
   social_name: string;
   phone_number: string;
   email: string;
+  birth_date: Date;
   size: 'MEI' | 'ME' | 'EPP' | 'SMALL' | 'MEDIUM' | 'LARGE';
   business_type_id: string;
-  legal_nature_id: 0;
+  legal_nature_id: number;
   site: string;
   cnae: string;
   joint_stock: 0;
   annual_billing: 0;
+  hasMember1?: HasMember;
+  hasMember2?: HasMember;
 }
 
 export interface CompanyAddress {
@@ -79,9 +103,9 @@ export interface CompanyAddress {
 }
 
 export interface Documents {
-  balance: FileProps | string;
-  billing: FileProps | string;
-  dre: FileProps | string;
+  front_document: documentBody;
+  back_documment: documentBody;
+  selfie: documentBody;
 }
 
 export interface Password {
@@ -106,9 +130,10 @@ export interface ComercialProps {
   social_name: string;
   phone_number: string;
   email: string;
+  birth_date: Date;
   size?: 'MEI' | 'ME' | 'EPP' | 'SMALL' | 'MEDIUM' | 'LARGE';
-  business_type_id?: string;
-  legal_nature_id: 0;
+  business_type_id: number;
+  legal_nature_id: number;
   site: string;
   cnae: string;
   joint_stock: 0;
@@ -116,12 +141,67 @@ export interface ComercialProps {
   address: CompanyAddress
 }
 
+export interface PersonalProps {
+  document_type: 'CPF';
+  nif_number: string;
+  register_name: string;
+  social_name?: string;
+  birth_date: Date;
+  mother_name: string;
+  email: string;
+  member_type: 'OWNER';
+  member_qualification?: string;
+  proxy_date?: Date;
+  percentual?: number;
+  presumed_income: number;
+  pep: false;
+  inform: true;
+  phone: {
+    number: string;
+  };
+  address: Address;
+}
+
 export type infoPersonProps = {
   token: string;
-  personalData: ComercialProps;
+  personalData: PersonalProps;
 };
 
 export type infoComercialProps = {
   token: string;
   comercialData: ComercialProps;
+};
+
+export type password = {
+  token: string;
+  passwordData: passwordProps;
+};
+
+export type passwordProps = {
+  name: string,
+  nif_number: string,
+  cell_phone: string,
+  email: string,
+  password: string,
+  password_confirmation: string,
+  user_identifier?: string,
+  client_id?: string,
+  client_secret?: string
+}
+
+export type documentBody = {
+  side: 'front' | 'back',
+  document_type: string,
+  file: File,
+  description: string
+  file_name: string
+}
+
+export type documentType = {
+  document_type: 'SELFIE' | 'NATIONAL_ID' | 'NATIONAL_DRIVE_LICENSE' | 'PROOF_OF_RESIDENCY' | 'CPF' | 'CNPJ' | 'QSA' | 'SOCIAL_BALANCE' | 'SOCIAL_CONTRACT' | 'SOCIAL_STATUS',
+}
+
+export type document = {
+  token: string;
+  DocumentData: documentBody;
 };

@@ -1,21 +1,35 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
   Flex,
   GridItem,
+  Radio,
+  RadioGroup,
   Select,
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormRegister, FieldValues, UseFormTrigger } from 'react-hook-form';
+import { FormState, UseFormRegister, FieldValues, UseFormTrigger, UseFormGetValues } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
+import { GetBusinessTypes, GetLegalNature } from '~/services/hooks/useCreateAccount';
+import { useQuery } from 'react-query';
+import { AddMember1 } from './AddMember1';
+import { AddMember2 } from './AddMember2';
+
+interface legalNatureProps {
+  id: number,
+  code: string,
+  name: string,
+  full_name: string
+}
 
 interface IComercialDataProps {
   register: UseFormRegister<ISchemaCredentials>;
   error: FormState<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
+  getValue: UseFormGetValues<ISchemaCredentials>
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
@@ -25,9 +39,20 @@ export function FormComercialData({
   register,
   currentTab,
   trigger,
+  getValue,
   setCurrentTab,
   setPermissionTab,
 }: IComercialDataProps) {
+  const dateRef = useRef<HTMLInputElement>(null);
+  const [value, setValueID] = React.useState('1')
+  const { data: legalNature } = useQuery(
+    'legal-nature',
+    GetLegalNature,
+    {
+      staleTime: 1000 * 60, // 1 minute
+    }
+  );
+
   return (
     <Box
       p="30px"
@@ -37,7 +62,7 @@ export function FormComercialData({
       mb="50px"
     >
       <Text fontSize="18px" fontWeight="600">
-        Passo {currentTab + 1}/7
+        Passo {currentTab + 1}/5
       </Text>
       <Text pt="10px" pb="30px" color="#7F8B9F">
         Queremos saber mais sobre o seu negócio. Nos informe alguns dados pra
@@ -74,7 +99,7 @@ export function FormComercialData({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem ipsum"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -93,7 +118,7 @@ export function FormComercialData({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem ipsum"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -158,29 +183,61 @@ export function FormComercialData({
             error={error.errors?.ComercialData?.phone_number}
           />
         </GridItem>
+
         <GridItem colSpan={2}>
-          <Input
-            label="Tipo de empresa"
-            labelColor="#7F8B9F"
-            size="sm"
-            w="full"
-            bg="transparent"
-            fontSize="16px"
-            border="0px"
-            borderBottom="1px solid #7F8B9F"
-            borderRadius={0}
-            placeholder="Lorem"
-            _focus={{
-              borderBottom: '1px solid #2E4EFF',
-            }}
-            {...register('ComercialData.business_type_id')}
-            error={error.errors?.ComercialData?.business_type_id}
-          />
+          <Box w="full" mr="20px">
+            <Input
+              css={{
+                '&::-webkit-calendar-picker-indicator': {
+                  background: ' url(/assets/calendar.png) center/80% no-repeat',
+                },
+              }}
+              cursor="pointer"
+              // ref={dateRef}
+              onClick={() => dateRef.current?.showPicker()}
+              label="Data de fundação"
+              labelColor="#7F8B9F"
+              size="sm"
+              bg="transparent"
+              color="#7F8B9F"
+              type="date"
+              fontSize="16px"
+              border="0px"
+              borderBottom="1px solid #7F8B9F"
+              borderRadius={0}
+              placeholder="dd/mm/aaaa"
+              _focus={{
+                borderBottom: '1px solid #2E4EFF',
+              }}
+              {...register('ComercialData.birth_date')}
+              error={error.errors?.PersonalData?.birth_date}
+            />
+          </Box>
         </GridItem>
         <GridItem colSpan={2}>
           <Box>
             <Text color="#7F8B9F" w="full" size="sm" pb="8px">
-              Porte da empresa
+              Natureza Jurídica
+            </Text>
+            <Select
+              size="sm"
+              w="full"
+              bg="transparent"
+              border="0px"
+              borderBottom="1px solid #7F8B9F"
+              defaultValue="1"
+              {...register('ComercialData.legal_nature_id')}
+            >
+              <option value="1">MEI</option>
+              <option value="2">EIRELI</option>
+              <option value="3">EI</option>
+            </Select>
+          </Box>
+        </GridItem>
+        <GridItem colSpan={2}>
+          <Box>
+            <Text color="#7F8B9F" w="full" size="sm" pb="8px">
+              Tipo de Empresa
             </Text>
             <Select
               size="sm"
@@ -191,50 +248,13 @@ export function FormComercialData({
               defaultValue="MEI"
               {...register('ComercialData.size')}
             >
-              <option value="MEI">MEI</option>
-              <option value="ME">ME</option>
-              <option value="EPP">EPP</option>
-              <option value="SMALL">SMALL</option>
-              <option value="MEDIUM">MEDIUM</option>
-              <option value="LARGE">LARGE</option>
+              {legalNature.data.map((item: legalNatureProps, key: number) => (
+                <option value={item.id} key={key}>
+                  {item.name}
+                </option>
+              ))}
             </Select>
           </Box>
-          {/* <Input
-                      label="Porte da empresa"
-                      labelColor="#7F8B9F"
-                      size="sm"
-                      w="full"
-                      bg="transparent"
-                      fontSize="16px"
-                      border="0px"
-                      borderBottom="1px solid #7F8B9F"
-                      borderRadius={0}
-                      placeholder="MEI"
-                      _focus={{
-                        borderBottom: '1px solid #2E4EFF',
-                      }}
-                      {...register('compan')}
-                      error={formState?.errors?.address}
-                    /> */}
-        </GridItem>
-        <GridItem colSpan={2}>
-          <Input
-            label="Natureza jurídica"
-            labelColor="#7F8B9F"
-            size="sm"
-            w="full"
-            bg="transparent"
-            fontSize="16px"
-            border="0px"
-            borderBottom="1px solid #7F8B9F"
-            borderRadius={0}
-            placeholder="Lorem ipsum"
-            _focus={{
-              borderBottom: '1px solid #2E4EFF',
-            }}
-            {...register('ComercialData.legal_nature_id')}
-            error={error.errors?.ComercialData?.legal_nature_id}
-          />
         </GridItem>
         <GridItem colSpan={2}>
           <Input
@@ -266,7 +286,7 @@ export function FormComercialData({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem ipsum"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -275,6 +295,52 @@ export function FormComercialData({
           />
         </GridItem>
       </SimpleGrid>
+      <Text fontSize="18px" pt="40px" pb="20px" fontWeight="600">
+        Número de membros
+      </Text>
+      <RadioGroup onChange={setValueID} value={value} >
+        <Flex w="full">
+          <Flex
+            align="center"
+            boxShadow="md"
+            h="50px"
+            borderRadius="4px"
+            mr="10px"
+          >
+            <Radio value="1" p="20px" >
+              1
+            </Radio>
+          </Flex>
+          <Flex
+            align="center"
+            boxShadow="md"
+            h="50px"
+            borderRadius="4px"
+          >
+            <Radio value="2" p="20px" >
+              2
+            </Radio>
+          </Flex>
+        </Flex>
+      </RadioGroup>
+      {value === "1" &&
+        <>
+          <AddMember1
+            error={error}
+            register={register}
+          />
+        </>}
+      {value === "2" &&
+        <>
+          <AddMember1
+            error={error}
+            register={register}
+          />
+          <AddMember2
+            error={error}
+            register={register}
+          />
+        </>}
       <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
         <Box w="25%">
           <Button
@@ -316,7 +382,7 @@ export function FormComercialData({
               console.log(validation);
               if (validation) {
                 setCurrentTab((current: any) => current + 1);
-                setPermissionTab((prev: any) => [...prev, 4]);
+                setPermissionTab((prev: any) => [...prev, 3]);
               }
             }}
           >

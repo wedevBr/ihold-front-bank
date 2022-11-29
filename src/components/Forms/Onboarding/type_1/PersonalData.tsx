@@ -4,6 +4,8 @@ import {
   Button,
   Flex,
   GridItem,
+  Radio,
+  RadioGroup,
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
@@ -12,14 +14,21 @@ import {
   UseFormRegister,
   FieldValues,
   UseFormTrigger,
+  UseFormSetValue,
+  UseFormGetValues,
 } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
+import { Client, documentType } from '~/types/onBoarding';
+import { getLocalStorage, setLocalStorage } from '~/utils/localStorageFormat';
 
 interface IClientProps {
   register: UseFormRegister<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
   error: FormState<ISchemaCredentials>;
+  getValues: UseFormGetValues<ISchemaCredentials>;
+  setValue: UseFormSetValue<ISchemaCredentials>;
+  document: (string: any) => void;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
@@ -29,11 +38,15 @@ export function FormPersonalData({
   currentTab,
   register,
   trigger,
+  setValue,
   setCurrentTab,
+  getValues,
   setPermissionTab,
+  document,
 }: IClientProps) {
   const dateRef = useRef<HTMLInputElement>(null);
-
+  const [value, setValueID] = React.useState('NATIONAL_ID')
+  document(value)
   return (
     <Box
       p="30px"
@@ -42,12 +55,11 @@ export function FormPersonalData({
       borderTop="11px solid #00102A"
     >
       <Text fontSize="18px" fontWeight="600">
-        Passo {currentTab + 1}/7
+        Passo {currentTab + 1}/5
       </Text>
       <Text pt="10px" pb="30px" color="#7F8B9F">
         Para começar, me fale um pouco mais sobre você
       </Text>
-
       <Flex w="full" justify="space-between">
         <Box w="full" mr="20px">
           <Input
@@ -60,7 +72,7 @@ export function FormPersonalData({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem ipsum"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -128,7 +140,7 @@ export function FormPersonalData({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem ipsum"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -200,9 +212,35 @@ export function FormPersonalData({
       </Flex>
       <Text>Documento de identificação:</Text>
       <Flex w="full" justify="space-between" my="20px">
+        <RadioGroup onChange={setValueID} value={value}>
+          <Flex w="full">
+            <Flex
+              align="center"
+              boxShadow="md"
+              h="50px"
+              borderRadius="4px"
+              mr="10px"
+            >
+              <Radio value="NATIONAL_ID" p="20px" >
+                RG
+              </Radio>
+            </Flex>
+            <Flex
+              align="center"
+              boxShadow="md"
+              h="50px"
+              borderRadius="4px"
+            >
+              <Radio value="NATIONAL_DRIVE_LICENSE" p="20px" >
+                CNH
+              </Radio>
+            </Flex>
+          </Flex>
+        </RadioGroup>
+      </Flex>
+      <Flex w="full" justify="space-between" my="20px">
         <Box w="full" mr="20px">
           <Input
-            name=""
             label="Frente"
             labelColor="#7F8B9F"
             size="sm"
@@ -222,13 +260,12 @@ export function FormPersonalData({
                 display: 'none',
               },
             }}
-          // {...register('key_type')}
-          // error={formState?.errors?.PersonalData??.key_type}
+            {...register('Documents.front_document.file')}
+            error={error.errors?.Documents?.front_document?.file}
           />
         </Box>
         <Box w="full">
           <Input
-            name=""
             label="Verso"
             labelColor="#7F8B9F"
             size="sm"
@@ -247,10 +284,38 @@ export function FormPersonalData({
                 display: 'none',
               },
             }}
-          // {...register('key_type')}
-          // error={formState?.errors?.PersonalData??.key_type}
+            {...register('Documents.back_documment.file')}
+            error={error.errors?.Documents?.back_documment?.file}
           />
         </Box>
+      </Flex>
+      <Flex w="full" justify="space-between" my="20px">
+        <Box w="full" mr="20px">
+          <Input
+            label="Selfie"
+            labelColor="#7F8B9F"
+            size="sm"
+            w="full"
+            type="file"
+            bg="transparent"
+            fontSize="16px"
+            border="0px"
+            borderBottom="1px solid #7F8B9F"
+            borderRadius={0}
+            placeholder="Nenhum documento adicionado"
+            _focus={{
+              borderBottom: '1px solid #2E4EFF',
+            }}
+            sx={{
+              '::file-selector-button': {
+                display: 'none',
+              },
+            }}
+            {...register('Documents.selfie.file')}
+            error={error.errors?.Documents?.selfie?.file}
+          />
+        </Box>
+        <Box w="full" />
       </Flex>
       <Flex gap={5} justify="flex-end" py="20px">
         <Box w="25%">
@@ -284,8 +349,8 @@ export function FormPersonalData({
                 'PersonalData.email',
                 'PersonalData.phone.number'
               ]);
-              console.log(validation);
               if (validation) {
+                setLocalStorage('PersonalDataLocal', getValues('PersonalData'));
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 1]);
               }
