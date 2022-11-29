@@ -44,25 +44,21 @@ import { useQuery } from 'react-query';
 import {
   generateToken,
   generateTokenProps,
-  infoPersonProps,
   personalData,
+  postComercialInfo,
+  postDocument,
+  postPassword,
   postPersonalInfo,
 } from '~/services/hooks/useCreateAccount';
 import { getLocalStorage } from '~/utils/localStorageFormat';
 import { AuthTwoFactors, GetAuthTwoFactors } from '~/services/hooks/useAuth';
 import { parseCookies, setCookie } from 'nookies';
-import { Client } from '~/components/Forms/Onboarding/type_1/PersonalData';
-import { Address } from '~/components/Forms/Onboarding/type_1/PersonalAddress';
-import { Auth } from '~/components/Forms/Onboarding/type_1/Authentication';
-import { ComercialData } from '~/components/Forms/Onboarding/type_1/ComercialData';
-import { CompanyAddress } from '~/components/Forms/Onboarding/type_1/ComercialAddress';
-import { Documents } from '~/components/Forms/Onboarding/type_1/Documents';
-import { Password } from '~/components/Forms/Onboarding/type_1/Password';
+import { Address, Auth, Client, ComercialData, ComercialProps, CompanyAddress, Documents, Password } from '~/types/onBoarding';
 
 export interface ISchemaCredentials {
   PersonalData: Client;
   AddressPersonal: Address;
-  Authentication: Auth;
+  // Authentication: Auth;
   ComercialData: ComercialData;
   CompanyAddress: CompanyAddress;
   Documents: Documents;
@@ -75,8 +71,52 @@ type ErrorMessage = {
 };
 
 const onboardingSchema = yup.object().shape({
-  register_name: yup.string().required('Usuário Obrigatório'),
-});
+  PersonalData: yup.object().shape({
+    register_name: yup.string().required('Nome Obrigatório'),
+    nif_number: yup.string().required('CPF Obrigatório'),
+    birth_date: yup.string().required('Data de Nascimento Obrigatório'),
+    mother_name: yup.string().required('Nome Obrigatório'),
+    email: yup.string().required('Email Obrigatório'),
+    phone: yup.object().shape({
+      number: yup.string().required('Telefone Obrigatório'),
+    })
+  }),
+  AddressPersonal: yup.object().shape({
+    address_line_one: yup.string().required('Endereço Obrigatório'),
+    building_number: yup.string().required('Número Obrigatório'),
+    zip_code: yup.string().required('CEP Obrigatório'),
+    neighborhood: yup.string().required('Bairro Obrigatório'),
+    city: yup.string().required('Cidade Obrigatória'),
+    state: yup.string().required('Estado Obrigatório'),
+  }),
+  ComercialData: yup.object().shape({
+    nif_number: yup.string().required('CNPJ Obrigatório'),
+    register_name: yup.string().required('Razão social Obrigatória'),
+    social_name: yup.string().required('Nome Fantasia Obrigatório'),
+    phone_number: yup.string().required('Telefone Obrigatório'),
+    email: yup.string().required('Email Obrigatório'),
+    size: yup.string().required('Porte da Empresa Obrigatório'),
+    business_type_id: yup.string().required('Tipo Obrigatório'),
+    legal_nature_id: yup.string().required('Natureza Jurídica Obrigatória'),
+    site: yup.string().required('Site Obrigatório'),
+    cnae: yup.string().required('CNAE Obrigatório'),
+    annual_billing: yup.string().required('Faturamento Anual Obrigatório'),
+  }),
+  CompanyAddress: yup.object().shape({
+    address_line_one: yup.string().required('Endereço Obrigatório'),
+    building_number: yup.string().required('Número Obrigatório'),
+    zip_code: yup.number().required('CEP Obrigatório'),
+    neighborhood: yup.string().required('Bairro Obrigatório'),
+    city: yup.string().required('Cidade Obrigatória'),
+    state: yup.string().required('Estado Obrigatório'),
+  }),
+  Password: yup.object().shape({
+    password: yup.string().required('').matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/,
+      ""
+    ),
+  })
+})
 
 export default function OnBoarding() {
   const [currentTab, setCurrentTab] = useState(0);
@@ -95,7 +135,6 @@ export default function OnBoarding() {
     resolver: yupResolver(onboardingSchema),
     // mode: 'onBlur',
   });
-  const token = getLocalStorage('clientToken');
   const steps = [
     {
       title: 'Dados Pessoais',
@@ -109,42 +148,44 @@ export default function OnBoarding() {
       iconName: 'akar-icons:location',
       step: 1,
     },
-    {
-      title: 'Autenticação',
-      subTitle: 'Lorem ipsum dolor sit amet',
-      iconName: 'lucide:user-check',
-      step: 2,
-    },
+    // {
+    //   title: 'Autenticação',
+    //   subTitle: 'Lorem ipsum dolor sit amet',
+    //   iconName: 'lucide:user-check',
+    //   step: 2,
+    // },
     {
       title: 'Dados Comerciais',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'carbon:enterprise',
-      step: 3,
+      step: 2,
     },
     {
       title: 'ENDEREÇO COMERCIAL',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'bx:map',
-      step: 4,
+      step: 3,
     },
-    {
-      title: 'DOCUMENTAÇÃO',
-      subTitle: 'Lorem ipsum dolor sit amet',
-      iconName: 'ep:document',
-      step: 5,
-    },
+    // {
+    //   title: 'DOCUMENTAÇÃO',
+    //   subTitle: 'Lorem ipsum dolor sit amet',
+    //   iconName: 'ep:document',
+    //   step: 5,
+    // },
     {
       title: 'SENHA',
       subTitle: 'Lorem ipsum dolor sit amet',
       iconName: 'gg:lock',
-      step: 6,
+      step: 4,
     },
+
   ];
   // console.log(getLocalStorage('clientToken'))
   const [error, setError] = useState<ErrorMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const [counter, setCounter] = useState(10);
-
+  const [termsAndPolicy, setTermsAndPolicy] = useState(false)
+  const [document, setDocument] = useState('')
   async function handleAuthTwoFactors() {
     const authCode = {
       code,
@@ -171,45 +212,190 @@ export default function OnBoarding() {
     }
   }
 
-  function ResendCodeAuthFactor() {
-    GetAuthTwoFactors().then(() => {
-      setCounter(10);
-    });
+  async function SendInfo() {
+    const token = getLocalStorage('clientToken');
+    const userIdentifier = getLocalStorage('userIdentifier')
+    const comercialInfo = getValues('ComercialData');
+    const comercialAddress = getValues('CompanyAddress')
+    const personalInfo = getValues('PersonalData')
+    const personalAddress = getValues('AddressPersonal')
+    const password = getValues('Password')
+    const documentInfo = getValues('Documents')
+    const hasMember1 = getValues('ComercialData.hasMember1')
+    const hasMember2 = getValues('ComercialData.hasMember2')
+    if (token && userIdentifier) {
+      try {
+        const responseComercialInfo = await postComercialInfo({
+          comercialData: {
+            social_name: comercialInfo.social_name,
+            annual_billing: comercialInfo.annual_billing,
+            cnae: comercialInfo.cnae,
+            email: comercialInfo.email,
+            joint_stock: comercialInfo.joint_stock,
+            legal_nature_id: comercialInfo.legal_nature_id,
+            nif_number: comercialInfo.nif_number,
+            business_type_id: 1,
+            birth_date: comercialInfo.birth_date,
+            size: comercialInfo.size,
+            phone_number: comercialInfo.phone_number,
+            register_name: comercialInfo.register_name,
+            site: comercialInfo.site,
+            address: comercialAddress
+
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responsePersonalInfo = await postPersonalInfo({
+          personalData: {
+            address: personalAddress,
+            birth_date: personalInfo.birth_date,
+            email: personalInfo.email,
+            mother_name: personalInfo.mother_name,
+            nif_number: personalInfo.nif_number,
+            register_name: personalInfo.register_name,
+            document_type: 'CPF',
+            percentual: 100,
+            presumed_income: 0,
+            pep: false,
+            inform: true,
+            member_type: 'OWNER',
+            phone: personalInfo.phone,
+
+          },
+          token: token.replace(/["]/g, ''),
+        });
+        console.log('responsePersonalInfo', responsePersonalInfo)
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responseFrontDocumentInfo = await postDocument({
+          DocumentData: {
+            description: documentInfo.front_document.description,
+            document_type: document,
+            file: documentInfo.front_document.file,
+            side: 'front',
+            file_name: 'Front Document'
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responseBackDocumentInfo = await postDocument({
+          DocumentData: {
+            description: documentInfo.back_documment.description,
+            document_type: document,
+            file: documentInfo.back_documment.file,
+            side: 'back',
+            file_name: 'Back Document'
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responseSelfieInfo = await postDocument({
+          DocumentData: {
+            description: documentInfo.selfie.description,
+            document_type: 'SELFIE',
+            file: documentInfo.selfie.file,
+            side: 'front',
+            file_name: 'Selfie document'
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      try {
+        const responsePersonalInfo = await postPassword({
+          passwordData: {
+            name: personalInfo.register_name,
+            nif_number: personalInfo.nif_number,
+            cell_phone: '+55'.concat(personalInfo.phone.number),
+            email: personalInfo.email,
+            password: password.password,
+            password_confirmation: password.password,
+            user_identifier: userIdentifier,
+            client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
+            client_secret: process.env.NEXT_PUBLIC_CLIENT_SECRET
+          },
+          token: token.replace(/["]/g, ''),
+        });
+      }
+      catch (err: any) {
+        console.log(err);
+      }
+      if (hasMember1) {
+        try {
+          const responseHasUser1 = await postPersonalInfo({
+            personalData: {
+              address: hasMember1.address,
+              birth_date: hasMember1.birth_date,
+              email: hasMember1.email,
+              mother_name: hasMember1?.mother_name,
+              nif_number: hasMember1?.nif_number,
+              register_name: hasMember1?.register_name,
+              document_type: 'CPF',
+              percentual: hasMember1?.percentual,
+              presumed_income: 0,
+              pep: false,
+              inform: true,
+              member_type: hasMember1.member_type,
+              phone: hasMember1?.phone,
+
+            },
+            token: token.replace(/["]/g, ''),
+          });
+        }
+        catch (err: any) {
+          console.log(err);
+        }
+      }
+      if (hasMember2) {
+        try {
+          const responseHasUser1 = await postPersonalInfo({
+            personalData: {
+              address: hasMember2.address,
+              birth_date: hasMember2.birth_date,
+              email: hasMember2.email,
+              mother_name: hasMember2?.mother_name,
+              nif_number: hasMember2?.nif_number,
+              register_name: hasMember2?.register_name,
+              document_type: 'CPF',
+              percentual: hasMember2?.percentual,
+              presumed_income: 0,
+              pep: false,
+              inform: true,
+              member_type: hasMember2.member_type,
+              phone: hasMember2?.phone,
+
+            },
+            token: token.replace(/["]/g, ''),
+          });
+        }
+        catch (err: any) {
+          console.log(err);
+        }
+      }
+    }
   }
-  useEffect(() => {
-    const timer: any =
-      counter > 0 && setInterval(() => setCounter(counter - 1), 1000);
-
-    return () => clearInterval(timer);
-  }, [counter]);
-
-  // async function SendPersonalInfo() {
-  //   setValue('infoPersonProps.document_type', 'CPF');
-  //   setValue('infoPersonProps.member_type', 'OWNER');
-  //   setValue('infoPersonProps.pep', true);
-  //   setValue('infoPersonProps.inform', true);
-  //   const personalData = getValues('infoPersonProps');
-  //   if (personalData && token) {
-  //     try {
-  //       const response = await postPersonalInfo({
-  //         personalData: personalData,
-  //         token: token.replace(/["]/g, ''),
-  //       });
-  //     } catch (err: any) {
-  //       console.log(err);
-  //     }
-  //   }
-  // }
-
-  // console.log(watch('register_name'));
-  const result = async () => {
-    return await trigger('PersonalData.register_name');
-  };
-  console.log(result);
-
+  console.log(watch('ComercialData.hasMember1.email'))
   return (
-    <Box bg="#F0F0F3" h="full" minH="100vh">
-      <Box h="full" w="full" maxW="1200px" mx="auto">
+    <Box bg="#F0F0F3" h="full" minH="100vh" >
+      <Box h="full" w="full" maxW="1200px" mx="auto" >
         <Flex justifyContent="space-between" w="full" align="center" py="30px">
           <Image
             src="/assets/logo-preta.svg"
@@ -217,7 +403,6 @@ export default function OnBoarding() {
             width="150px"
             objectFit="contain"
           />
-          <Text>INTERNET BANKING</Text>
         </Flex>
         <Tabs
           variant="unstyled"
@@ -241,6 +426,8 @@ export default function OnBoarding() {
               setCurrentTab(tab);
             } else if (currentTab === 6) {
               setCurrentTab(tab);
+              // } else if (currentTab === 7) {
+              //   setCurrentTab(tab);
             }
           }}
         >
@@ -275,8 +462,8 @@ export default function OnBoarding() {
                         !permissionTab.includes(key)
                           ? '#ccc'
                           : currentTab === key
-                          ? '#2E4EFF'
-                          : '#21C6DE'
+                            ? '#2E4EFF'
+                            : '#21C6DE'
                       }
                       align="center"
                       justify="center"
@@ -312,9 +499,12 @@ export default function OnBoarding() {
                 currentTab={currentTab}
                 error={formState}
                 register={register}
+                getValues={getValues}
+                setValue={setValue}
                 trigger={trigger}
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
+                document={setDocument}
               />
             </TabPanel>
             <TabPanel>
@@ -322,11 +512,12 @@ export default function OnBoarding() {
                 currentTab={currentTab}
                 error={formState}
                 register={register}
+                trigger={trigger}
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
             </TabPanel>
-            <TabPanel>
+            {/* <TabPanel>
               <FormAuthentication
                 currentTab={currentTab}
                 error={formState}
@@ -334,12 +525,14 @@ export default function OnBoarding() {
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
-            </TabPanel>
+            </TabPanel> */}
             <TabPanel>
               <FormComercialData
                 currentTab={currentTab}
                 error={formState}
                 register={register}
+                trigger={trigger}
+                getValue={getValues}
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
@@ -349,11 +542,12 @@ export default function OnBoarding() {
                 currentTab={currentTab}
                 error={formState}
                 register={register}
+                trigger={trigger}
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
             </TabPanel>
-            <TabPanel>
+            {/* <TabPanel>
               <FormDocuments
                 currentTab={currentTab}
                 error={formState}
@@ -361,17 +555,156 @@ export default function OnBoarding() {
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
-            </TabPanel>
+            </TabPanel> */}
             <TabPanel>
               <FormPassword
                 watch={watch}
                 currentTab={currentTab}
                 error={formState}
                 register={register}
+                trigger={trigger}
                 setCurrentTab={setCurrentTab}
                 setPermissionTab={setPermissionTab}
               />
             </TabPanel>
+            <TabPanel>
+              <Box
+                p="30px"
+                bg="#FFFFFF"
+                borderRadius="6px"
+                borderTop="11px solid #00102A"
+              >
+                <Text fontSize="18px" fontWeight="600">
+                  Revisar Dados
+                </Text>
+                <Flex pt="30px" borderBottom="1px" borderColor="#7F8B9F" justify="space-between">
+                  <Text color="#7F8B9F">
+                    Dados Pessoais
+                  </Text>
+                  <Center cursor="pointer" onClick={() => setCurrentTab(0)}>
+                    <Icon color="#21C6DE" icon="material-symbols:edit" />
+                    <Text color="#21C6DE">
+                      Editar
+                    </Text>
+                  </Center>
+                </Flex>
+                <Box pt="10px" >
+                  <SimpleGrid columns={2} gap={2}>
+                    <Text>Nome: {watch('PersonalData.register_name')}</Text>
+                    <Text>CPF: {watch('PersonalData.nif_number')}</Text>
+                    <Text>Data de Nascimento: {moment(watch('PersonalData.birth_date')).locale('pt-br').format('L')}</Text>
+                    <Text>Nome da Mãe: {watch('PersonalData.mother_name')}</Text>
+                    <Text>Email: {watch('PersonalData.email')}</Text>
+                    <Text>Telefone: {watch('PersonalData.phone.number')}</Text>
+                  </SimpleGrid>
+                </Box>
+                <Flex pt="20px" borderBottom="1px" borderColor="#7F8B9F" justify="space-between">
+                  <Text color="#7F8B9F">
+                    Endereço Pessoal
+                  </Text>
+                  <Center cursor="pointer" onClick={() => setCurrentTab(1)}>
+                    <Icon color="#21C6DE" icon="material-symbols:edit" />
+                    <Text color="#21C6DE">
+                      Editar
+                    </Text>
+                  </Center>
+                </Flex>
+                <Box pt="10px" >
+                  <SimpleGrid columns={2} gap={2}>
+                    <Text>CEP: {watch('AddressPersonal.zip_code')}</Text>
+                    <Text>Logradouro: {watch('AddressPersonal.address_line_one')}</Text>
+                    <Text>Bairro: {moment(watch('AddressPersonal.neighborhood')).locale('pt-br').format('L')}</Text>
+                    <Text>Número: {watch('AddressPersonal.building_number')}</Text>
+                    <Text>Estado: {watch('AddressPersonal.state')}</Text>
+                    <Text>Cidade: {watch('AddressPersonal.city')}</Text>
+                  </SimpleGrid>
+                </Box>
+                <Flex pt="20px" borderBottom="1px" borderColor="#7F8B9F" justify="space-between">
+                  <Text color="#7F8B9F">
+                    Dados Comerciais
+                  </Text>
+                  <Center cursor="pointer" onClick={() => setCurrentTab(3)}>
+                    <Icon color="#21C6DE" icon="material-symbols:edit" />
+                    <Text color="#21C6DE">
+                      Editar
+                    </Text>
+                  </Center>
+                </Flex>
+                <Box pt="10px" >
+                  <SimpleGrid columns={2} gap={2}>
+                    <Text>CNPJ: {watch('ComercialData.nif_number')}</Text>
+                    <Text>Razão Social: {watch('ComercialData.register_name')}</Text>
+                    <Text>Nome Fantasia: {watch('ComercialData.social_name')}</Text>
+                    <Text>Email: {watch('ComercialData.email')}</Text>
+                    <Text>Telefone: {watch('ComercialData.phone_number')}</Text>
+                    <Text>Site: {watch('ComercialData.site')}</Text>
+                    <Text>Tipo de Empresa: {watch('ComercialData.business_type_id')}</Text>
+                    <Text>Porte da Empresa: {watch('ComercialData.size')}</Text>
+                    <Text>Natureza Jurídica: {watch('ComercialData.legal_nature_id')}</Text>
+                    <Text>Faturamento Anual: {watch('ComercialData.annual_billing')}</Text>
+                    <Text>CNAE principal: {watch('ComercialData.cnae')}</Text>
+                  </SimpleGrid>
+                </Box>
+                <Flex pt="20px" borderBottom="1px" borderColor="#7F8B9F" justify="space-between">
+                  <Text color="#7F8B9F">
+                    Endereço Comercial
+                  </Text>
+                  <Center cursor="pointer" onClick={() => setCurrentTab(4)}>
+                    <Icon color="#21C6DE" icon="material-symbols:edit" />
+                    <Text color="#21C6DE">
+                      Editar
+                    </Text>
+                  </Center>
+                </Flex>
+                <Box pt="10px" >
+                  <SimpleGrid columns={2} gap={2}>
+                    <Text>CEP: {watch('CompanyAddress.zip_code')}</Text>
+                    <Text>Logradouro: {watch('CompanyAddress.address_line_one')}</Text>
+                    <Text>Bairro: {moment(watch('CompanyAddress.neighborhood')).locale('pt-br').format('L')}</Text>
+                    <Text>Número: {watch('CompanyAddress.building_number')}</Text>
+                    <Text>Estado: {watch('CompanyAddress.state')}</Text>
+                    <Text>Cidade: {watch('CompanyAddress.city')}</Text>
+                  </SimpleGrid>
+                </Box>
+                <Flex gap={2} pt="20px">
+                  <Checkbox size="lg" isChecked={termsAndPolicy} onChange={(e) => setTermsAndPolicy(e.target.checked)} />
+                  <Text color="#7F8B9F">
+                    Eu concordo com os <Link color="#2E4EFF">Termos de Serviço</Link> e
+                    aceito o <Link color="#2E4EFF">Contrato de Credenciamento</Link>
+                  </Text>
+                </Flex>
+                <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
+                  <Box w="25%">
+                    <Button
+                      bg="#FFF"
+                      w="100%"
+                      border="1px"
+                      borderColor="#2E4EFF"
+                      color="#2E4EFF"
+                      borderRadius="40px"
+                      onClick={() => currentTab !== 0 && setCurrentTab(currentTab - 1)}
+                    >
+                      VOLTAR
+                    </Button>
+                  </Box>
+                  <Box w="25%" as="form" onSubmit={handleSubmit(SendInfo)}>
+                    <Button
+                      bg="#CBD3E0"
+                      w="100%"
+                      border="0"
+                      color="#070A0E"
+                      type="submit"
+                      borderRadius="40px"
+                      disabled={!termsAndPolicy}
+                      _hover={{ background: '#2E4EFF', color: '#FFF' }}
+                    >
+                      ENVIAR
+                    </Button>
+                  </Box>
+                </Flex>
+              </Box>
+            </TabPanel>
+
             {/* <TabPanel py="0">
               
             </TabPanel> */}

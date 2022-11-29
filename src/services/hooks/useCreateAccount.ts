@@ -1,3 +1,4 @@
+import { infoComercialProps, infoPersonProps, password, document } from '~/types/onBoarding';
 import { api } from '../api';
 
 export type dataGenerateTokenProps = {
@@ -11,10 +12,7 @@ export type generateTokenProps = {
   fcm_token: string;
 };
 
-export type infoPersonProps = {
-  token: string;
-  personalData: personalData;
-};
+
 
 export type personalData = {
   document_type: string;
@@ -106,3 +104,74 @@ export async function postPersonalInfo({
     throw err;
   }
 }
+
+
+export async function postComercialInfo({
+  comercialData,
+  token,
+}: infoComercialProps) {
+  try {
+    const { data } = await api.post('/business_accounts', comercialData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+export async function postPassword({
+  passwordData,
+  token,
+}: password) {
+  try {
+    const { data } = await api.post('/identity_server/oauth/users', passwordData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+export async function postDocument({
+  DocumentData,
+  token,
+}: document) {
+  try {
+    const { data } = await api.post('/documents', DocumentData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+export async function GetLegalNature() {
+  try {
+    const { data } = await api.get('/legal_natures');
+    return data;
+  } catch (error: any) {
+    throw error;
+  }
+}
+
+export async function GetBusinessTypes() {
+  try {
+    const { data } = await api.get('/business_types');
+    return data;
+  } catch (error: any) {
+    throw error;
+  }
+}
+

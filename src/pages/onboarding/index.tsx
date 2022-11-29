@@ -27,6 +27,7 @@ export default function OnBoarding() {
         fcm_token: 'string',
       });
       setLocalStorage('clientToken', data.data.access_token);
+      setLocalStorage('userIdentifier', data.data.user_identifier);
     } catch (err: any) {
       console.log(err);
     } finally {
@@ -62,6 +63,27 @@ export default function OnBoarding() {
         ) : (
           <Box pt="60px" w="90%">
             <Box mt="18px">
+              <Box pb="20px">
+                <Text
+                  color="#00102A"
+                  fontSize="18px"
+                  fontWeight="600"
+                  lineHeight="22px"
+                >
+                  ABRIR CONTA
+                </Text>
+              </Box>
+              <Flex pt="40px">
+                <Text
+                  color="#7F8B9F"
+                  fontWeight="400"
+                  lineHeight="20px"
+                >
+                  Antes de começar, confira alguns requisitos essenciais para abrir sua conta para
+                  Pessoa Jurídica IHold
+                </Text>
+                
+              </Flex>
               <Box mt="18px">
                 <Button
                   bg="#FFF"
@@ -73,10 +95,21 @@ export default function OnBoarding() {
                   onClick={() => getToken(1)}
                   isLoading={loading}
                 >
-                  Tipo 1
+                  MEI, EI e EIRELI
                 </Button>
               </Box>
-              <Box mt="18px">
+              <Box pt="40px">
+                <Text
+                  color="#7F8B9F"
+                  fontSize="14px"
+                  fontWeight="400"
+                  lineHeight="17px"
+                >
+                  Clicando em Entrar, você concorda com nossa{' '}
+                  <Link color="#2E4EFF">Política de Privacidade.</Link>
+                </Text>
+              </Box>
+              {/* <Box mt="18px">
                 <Button
                   bg="#FFF"
                   border="1px"
@@ -88,7 +121,7 @@ export default function OnBoarding() {
                 >
                   Tipo 2
                 </Button>
-              </Box>
+              </Box> */}
             </Box>
           </Box>
         )}

@@ -4,6 +4,8 @@ import {
   Button,
   Flex,
   GridItem,
+  Radio,
+  RadioGroup,
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
@@ -12,43 +14,21 @@ import {
   UseFormRegister,
   FieldValues,
   UseFormTrigger,
+  UseFormSetValue,
+  UseFormGetValues,
 } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
-export type FileProps = {
-  path: string;
-  lastModified: number;
-  slice: () => void;
-  stream: () => void;
-  text: () => void;
-  arrayBuffer: ArrayBuffer;
-  name: string;
-  size: number;
-  type: string;
-};
-export interface Client {
-  document_type: string;
-  nif_number: string;
-  register_name: string;
-  social_name: string;
-  birth_date: Date;
-  mother_name: string;
-  email: string;
-  member_type: string;
-  member_qualification: string;
-  proxy_date: Date;
-  percentual: number;
-  presumed_income: number;
-  pep: true;
-  inform: true;
-  phone: {
-    number: string;
-  };
-}
+import { Client, documentType } from '~/types/onBoarding';
+import { getLocalStorage, setLocalStorage } from '~/utils/localStorageFormat';
+
 interface IClientProps {
   register: UseFormRegister<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
   error: FormState<ISchemaCredentials>;
+  getValues: UseFormGetValues<ISchemaCredentials>;
+  setValue: UseFormSetValue<ISchemaCredentials>;
+  document: (string: any) => void;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
@@ -58,11 +38,15 @@ export function FormPersonalData({
   currentTab,
   register,
   trigger,
+  setValue,
   setCurrentTab,
+  getValues,
   setPermissionTab,
+  document,
 }: IClientProps) {
   const dateRef = useRef<HTMLInputElement>(null);
-
+  const [value, setValueID] = React.useState('NATIONAL_ID')
+  document(value)
   return (
     <Box
       p="30px"
@@ -71,12 +55,11 @@ export function FormPersonalData({
       borderTop="11px solid #00102A"
     >
       <Text fontSize="18px" fontWeight="600">
-        Passo {currentTab + 1}/7
+        Passo {currentTab + 1}/5
       </Text>
       <Text pt="10px" pb="30px" color="#7F8B9F">
         Para começar, me fale um pouco mais sobre você
       </Text>
-
       <Flex w="full" justify="space-between">
         <Box w="full" mr="20px">
           <Input
@@ -89,7 +72,7 @@ export function FormPersonalData({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem ipsum"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -157,7 +140,7 @@ export function FormPersonalData({
             border="0px"
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
-            placeholder="Lorem ipsum"
+            placeholder=""
             _focus={{
               borderBottom: '1px solid #2E4EFF',
             }}
@@ -229,9 +212,35 @@ export function FormPersonalData({
       </Flex>
       <Text>Documento de identificação:</Text>
       <Flex w="full" justify="space-between" my="20px">
+        <RadioGroup onChange={setValueID} value={value}>
+          <Flex w="full">
+            <Flex
+              align="center"
+              boxShadow="md"
+              h="50px"
+              borderRadius="4px"
+              mr="10px"
+            >
+              <Radio value="NATIONAL_ID" p="20px" >
+                RG
+              </Radio>
+            </Flex>
+            <Flex
+              align="center"
+              boxShadow="md"
+              h="50px"
+              borderRadius="4px"
+            >
+              <Radio value="NATIONAL_DRIVE_LICENSE" p="20px" >
+                CNH
+              </Radio>
+            </Flex>
+          </Flex>
+        </RadioGroup>
+      </Flex>
+      <Flex w="full" justify="space-between" my="20px">
         <Box w="full" mr="20px">
           <Input
-            name=""
             label="Frente"
             labelColor="#7F8B9F"
             size="sm"
@@ -251,13 +260,12 @@ export function FormPersonalData({
                 display: 'none',
               },
             }}
-            // {...register('key_type')}
-            // error={formState?.errors?.PersonalData??.key_type}
+            {...register('Documents.front_document.file')}
+            error={error.errors?.Documents?.front_document?.file}
           />
         </Box>
         <Box w="full">
           <Input
-            name=""
             label="Verso"
             labelColor="#7F8B9F"
             size="sm"
@@ -276,10 +284,38 @@ export function FormPersonalData({
                 display: 'none',
               },
             }}
-            // {...register('key_type')}
-            // error={formState?.errors?.PersonalData??.key_type}
+            {...register('Documents.back_documment.file')}
+            error={error.errors?.Documents?.back_documment?.file}
           />
         </Box>
+      </Flex>
+      <Flex w="full" justify="space-between" my="20px">
+        <Box w="full" mr="20px">
+          <Input
+            label="Selfie"
+            labelColor="#7F8B9F"
+            size="sm"
+            w="full"
+            type="file"
+            bg="transparent"
+            fontSize="16px"
+            border="0px"
+            borderBottom="1px solid #7F8B9F"
+            borderRadius={0}
+            placeholder="Nenhum documento adicionado"
+            _focus={{
+              borderBottom: '1px solid #2E4EFF',
+            }}
+            sx={{
+              '::file-selector-button': {
+                display: 'none',
+              },
+            }}
+            {...register('Documents.selfie.file')}
+            error={error.errors?.Documents?.selfie?.file}
+          />
+        </Box>
+        <Box w="full" />
       </Flex>
       <Flex gap={5} justify="flex-end" py="20px">
         <Box w="25%">
@@ -305,9 +341,16 @@ export function FormPersonalData({
             borderRadius="40px"
             _hover={{ background: '#2E4EFF', color: '#FFF' }}
             onClick={async () => {
-              const validation = await trigger();
-              console.log(validation);
+              const validation = await trigger([
+                'PersonalData.register_name',
+                'PersonalData.nif_number',
+                'PersonalData.birth_date',
+                'PersonalData.mother_name',
+                'PersonalData.email',
+                'PersonalData.phone.number'
+              ]);
               if (validation) {
+                setLocalStorage('PersonalDataLocal', getValues('PersonalData'));
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 1]);
               }
@@ -316,7 +359,7 @@ export function FormPersonalData({
             SALVAR
           </Button>
         </Box>
-      </Flex>
-    </Box>
+      </Flex >
+    </Box >
   );
 }
