@@ -39,11 +39,7 @@ export function FormPersonalAddress({
       <Text fontSize="18px" fontWeight="600">
         Passo {currentTab + 1}/5
       </Text>
-      <Text
-        pt="10px"
-        pb="30px"
-        color="#7F8B9F"
-      >
+      <Text pt="10px" pb="30px" color="#7F8B9F">
         Para começar, me fale um pouco mais sobre você
       </Text>
       <SimpleGrid columns={4} gap={5}>
@@ -247,7 +243,7 @@ export function FormPersonalAddress({
                 'AddressPersonal.zip_code',
                 'AddressPersonal.neighborhood',
                 'AddressPersonal.city',
-                'AddressPersonal.state'
+                'AddressPersonal.state',
               ]);
               console.log(validation);
               if (validation) {

@@ -130,36 +130,36 @@ export interface ComercialProps {
   social_name: string;
   phone_number: string;
   email: string;
-  birth_date: Date;
+  birth_date?: Date;
   size?: 'MEI' | 'ME' | 'EPP' | 'SMALL' | 'MEDIUM' | 'LARGE';
-  business_type_id: number;
-  legal_nature_id: number;
+  business_type_id?: number;
+  legal_nature_id?: number;
   site: string;
   cnae: string;
   joint_stock: 0;
   annual_billing: 0;
-  address: CompanyAddress
+  address: CompanyAddress;
 }
 
 export interface PersonalProps {
-  document_type: 'CPF';
-  nif_number: string;
-  register_name: string;
+  document_type?: 'CPF';
+  nif_number?: string;
+  register_name?: string;
   social_name?: string;
-  birth_date: Date;
-  mother_name: string;
-  email: string;
-  member_type: 'OWNER';
+  birth_date?: Date;
+  mother_name?: string;
+  email?: string;
+  member_type?: 'OWNER';
   member_qualification?: string;
   proxy_date?: Date;
   percentual?: number;
-  presumed_income: number;
-  pep: false;
-  inform: true;
-  phone: {
-    number: string;
+  presumed_income?: number;
+  pep?: boolean;
+  inform?: boolean;
+  phone?: {
+    number?: string;
   };
-  address: Address;
+  address?: Address;
 }
 
 export type infoPersonProps = {
@@ -178,28 +178,38 @@ export type password = {
 };
 
 export type passwordProps = {
-  name: string,
-  nif_number: string,
-  cell_phone: string,
-  email: string,
-  password: string,
-  password_confirmation: string,
-  user_identifier?: string,
-  client_id?: string,
-  client_secret?: string
-}
+  name: string;
+  nif_number: string;
+  cell_phone: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  user_identifier?: string;
+  client_id?: string;
+  client_secret?: string;
+};
 
 export type documentBody = {
-  side: 'front' | 'back',
-  document_type: string,
-  file: FileProps,
-  description: string
-  file_name: string
-}
+  side: 'front' | 'back';
+  document_type: string;
+  file: FileProps;
+  description: string;
+  file_name: string;
+};
 
 export type documentType = {
-  document_type: 'SELFIE' | 'NATIONAL_ID' | 'NATIONAL_DRIVE_LICENSE' | 'PROOF_OF_RESIDENCY' | 'CPF' | 'CNPJ' | 'QSA' | 'SOCIAL_BALANCE' | 'SOCIAL_CONTRACT' | 'SOCIAL_STATUS',
-}
+  document_type:
+    | 'SELFIE'
+    | 'NATIONAL_ID'
+    | 'NATIONAL_DRIVE_LICENSE'
+    | 'PROOF_OF_RESIDENCY'
+    | 'CPF'
+    | 'CNPJ'
+    | 'QSA'
+    | 'SOCIAL_BALANCE'
+    | 'SOCIAL_CONTRACT'
+    | 'SOCIAL_STATUS';
+};
 
 export type document = {
   token: string;
