@@ -10,7 +10,7 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormRegister, FieldValues, UseFormTrigger, UseFormGetValues } from 'react-hook-form';
+import { FormState, UseFormRegister, FieldValues, UseFormTrigger, UseFormGetValues, UseFormWatch } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
 import { GetBusinessTypes, GetLegalNature } from '~/services/hooks/useCreateAccount';
@@ -29,6 +29,7 @@ interface IComercialDataProps {
   register: UseFormRegister<ISchemaCredentials>;
   error: FormState<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
+  watch: UseFormWatch<ISchemaCredentials>;
   getValue: UseFormGetValues<ISchemaCredentials>
   currentTab: number;
   setCurrentTab: (number: any) => void;
@@ -38,6 +39,7 @@ export function FormComercialData({
   error,
   register,
   currentTab,
+  watch,
   trigger,
   getValue,
   setCurrentTab,
@@ -45,6 +47,8 @@ export function FormComercialData({
 }: IComercialDataProps) {
   const dateRef = useRef<HTMLInputElement>(null);
   const [value, setValueID] = React.useState('1')
+  const [natureID, setNatureID] = React.useState('1')
+
   const { data: legalNature } = useQuery(
     'legal-nature',
     GetLegalNature,
@@ -52,7 +56,10 @@ export function FormComercialData({
       staleTime: 1000 * 60, // 1 minute
     }
   );
-
+  const lastValue = getValue('ComercialData.legal_nature_id') || '1'
+  if (natureID !== lastValue.toString()) {
+    setNatureID(getValue('ComercialData.legal_nature_id').toString())
+  }
   return (
     <Box
       p="30px"
@@ -248,7 +255,7 @@ export function FormComercialData({
               defaultValue="MEI"
               {...register('ComercialData.size')}
             >
-              {legalNature.data.map((item: legalNatureProps, key: number) => (
+              {legalNature && legalNature.data.map((item: legalNatureProps, key: number) => (
                 <option value={item.id} key={key}>
                   {item.name}
                 </option>
@@ -295,52 +302,56 @@ export function FormComercialData({
           />
         </GridItem>
       </SimpleGrid>
-      <Text fontSize="18px" pt="40px" pb="20px" fontWeight="600">
-        Número de membros
-      </Text>
-      <RadioGroup onChange={setValueID} value={value} >
-        <Flex w="full">
-          <Flex
-            align="center"
-            boxShadow="md"
-            h="50px"
-            borderRadius="4px"
-            mr="10px"
-          >
-            <Radio value="1" p="20px" >
-              1
-            </Radio>
-          </Flex>
-          <Flex
-            align="center"
-            boxShadow="md"
-            h="50px"
-            borderRadius="4px"
-          >
-            <Radio value="2" p="20px" >
-              2
-            </Radio>
-          </Flex>
-        </Flex>
-      </RadioGroup>
-      {value === "1" &&
+      {natureID !== '1' &&
         <>
-          <AddMember1
-            error={error}
-            register={register}
-          />
-        </>}
-      {value === "2" &&
-        <>
-          <AddMember1
-            error={error}
-            register={register}
-          />
-          <AddMember2
-            error={error}
-            register={register}
-          />
-        </>}
+          <Text fontSize="18px" pt="40px" pb="20px" fontWeight="600">
+            Número de membros
+          </Text>
+          <RadioGroup onChange={setValueID} value={value} >
+            <Flex w="full">
+              <Flex
+                align="center"
+                boxShadow="md"
+                h="50px"
+                borderRadius="4px"
+                mr="10px"
+              >
+                <Radio value="1" p="20px" >
+                  1
+                </Radio>
+              </Flex>
+              <Flex
+                align="center"
+                boxShadow="md"
+                h="50px"
+                borderRadius="4px"
+              >
+                <Radio value="2" p="20px" >
+                  2
+                </Radio>
+              </Flex>
+            </Flex>
+          </RadioGroup>
+          {value === "1" &&
+            <>
+              <AddMember1
+                error={error}
+                register={register}
+              />
+            </>}
+          {value === "2" &&
+            <>
+              <AddMember1
+                error={error}
+                register={register}
+              />
+              <AddMember2
+                error={error}
+                register={register}
+              />
+            </>}
+        </>
+      }
       <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
         <Box w="25%">
           <Button
@@ -373,7 +384,6 @@ export function FormComercialData({
                 'ComercialData.phone_number',
                 'ComercialData.email',
                 'ComercialData.size',
-                'ComercialData.business_type_id',
                 'ComercialData.legal_nature_id',
                 'ComercialData.site',
                 'ComercialData.cnae',

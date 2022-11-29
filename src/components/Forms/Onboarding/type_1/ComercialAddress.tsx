@@ -5,6 +5,7 @@ import {
   Checkbox,
   Flex,
   GridItem,
+  Select,
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
@@ -133,23 +134,50 @@ export function FormCompanyAddress({
           />
         </GridItem>
         <GridItem colSpan={1}>
-          <Input
-            label="Estado"
-            labelColor="#7F8B9F"
-            size="sm"
-            w="full"
-            bg="transparent"
-            fontSize="16px"
-            border="0px"
-            borderBottom="1px solid #7F8B9F"
-            borderRadius={0}
-            placeholder=""
-            _focus={{
-              borderBottom: '1px solid #2E4EFF',
-            }}
-            {...register('CompanyAddress.state')}
-            error={error.errors?.CompanyAddress?.state}
-          />
+          <Box>
+            <Text color="#7F8B9F" w="full" size="sm" pb="8px">
+              Estado
+            </Text>
+            <Select
+              size="sm"
+              w="full"
+              bg="transparent"
+              border="0px"
+              borderBottom="1px solid #7F8B9F"
+              _focus={{
+                borderBottom: '1px solid #2E4EFF',
+              }}
+              {...register('CompanyAddress.state')}
+            >
+              <option value="AC">Acre</option>
+              <option value="AL">Alagoas</option>
+              <option value="AP">Amapá</option>
+              <option value="AM">Amazonas</option>
+              <option value="BA">Bahia</option>
+              <option value="CE">Ceara</option>
+              <option value="DF">Distrito Federal</option>
+              <option value="ES">Espírito Santo</option>
+              <option value="GO">Goiás</option>
+              <option value="MA">Maranhão</option>
+              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul</option>
+              <option value="MG">Minas Gerais</option>
+              <option value="PA">Pará</option>
+              <option value="PB">Paraíba</option>
+              <option value="PR">Paraná</option>
+              <option value="PE">Pernambuco</option>
+              <option value="PI">Piauí</option>
+              <option value="RJ">Rio de Janeiro</option>
+              <option value="RN">Rio Grande do Norte</option>
+              <option value="RS">Rio Grande do Sul</option>
+              <option value="RO">Rondônia</option>
+              <option value="RR">Roraima</option>
+              <option value="SC">Santa Catarina</option>
+              <option value="SP">São Paulo</option>
+              <option value="SE">Sergipe</option>
+              <option value="TO">Tocantins</option>
+            </Select>
+          </Box>
         </GridItem>
         <GridItem colSpan={1}>
           <Input
