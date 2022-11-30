@@ -61,7 +61,6 @@ export function AddMember({ error, register, control, trigger }: IAddressProps) 
     name: 'ComercialData.hasMember',
     control,
   });
-
   return (
     <>
       {fields &&
@@ -79,7 +78,7 @@ export function AddMember({ error, register, control, trigger }: IAddressProps) 
                 </Text>
                 <Center cursor="pointer">
                   <Icon color="#21C6DE" icon="ic:baseline-delete-forever" />
-                  <Text color="#21C6DE" onClick={() =>  remove(index)}>Deletar Membro</Text>
+                  <Text color="#21C6DE" onClick={() => remove(index)}>Deletar Membro</Text>
                 </Center>
               </Flex>
               <SimpleGrid columns={4} gap={5} pt="40px">
@@ -473,7 +472,6 @@ export function AddMember({ error, register, control, trigger }: IAddressProps) 
                     `ComercialData.hasMember.${index}.address.state`,
                     `ComercialData.hasMember.${index}.address.city`
                   ]);
-                  console.log(validation,"aqio");
                   if (validation) {
                     append(empatyData)
                   }

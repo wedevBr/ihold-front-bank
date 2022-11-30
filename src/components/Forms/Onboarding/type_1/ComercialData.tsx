@@ -59,17 +59,11 @@ export function FormComercialData({
   setPermissionTab,
 }: IComercialDataProps) {
   const dateRef = useRef<HTMLInputElement>(null);
-  const [value, setValueID] = React.useState('1');
-  const [natureID, setNatureID] = React.useState('1');
-
+  const [valueID, setValueID] = React.useState('1');
+  console.log(getValues('ComercialData.legal_nature_id'), 'valor')
   const { data: legalNature } = useQuery('legal-nature', GetLegalNature, {
     staleTime: 1000 * 60, // 1 minute
   });
-  const lastValue = getValues('ComercialData.legal_nature_id') || '1';
-  if (natureID !== lastValue.toString()) {
-    setNatureID(getValues('ComercialData.legal_nature_id').toString());
-  }
-
   const { fields, append, remove } = useFieldArray({
     name: 'ComercialData.hasMember',
     control,
@@ -247,7 +241,9 @@ export function FormComercialData({
               border="0px"
               borderBottom="1px solid #7F8B9F"
               defaultValue="1"
-              {...register('ComercialData.legal_nature_id')}
+              {...register('ComercialData.legal_nature_id', {
+                onChange: () => setValueID('ComercialData.legal_nature_id'),
+              })}
             >
               <option value="1">MEI</option>
               <option value="2">EIRELI</option>
@@ -317,10 +313,8 @@ export function FormComercialData({
           />
         </GridItem>
       </SimpleGrid>
-      {natureID !== '1' && (
-        <>
+      {valueID !== '1' && (
           <AddMember error={error} register={register} control={control} trigger={trigger} />
-        </>
       )}
       <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
         <Box w="25%">
