@@ -9,14 +9,16 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormRegister, UseFormTrigger } from 'react-hook-form';
+import { FormState, UseFormGetValues, UseFormRegister, UseFormTrigger } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
+import { setLocalStorage } from '~/utils/localStorageFormat';
 
 interface ICompanyAddressProps {
   register: UseFormRegister<ISchemaCredentials>;
   error: FormState<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
+  getValues: UseFormGetValues<ISchemaCredentials>;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
@@ -26,6 +28,7 @@ export function FormCompanyAddress({
   register,
   currentTab,
   trigger,
+  getValues,
   setCurrentTab,
   setPermissionTab,
 }: ICompanyAddressProps) {
@@ -259,6 +262,7 @@ export function FormCompanyAddress({
               ]);
               console.log(validation);
               if (validation) {
+                setLocalStorage('CompanyAddressLocal', getValues('CompanyAddress'));
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 4]);
               }

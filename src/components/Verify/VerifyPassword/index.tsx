@@ -60,6 +60,13 @@ export const VerifyPassword = ({ verify }: VerifyPasswordProps) => {
         >
           Pelo menos 1 número
         </Text>
+        <Text color=
+          {verify != undefined ? (/(?=.*[!@#\\$%\\^&\\*])/.test(verify)) ?
+            '#27AE60' : "#F03D3E" : "gray.300"}
+          fontSize="14px"
+        >
+          Conter caracter especial (#@!.$%*)
+        </Text>
       </Box>
     </>
   );

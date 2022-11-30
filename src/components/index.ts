@@ -25,6 +25,7 @@ import { FormCompanyAddress } from './Forms/Onboarding/type_1/ComercialAddress';
 import { FormDocuments } from './Forms/Onboarding/type_1/Documents';
 import { FormPassword } from './Forms/Onboarding/type_1/Password';
 import { FormAuthentication } from './Forms/Onboarding/type_1/Authentication';
+import { AddMember } from './Forms/Onboarding/type_1/AddMember';
 
 export {
   Button,
@@ -54,4 +55,5 @@ export {
   FormDocuments,
   FormPassword,
   FormAuthentication,
+  AddMember,
 };

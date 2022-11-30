@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Control, useFieldArray } from 'react-hook-form';
 import {
   Box,
   Button,
+  Center,
   Flex,
   GridItem,
   Select,
@@ -10,6 +11,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { FormState, UseFormRegister, UseFormTrigger } from 'react-hook-form';
+import { Icon } from '@iconify/react';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
 
@@ -17,6 +19,7 @@ interface IAddressProps {
   control: Control<ISchemaCredentials, any>;
   register: UseFormRegister<ISchemaCredentials>;
   error: FormState<ISchemaCredentials>;
+  trigger: UseFormTrigger<ISchemaCredentials>;
 }
 
 export const empatyData = {
@@ -52,9 +55,8 @@ export const empatyData = {
   social_name: '',
 };
 
-export function AddMember1({ error, register, control }: IAddressProps) {
+export function AddMember({ error, register, control, trigger }: IAddressProps) {
   const dateRef = useRef<HTMLInputElement>(null);
-
   const { fields, append, remove } = useFieldArray({
     name: 'ComercialData.hasMember',
     control,
@@ -62,23 +64,24 @@ export function AddMember1({ error, register, control }: IAddressProps) {
 
   return (
     <>
-      <Text
-        onClick={() => {
-          append(empatyData);
-        }}
-      >
-        Add Member
-      </Text>
       {fields &&
         fields.map((item, index) => (
           <Box key={index}>
             <Box pt="30px">
-              <Text fontSize="18px" fontWeight="600">
-                {`Adicionar membro ${index + 1}`}
-              </Text>
-              <Text onClick={() => remove(index)} color="red">
-                Deletar Membro
-              </Text>
+              <Flex
+                pt="30px"
+                borderBottom="1px"
+                borderColor="#7F8B9F"
+                justify="space-between"
+              >
+                <Text fontSize="18px" fontWeight="600">
+                  {`Membro ${index + 1}`}
+                </Text>
+                <Center cursor="pointer">
+                  <Icon color="#21C6DE" icon="ic:baseline-delete-forever" />
+                  <Text color="#21C6DE" onClick={() =>  remove(index)}>Deletar Membro</Text>
+                </Center>
+              </Flex>
               <SimpleGrid columns={4} gap={5} pt="40px">
                 <GridItem colSpan={2}>
                   <Input
@@ -444,6 +447,41 @@ export function AddMember1({ error, register, control }: IAddressProps) {
                 </GridItem>
               </SimpleGrid>
             </Box>
+            <Button
+              bg="#FFF"
+              mt="30px"
+              w="20%"
+              border="1px"
+              borderColor="#2E4EFF"
+              color="#2E4EFF"
+              borderRadius="40px"
+              onClick={
+                async () => {
+                  const validation = await trigger([
+                    `ComercialData.hasMember.${index}.register_name`,
+                    `ComercialData.hasMember.${index}.nif_number`,
+                    `ComercialData.hasMember.${index}.birth_date`,
+                    `ComercialData.hasMember.${index}.mother_name`,
+                    `ComercialData.hasMember.${index}.phone.number`,
+                    `ComercialData.hasMember.${index}.email`,
+                    `ComercialData.hasMember.${index}.member_type`,
+                    `ComercialData.hasMember.${index}.percentual`,
+                    `ComercialData.hasMember.${index}.address.zip_code`,
+                    `ComercialData.hasMember.${index}.address.address_line_one`,
+                    `ComercialData.hasMember.${index}.address.neighborhood`,
+                    `ComercialData.hasMember.${index}.address.building_number`,
+                    `ComercialData.hasMember.${index}.address.state`,
+                    `ComercialData.hasMember.${index}.address.city`
+                  ]);
+                  console.log(validation,"aqio");
+                  if (validation) {
+                    append(empatyData)
+                  }
+                }
+              }
+            >
+              Adicionar Membro
+            </Button>
           </Box>
         ))}
     </>
