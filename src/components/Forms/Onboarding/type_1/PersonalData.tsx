@@ -28,10 +28,10 @@ interface IClientProps {
   error: FormState<ISchemaCredentials>;
   getValues: UseFormGetValues<ISchemaCredentials>;
   setValue: UseFormSetValue<ISchemaCredentials>;
-  document: (string: any) => void;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
+  setValueID: (string: any) => void;
 }
 export function FormPersonalData({
   error,
@@ -42,11 +42,9 @@ export function FormPersonalData({
   setCurrentTab,
   getValues,
   setPermissionTab,
-  document,
+  setValueID
 }: IClientProps) {
   const dateRef = useRef<HTMLInputElement>(null);
-  const [value, setValueID] = React.useState('NATIONAL_ID')
-  document(value)
   return (
     <Box
       p="30px"
@@ -212,7 +210,7 @@ export function FormPersonalData({
       </Flex>
       <Text>Documento de identificação:</Text>
       <Flex w="full" justify="space-between" my="20px">
-        <RadioGroup onChange={setValueID} value={value}>
+        <RadioGroup onChange={setValueID} >
           <Flex w="full">
             <Flex
               align="center"

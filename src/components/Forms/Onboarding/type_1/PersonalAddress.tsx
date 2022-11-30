@@ -8,13 +8,15 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormRegister, UseFormTrigger } from 'react-hook-form';
+import { FormState, UseFormGetValues, UseFormRegister, UseFormTrigger } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
+import { setLocalStorage } from '~/utils/localStorageFormat';
 
 interface IAddressProps {
   register: UseFormRegister<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
+  getValues: UseFormGetValues<ISchemaCredentials>;
   error: FormState<ISchemaCredentials>;
   currentTab: number;
   setCurrentTab: (number: any) => void;
@@ -25,6 +27,7 @@ export function FormPersonalAddress({
   register,
   currentTab,
   setCurrentTab,
+  getValues,
   trigger,
   setPermissionTab,
 }: IAddressProps) {
@@ -247,6 +250,7 @@ export function FormPersonalAddress({
               ]);
               console.log(validation);
               if (validation) {
+                setLocalStorage('AddressPersonalLocal', getValues('AddressPersonal'));
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 2]);
               }

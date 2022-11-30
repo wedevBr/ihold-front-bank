@@ -26,8 +26,8 @@ import {
   GetLegalNature,
 } from '~/services/hooks/useCreateAccount';
 import { useQuery } from 'react-query';
-import { AddMember1 } from './AddMember1';
-import { AddMember2 } from './AddMember2';
+import { setLocalStorage } from '~/utils/localStorageFormat';
+import { AddMember } from '~/components';
 
 interface legalNatureProps {
   id: number;
@@ -42,7 +42,7 @@ interface IComercialDataProps {
   error: FormState<ISchemaCredentials>;
   trigger: UseFormTrigger<ISchemaCredentials>;
   watch: UseFormWatch<ISchemaCredentials>;
-  getValue: UseFormGetValues<ISchemaCredentials>;
+  getValues: UseFormGetValues<ISchemaCredentials>;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
@@ -54,7 +54,7 @@ export function FormComercialData({
   currentTab,
   watch,
   trigger,
-  getValue,
+  getValues,
   setCurrentTab,
   setPermissionTab,
 }: IComercialDataProps) {
@@ -65,9 +65,9 @@ export function FormComercialData({
   const { data: legalNature } = useQuery('legal-nature', GetLegalNature, {
     staleTime: 1000 * 60, // 1 minute
   });
-  const lastValue = getValue('ComercialData.legal_nature_id') || '1';
+  const lastValue = getValues('ComercialData.legal_nature_id') || '1';
   if (natureID !== lastValue.toString()) {
-    setNatureID(getValue('ComercialData.legal_nature_id').toString());
+    setNatureID(getValues('ComercialData.legal_nature_id').toString());
   }
 
   const { fields, append, remove } = useFieldArray({
@@ -319,40 +319,7 @@ export function FormComercialData({
       </SimpleGrid>
       {natureID !== '1' && (
         <>
-          <Text fontSize="18px" pt="40px" pb="20px" fontWeight="600">
-            Número de membros
-          </Text>
-          <RadioGroup onChange={setValueID} value={value}>
-            <Flex w="full">
-              <Flex
-                align="center"
-                boxShadow="md"
-                h="50px"
-                borderRadius="4px"
-                mr="10px"
-              >
-                <Radio value="1" p="20px">
-                  1
-                </Radio>
-              </Flex>
-              <Flex align="center" boxShadow="md" h="50px" borderRadius="4px">
-                <Radio value="2" p="20px">
-                  2
-                </Radio>
-              </Flex>
-            </Flex>
-          </RadioGroup>
-          {value === '1' && (
-            <>
-              <AddMember1 error={error} register={register} control={control} />
-            </>
-          )}
-          {value === '2' && (
-            <>
-              <AddMember1 error={error} register={register} control={control} />
-              <AddMember1 error={error} register={register} control={control} />
-            </>
-          )}
+          <AddMember error={error} register={register} control={control} trigger={trigger} />
         </>
       )}
       <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
@@ -393,6 +360,7 @@ export function FormComercialData({
               ]);
               console.log(validation);
               if (validation) {
+                setLocalStorage('ComercialDatalLocal', getValues('ComercialData'));
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 3]);
               }
