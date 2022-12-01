@@ -177,57 +177,57 @@ export default function OnBoarding() {
   const steps = [
     {
       title: 'Dados Pessoais',
-      subTitle: 'Lorem ipsum dolor sit amet',
+      subTitle: '',
       iconName: 'bx:user',
       step: 0,
     },
     {
       title: 'Endereço Pessoal',
-      subTitle: 'Lorem ipsum dolor sit amet',
+      subTitle: '',
       iconName: 'akar-icons:location',
       step: 1,
     },
     // {
     //   title: 'Autenticação',
-    //   subTitle: 'Lorem ipsum dolor sit amet',
+    //   subTitle: '',
     //   iconName: 'lucide:user-check',
     //   step: 2,
     // },
     {
       title: 'Dados Comerciais',
-      subTitle: 'Lorem ipsum dolor sit amet',
+      subTitle: '',
       iconName: 'carbon:enterprise',
       step: 2,
     },
     {
       title: 'ENDEREÇO COMERCIAL',
-      subTitle: 'Lorem ipsum dolor sit amet',
+      subTitle: '',
       iconName: 'bx:map',
       step: 3,
     },
     // {
     //   title: 'DOCUMENTAÇÃO',
-    //   subTitle: 'Lorem ipsum dolor sit amet',
+    //   subTitle: '',
     //   iconName: 'ep:document',
     //   step: 5,
     // },
     {
       title: 'SENHA',
-      subTitle: 'Lorem ipsum dolor sit amet',
+      subTitle: '',
       iconName: 'gg:lock',
       step: 4,
     },
   ];
-  console.log(watch('Documents.front_document.file'))
+  console.log(watch('Documents.front_document.file'));
   const [error, setError] = useState<ErrorMessage | null>(null);
   const [loading, setLoading] = useState(true);
   const [counter, setCounter] = useState(10);
   const [termsAndPolicy, setTermsAndPolicy] = useState(false);
   const [document, setDocument] = useState('');
-const [valueID, setValueID] = useState('NATIONAL_ID')
+  const [valueID, setValueID] = useState('NATIONAL_ID');
 
-  async function SendInfo() {
-    console.log("Aqui")
+  async function SendInfo(data: ISchemaCredentials) {
+    console.log('Aqui');
     const token = getLocalStorage('clientToken');
     const userIdentifier = getLocalStorage('userIdentifier');
     // const comercialInfo = getValues('ComercialData');
@@ -288,17 +288,25 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
       // catch (err: any) {
       //   console.log(err);
       // }
+
+      // const objectURL: string = window.URL.createObjectURL(
+      //   data.Documents.front_document.file[0]
+      // );
+      // let file = data.Documents.front_document.file[0];
+
+      // setValue('Documents.front_document.file', file);
+
+      const formData = new FormData();
+      formData.append('description', data.Documents.front_document.description);
+      formData.append('document_type', valueID);
+      formData.append('file', data.Documents.front_document.file[0]);
+      formData.append('side', 'front');
+      formData.append('file_name', 'Front Document');
       try {
-        const responseFrontDocumentInfo = await postDocument({
-          DocumentData: {
-            description: documentInfo.front_document.description,
-            document_type: valueID,
-            file: documentInfo.front_document.file,
-            side: 'front',
-            file_name: 'Front Document',
-          },
-          token: token.replace(/["]/g, ''),
-        });
+        const responseFrontDocumentInfo = await postDocument(
+          formData,
+          token.replace(/["]/g, '')
+        );
       } catch (err: any) {
         console.log(err);
       }
@@ -421,7 +429,7 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
 
   // }, []);
   useEffect(() => {
-    setLoading(false)
+    setLoading(false);
     if (getLocalStorage('PersonalDataLocal')) {
       const PersonalDataLocal = JSON.parse(
         getLocalStorage('PersonalDataLocal') || ''
@@ -452,16 +460,27 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
     }
   }, []);
 
-  return (<>
-    {
-      loading ?
+  return (
+    <>
+      {loading ? (
         <Center h="100vh">
-          < Loading />
+          <Loading />
         </Center>
-        :
+      ) : (
         <Box bg="#F0F0F3" h="full" minH="100vh">
-          <Box h="full" w="full" maxW="1200px" mx="auto" onSubmit={handleSubmit(SendInfo)}>
-            <Flex justifyContent="space-between" w="full" align="center" py="30px">
+          <Box
+            h="full"
+            w="full"
+            maxW="1200px"
+            mx="auto"
+            onSubmit={handleSubmit(SendInfo)}
+          >
+            <Flex
+              justifyContent="space-between"
+              w="full"
+              align="center"
+              py="30px"
+            >
               <Image
                 src="/assets/logo-preta.svg"
                 alt="Logo_iHold"
@@ -527,8 +546,8 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
                             !permissionTab.includes(key)
                               ? '#ccc'
                               : currentTab === key
-                                ? '#2E4EFF'
-                                : '#21C6DE'
+                              ? '#2E4EFF'
+                              : '#21C6DE'
                           }
                           align="center"
                           justify="center"
@@ -672,7 +691,9 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
                           Nome da Mãe: {watch('PersonalData.mother_name')}
                         </Text>
                         <Text>Email: {watch('PersonalData.email')}</Text>
-                        <Text>Telefone: {watch('PersonalData.phone.number')}</Text>
+                        <Text>
+                          Telefone: {watch('PersonalData.phone.number')}
+                        </Text>
                       </SimpleGrid>
                     </Box>
                     <Flex
@@ -691,7 +712,8 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
                       <SimpleGrid columns={2} gap={2}>
                         <Text>CEP: {watch('AddressPersonal.zip_code')}</Text>
                         <Text>
-                          Logradouro: {watch('AddressPersonal.address_line_one')}
+                          Logradouro:{' '}
+                          {watch('AddressPersonal.address_line_one')}
                         </Text>
                         <Text>
                           Bairro:{' '}
@@ -728,20 +750,28 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
                           Nome Fantasia: {watch('ComercialData.social_name')}
                         </Text>
                         <Text>Email: {watch('ComercialData.email')}</Text>
-                        <Text>Telefone: {watch('ComercialData.phone_number')}</Text>
+                        <Text>
+                          Telefone: {watch('ComercialData.phone_number')}
+                        </Text>
                         <Text>Site: {watch('ComercialData.site')}</Text>
                         <Text>
-                          Tipo de Empresa: {watch('ComercialData.business_type_id')}
+                          Tipo de Empresa:{' '}
+                          {watch('ComercialData.business_type_id')}
                         </Text>
-                        <Text>Porte da Empresa: {watch('ComercialData.size')}</Text>
+                        <Text>
+                          Porte da Empresa: {watch('ComercialData.size')}
+                        </Text>
                         <Text>
                           Natureza Jurídica:{' '}
                           {watch('ComercialData.legal_nature_id')}
                         </Text>
                         <Text>
-                          Faturamento Anual: {watch('ComercialData.annual_billing')}
+                          Faturamento Anual:{' '}
+                          {watch('ComercialData.annual_billing')}
                         </Text>
-                        <Text>CNAE principal: {watch('ComercialData.cnae')}</Text>
+                        <Text>
+                          CNAE principal: {watch('ComercialData.cnae')}
+                        </Text>
                       </SimpleGrid>
                     </Box>
                     <Flex
@@ -783,12 +813,13 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
                       />
                       <Text color="#7F8B9F">
                         Eu concordo com os{' '}
-                        <Link color="#2E4EFF">Termos de Serviço</Link> e aceito o{' '}
+                        <Link color="#2E4EFF">Termos de Serviço</Link> e aceito
+                        o{' '}
                         <Link color="#2E4EFF">Contrato de Credenciamento</Link>
                       </Text>
                     </Flex>
                     <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
-                      <Box w="25%" >
+                      <Box w="25%">
                         <Button
                           bg="#FFF"
                           w="100%"
@@ -805,6 +836,9 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
                       </Box>
                       <Box w="25%" as="form">
                         <Button
+                          onClick={() => {
+                            console.log(formState.errors);
+                          }}
                           bg="#CBD3E0"
                           w="100%"
                           border="0"
@@ -838,7 +872,7 @@ const [valueID, setValueID] = useState('NATIONAL_ID')
             </Tabs>
           </Box>
         </Box>
-    }
-  </>
+      )}
+    </>
   );
 }

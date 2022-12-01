@@ -60,7 +60,7 @@ export function FormComercialData({
 }: IComercialDataProps) {
   const dateRef = useRef<HTMLInputElement>(null);
   const [valueID, setValueID] = React.useState('1');
-  console.log(getValues('ComercialData.legal_nature_id'), 'valor')
+  console.log(getValues('ComercialData.legal_nature_id'), 'valor');
   const { data: legalNature } = useQuery('legal-nature', GetLegalNature, {
     staleTime: 1000 * 60, // 1 minute
   });
@@ -314,7 +314,12 @@ export function FormComercialData({
         </GridItem>
       </SimpleGrid>
       {valueID !== '1' && (
-          <AddMember error={error} register={register} control={control} trigger={trigger} />
+        <AddMember
+          error={error}
+          register={register}
+          control={control}
+          trigger={trigger}
+        />
       )}
       <Flex gap={5} justify="flex-end" pb="20px" pt="40px">
         <Box w="25%">
@@ -354,7 +359,10 @@ export function FormComercialData({
               ]);
               console.log(validation);
               if (validation) {
-                setLocalStorage('ComercialDatalLocal', getValues('ComercialData'));
+                setLocalStorage(
+                  'ComercialDatalLocal',
+                  getValues('ComercialData')
+                );
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 3]);
               }

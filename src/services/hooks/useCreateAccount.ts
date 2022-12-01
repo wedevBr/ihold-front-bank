@@ -1,4 +1,9 @@
-import { infoComercialProps, infoPersonProps, password, document } from '~/types/onBoarding';
+import {
+  infoComercialProps,
+  infoPersonProps,
+  password,
+  document,
+} from '~/types/onBoarding';
 import { api } from '../api';
 
 export type dataGenerateTokenProps = {
@@ -11,8 +16,6 @@ export type generateTokenProps = {
   device_id: string;
   fcm_token: string;
 };
-
-
 
 export type personalData = {
   document_type: string;
@@ -105,7 +108,6 @@ export async function postPersonalInfo({
   }
 }
 
-
 export async function postComercialInfo({
   comercialData,
   token,
@@ -123,16 +125,17 @@ export async function postComercialInfo({
   }
 }
 
-export async function postPassword({
-  passwordData,
-  token,
-}: password) {
+export async function postPassword({ passwordData, token }: password) {
   try {
-    const { data } = await api.post('/identity_server/oauth/users', passwordData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const { data } = await api.post(
+      '/identity_server/oauth/users',
+      passwordData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return data;
   } catch (err: any) {
@@ -140,10 +143,7 @@ export async function postPassword({
   }
 }
 
-export async function postDocument({
-  DocumentData,
-  token,
-}: document) {
+export async function postDocument(DocumentData: FormData, token: string) {
   try {
     const { data } = await api.post('/documents', DocumentData, {
       headers: {
@@ -174,4 +174,3 @@ export async function GetBusinessTypes() {
     throw error;
   }
 }
-
