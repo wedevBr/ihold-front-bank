@@ -77,13 +77,14 @@ export interface ComercialData {
   email: string;
   birth_date: Date;
   size: 'MEI' | 'ME' | 'EPP' | 'SMALL' | 'MEDIUM' | 'LARGE';
-  business_type_id: string;
+  business_type_id: number;
   legal_nature_id: number;
   site: string;
   cnae: string;
   joint_stock: 0;
   annual_billing: 0;
   hasMember?: HasMember[];
+  address: CompanyAddress
 }
 
 export interface CompanyAddress {
@@ -108,7 +109,7 @@ export interface Documents {
 }
 
 export interface Password {
-  password: string;
+  password: passwordProps;
 }
 
 export type FileProps = {
@@ -167,7 +168,6 @@ export type infoPersonProps = {
 };
 
 export type infoComercialProps = {
-  token: string;
   comercialData: ComercialProps;
 };
 

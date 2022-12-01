@@ -79,12 +79,12 @@ export function AddMember({
                 justify="space-between"
               >
                 <Text fontSize="18px" fontWeight="600">
-                  {`Membro ${index + 1}`}
+                  {`Sócio ${index + 1}`}
                 </Text>
                 <Center cursor="pointer">
                   <Icon color="#21C6DE" icon="ic:baseline-delete-forever" />
                   <Text color="#21C6DE" onClick={() => remove(index)}>
-                    Deletar Membro
+                    Deletar Sócio
                   </Text>
                 </Center>
               </Flex>
@@ -483,7 +483,7 @@ export function AddMember({
                 }
               }}
             >
-              Adicionar Membro
+              Adicionar Sócio
             </Button>
           </Box>
         ))}
