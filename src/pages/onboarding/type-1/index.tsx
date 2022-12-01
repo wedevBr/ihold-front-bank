@@ -66,6 +66,7 @@ import {
   Password,
 } from '~/types/onBoarding';
 import { empatyData } from '~/components/Forms/Onboarding/type_1/AddMember';
+import { redirectTo } from '~/utils/redirectTo';
 
 export interface ISchemaCredentials {
   PersonalData: Client;
@@ -73,6 +74,15 @@ export interface ISchemaCredentials {
   // Authentication: Auth;
   ComercialData: ComercialData;
   CompanyAddress: CompanyAddress;
+  Documents: Documents;
+  Password: Password;
+}
+
+export interface PostSchema {
+  PersonalData: Client;
+  AddressPersonal: Address;
+  // Authentication: Auth;
+  ComercialData: ComercialProps;
   Documents: Documents;
   Password: Password;
 }
@@ -153,9 +163,16 @@ const onboardingSchema = yup.object().shape({
 });
 
 export default function OnBoarding() {
+
   const [currentTab, setCurrentTab] = useState(0);
   const [permissionTab, setPermissionTab] = useState([0]);
   const [code, setCode] = useState('');
+  const [error, setError] = useState<ErrorMessage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [counter, setCounter] = useState(10);
+  const [termsAndPolicy, setTermsAndPolicy] = useState(false);
+  const [document, setDocument] = useState('');
+  const [valueID, setValueID] = useState('NATIONAL_ID');
   const dateRef = useRef<HTMLInputElement>(null);
   const {
     register,
@@ -174,6 +191,7 @@ export default function OnBoarding() {
       },
     },
   });
+
   const steps = [
     {
       title: 'Dados Pessoais',
@@ -218,16 +236,9 @@ export default function OnBoarding() {
       step: 4,
     },
   ];
-  console.log(watch('Documents.front_document.file'));
-  const [error, setError] = useState<ErrorMessage | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [counter, setCounter] = useState(10);
-  const [termsAndPolicy, setTermsAndPolicy] = useState(false);
-  const [document, setDocument] = useState('');
-  const [valueID, setValueID] = useState('NATIONAL_ID');
+
 
   async function SendInfo(data: ISchemaCredentials) {
-    console.log('Aqui');
     const token = getLocalStorage('clientToken');
     const userIdentifier = getLocalStorage('userIdentifier');
     // const comercialInfo = getValues('ComercialData');
@@ -235,59 +246,60 @@ export default function OnBoarding() {
     // const personalInfo = getValues('PersonalData');
     // const personalAddress = getValues('AddressPersonal');
     // const password = getValues('Password');
-    const documentInfo = getValues('Documents');
+    // const documentInfo = getValues('Documents');
     // const hasMember = getValues('ComercialData.hasMember');
+    setValue('ComercialData.business_type_id', 1)
+    setValue('PersonalData.phone.number', '+55'.concat(getValues('PersonalData.phone.number')))
+    setValue('Password.password.client_id', process.env.NEXT_PUBLIC_CLIENT_ID)
+    setValue('Password.password.client_secret', process.env.NEXT_PUBLIC_CLIENT_SECRET)
     if (token && userIdentifier) {
-      // try {
-      //   const responseComercialInfo = await postComercialInfo({
-      //     comercialData: {
-      //       social_name: comercialInfo.social_name,
-      //       annual_billing: comercialInfo.annual_billing,
-      //       cnae: comercialInfo.cnae,
-      //       email: comercialInfo.email,
-      //       joint_stock: comercialInfo.joint_stock,
-      //       legal_nature_id: comercialInfo.legal_nature_id,
-      //       nif_number: comercialInfo.nif_number,
-      //       business_type_id: 1,
-      //       birth_date: comercialInfo.birth_date,
-      //       size: comercialInfo.size,
-      //       phone_number: comercialInfo.phone_number,
-      //       register_name: comercialInfo.register_name,
-      //       site: comercialInfo.site,
-      //       address: comercialAddress
+      try {
+        const responseComercialInfo = await postComercialInfo(
+          data.ComercialData,
+          token.replace(/["]/g, '')
+        );
+        try {
+          const responsePersonalInfo = await postPersonalInfo(
+            data.PersonalData,
+            token.replace(/["]/g, '')
+          );
+          const formData = new FormData();
+          formData.append('description', data.Documents.front_document.description);
+          formData.append('document_type', valueID);
+          formData.append('file', data.Documents.front_document.file[0]);
+          formData.append('side', 'front');
+          formData.append('file_name', 'Front Document');
+          try {
+            const responseFrontDocumentInfo = await postDocument(
+              formData,
+              token.replace(/["]/g, '')
+            );
+            try {
+              const responsePersonalInfo = await postPassword(
+                data.Password.password,
+                token.replace(/["]/g, '')
+              );
+              redirectTo('/onboarding/underAnalysis');
+            }
+            catch (err: any) {
+              console.log(err);
+              redirectTo('/onboarding/expiredSession');
+            }
+          } catch (err: any) {
+            console.log(err);
+            redirectTo('/onboarding/expiredSession');
+          }
+        }
+        catch (err: any) {
+          console.log(err);
+          redirectTo('/onboarding/expiredSession');
+        }
+      }
+      catch (err: any) {
+        console.log(err);
+        redirectTo('/onboarding/expiredSession');
+      }
 
-      //     },
-      //     token: token.replace(/["]/g, ''),
-      //   });
-      // }
-      // catch (err: any) {
-      //   console.log(err);
-      // }
-      // try {
-      //   const responsePersonalInfo = await postPersonalInfo({
-      //     personalData: {
-      //       address: personalAddress,
-      //       birth_date: personalInfo.birth_date,
-      //       email: personalInfo.email,
-      //       mother_name: personalInfo.mother_name,
-      //       nif_number: personalInfo.nif_number,
-      //       register_name: personalInfo.register_name,
-      //       document_type: 'CPF',
-      //       percentual: 100,
-      //       presumed_income: 0,
-      //       pep: false,
-      //       inform: true,
-      //       member_type: 'OWNER',
-      //       phone: personalInfo.phone,
-
-      //     },
-      //     token: token.replace(/["]/g, ''),
-      //   });
-      //   console.log('responsePersonalInfo', responsePersonalInfo)
-      // }
-      // catch (err: any) {
-      //   console.log(err);
-      // }
 
       // const objectURL: string = window.URL.createObjectURL(
       //   data.Documents.front_document.file[0]
@@ -296,20 +308,7 @@ export default function OnBoarding() {
 
       // setValue('Documents.front_document.file', file);
 
-      const formData = new FormData();
-      formData.append('description', data.Documents.front_document.description);
-      formData.append('document_type', valueID);
-      formData.append('file', data.Documents.front_document.file[0]);
-      formData.append('side', 'front');
-      formData.append('file_name', 'Front Document');
-      try {
-        const responseFrontDocumentInfo = await postDocument(
-          formData,
-          token.replace(/["]/g, '')
-        );
-      } catch (err: any) {
-        console.log(err);
-      }
+
       // try {
       //   const responseBackDocumentInfo = await postDocument({
       //     DocumentData: {
@@ -340,94 +339,10 @@ export default function OnBoarding() {
       // catch (err: any) {
       //   console.log(err);
       // }
-      // try {
-      //   const responsePersonalInfo = await postPassword({
-      //     passwordData: {
-      //       name: personalInfo.register_name,
-      //       nif_number: personalInfo.nif_number,
-      //       cell_phone: '+55'.concat(personalInfo.phone.number),
-      //       email: personalInfo.email,
-      //       password: password.password,
-      //       password_confirmation: password.password,
-      //       user_identifier: userIdentifier,
-      //       client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
-      //       client_secret: process.env.NEXT_PUBLIC_CLIENT_SECRET
-      //     },
-      //     token: token.replace(/["]/g, ''),
-      //   });
-      // }
-      // catch (err: any) {
-      //   console.log(err);
-      // }
-      // if (hasMember1) {
-      //   try {
-      //     const responseHasUser1 = await postPersonalInfo({
-      //       personalData: {
-      //         address: hasMember1.address,
-      //         birth_date: hasMember1.birth_date,
-      //         email: hasMember1.email,
-      //         mother_name: hasMember1?.mother_name,
-      //         nif_number: hasMember1?.nif_number,
-      //         register_name: hasMember1?.register_name,
-      //         document_type: 'CPF',
-      //         percentual: hasMember1?.percentual,
-      //         presumed_income: 0,
-      //         pep: false,
-      //         inform: true,
-      //         member_type: hasMember1.member_type,
-      //         phone: hasMember1?.phone,
 
-      //       },
-      //       token: token.replace(/["]/g, ''),
-      //     });
-      //   }
-      //   catch (err: any) {
-      //     console.log(err);
-      //   }
-      // }
-      // if (hasMember2) {
-      //   try {
-      //     const responseHasUser1 = await postPersonalInfo({
-      //       personalData: {
-      //         address: hasMember2.address,
-      //         birth_date: hasMember2.birth_date,
-      //         email: hasMember2.email,
-      //         mother_name: hasMember2?.mother_name,
-      //         nif_number: hasMember2?.nif_number,
-      //         register_name: hasMember2?.register_name,
-      //         document_type: 'CPF',
-      //         percentual: hasMember2?.percentual,
-      //         presumed_income: 0,
-      //         pep: false,
-      //         inform: true,
-      //         member_type: hasMember2.member_type,
-      //         phone: hasMember2?.phone,
 
-      //       },
-      //       token: token.replace(/["]/g, ''),
-      //     });
-      //   }
-      //   catch (err: any) {
-      //     console.log(err);
-      //   }
-      // }
     }
   }
-  // useEffect(() => {
-  //   setLoading(true)
-  //   const PersonalDataLocal = JSON.parse(getLocalStorage('PersonalDataLocal') ) || '';
-  //   const AddressPersonalLocal = JSON.parse(getLocalStorage('AddressPersonalLocal') || '');
-  //   const ComercialDatalLocal = JSON.parse(getLocalStorage('ComercialDatalLocal') || '');
-  //   const CompanyAddressLocal = JSON.parse(getLocalStorage('CompanyAddressLocal') || '');
-  //   if (PersonalDataLocal && AddressPersonalLocal && ComercialDatalLocal && CompanyAddressLocal) {
-  //     setValue('PersonalData', PersonalDataLocal);
-  //     setValue('AddressPersonal', AddressPersonalLocal);
-  //     setValue('ComercialData', ComercialDatalLocal);
-  //     setValue('CompanyAddress', CompanyAddressLocal);
-  //     setLoading(false)
-  //   }
-
-  // }, []);
   useEffect(() => {
     setLoading(false);
     if (getLocalStorage('PersonalDataLocal')) {
@@ -459,6 +374,10 @@ export default function OnBoarding() {
       }
     }
   }, []);
+  if (!getLocalStorage('clientToken') && !getLocalStorage('userIdentifier')) {
+    redirectTo('/login');
+    return {};
+  }
 
   return (
     <>
@@ -546,8 +465,8 @@ export default function OnBoarding() {
                             !permissionTab.includes(key)
                               ? '#ccc'
                               : currentTab === key
-                              ? '#2E4EFF'
-                              : '#21C6DE'
+                                ? '#2E4EFF'
+                                : '#21C6DE'
                           }
                           align="center"
                           justify="center"

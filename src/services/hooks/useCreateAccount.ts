@@ -3,6 +3,9 @@ import {
   infoPersonProps,
   password,
   document,
+  ComercialProps,
+  PersonalProps,
+  passwordProps,
 } from '~/types/onBoarding';
 import { api } from '../api';
 
@@ -91,10 +94,7 @@ export async function generateToken({
   }
 }
 
-export async function postPersonalInfo({
-  personalData,
-  token,
-}: infoPersonProps) {
+export async function postPersonalInfo(personalData: PersonalProps, token: string) {
   try {
     const { data } = await api.post('/business_members', personalData, {
       headers: {
@@ -108,10 +108,7 @@ export async function postPersonalInfo({
   }
 }
 
-export async function postComercialInfo({
-  comercialData,
-  token,
-}: infoComercialProps) {
+export async function postComercialInfo(comercialData: ComercialProps, token: string) {
   try {
     const { data } = await api.post('/business_accounts', comercialData, {
       headers: {
@@ -125,7 +122,7 @@ export async function postComercialInfo({
   }
 }
 
-export async function postPassword({ passwordData, token }: password) {
+export async function postPassword(passwordData: passwordProps, token: string) {
   try {
     const { data } = await api.post(
       '/identity_server/oauth/users',
