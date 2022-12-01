@@ -191,7 +191,7 @@ export type passwordProps = {
 export type documentBody = {
   side: 'front' | 'back';
   document_type: string;
-  file: FileProps;
+  file: any;
   description: string;
   file_name: string;
 };
@@ -212,5 +212,5 @@ export type documentType = {
 
 export type document = {
   token: string;
-  DocumentData: documentBody;
+  DocumentData: any;
 };
