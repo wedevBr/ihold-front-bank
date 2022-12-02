@@ -84,7 +84,7 @@ export interface ComercialData {
   joint_stock: 0;
   annual_billing: 0;
   hasMember?: HasMember[];
-  address: CompanyAddress
+  address: CompanyAddress;
 }
 
 export interface CompanyAddress {
