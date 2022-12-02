@@ -46,6 +46,8 @@ interface IComercialDataProps {
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
+  setSelectedValueID: (id: string) => void;
+  valueIDSelected: string;
 }
 export function FormComercialData({
   control,
@@ -57,9 +59,11 @@ export function FormComercialData({
   getValues,
   setCurrentTab,
   setPermissionTab,
+  setSelectedValueID,
+  valueIDSelected,
 }: IComercialDataProps) {
   const dateRef = useRef<HTMLInputElement>(null);
-  const [valueID, setValueID] = React.useState('1');
+
   console.log(getValues('ComercialData.legal_nature_id'), 'valor');
   const { data: legalNature } = useQuery('legal-nature', GetLegalNature, {
     staleTime: 1000 * 60, // 1 minute
@@ -242,7 +246,8 @@ export function FormComercialData({
               borderBottom="1px solid #7F8B9F"
               defaultValue="1"
               {...register('ComercialData.legal_nature_id', {
-                onChange: () => setValueID('ComercialData.legal_nature_id'),
+                onChange: () =>
+                  setSelectedValueID('ComercialData.legal_nature_id'),
               })}
             >
               <option value="1">MEI</option>
@@ -313,7 +318,7 @@ export function FormComercialData({
           />
         </GridItem>
       </SimpleGrid>
-      {valueID !== '1' && (
+      {valueIDSelected !== '1' && (
         <AddMember
           error={error}
           register={register}
