@@ -259,6 +259,29 @@ export function FormComercialData({
         <GridItem colSpan={2}>
           <Box>
             <Text color="#7F8B9F" w="full" size="sm" pb="8px">
+              Tamanho da empreza
+            </Text>
+            <Select
+              size="sm"
+              w="full"
+              bg="transparent"
+              border="0px"
+              borderBottom="1px solid #7F8B9F"
+              defaultValue="1"
+              {...register('ComercialData.size')}
+            >
+              <option value="MEI">MEI</option>
+              <option value="ME">ME</option>
+              <option value="EPP">EPP</option>
+              <option value="SMALL">SMALL</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="LARGE">LARGE</option>
+            </Select>
+          </Box>
+        </GridItem>
+        <GridItem colSpan={2}>
+          <Box>
+            <Text color="#7F8B9F" w="full" size="sm" pb="8px">
               Tipo de Empresa
             </Text>
             <Select
