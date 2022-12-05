@@ -139,33 +139,33 @@ export default function OnBoarding() {
       hasMember:
         valueIDSelected !== '1'
           ? yup.array().of(
-              yup.object().shape({
-                register_name: yup.string().required('Nome Obrigatório'),
-                nif_number: yup.string().required('CPF Obrigatório'),
-                birth_date: yup
+            yup.object().shape({
+              register_name: yup.string().required('Nome Obrigatório'),
+              nif_number: yup.string().required('CPF Obrigatório'),
+              birth_date: yup
+                .string()
+                .required('Data de Nascimento Obrigatório'),
+              mother_name: yup.string().required('Nome Obrigatório'),
+              email: yup.string().required('Email Obrigatório'),
+              phone: yup.object().shape({
+                number: yup.string().required('Telefone Obrigatório'),
+              }),
+              percentual: yup.string().required('Porcentagem Obrigatória'),
+              member_type: yup
+                .string()
+                .required('Tipo de Membro Obrigatório'),
+              address: yup.object().shape({
+                address_line_one: yup
                   .string()
-                  .required('Data de Nascimento Obrigatório'),
-                mother_name: yup.string().required('Nome Obrigatório'),
-                email: yup.string().required('Email Obrigatório'),
-                phone: yup.object().shape({
-                  number: yup.string().required('Telefone Obrigatório'),
-                }),
-                percentual: yup.string().required('Porcentagem Obrigatória'),
-                member_type: yup
-                  .string()
-                  .required('Tipo de Membro Obrigatório'),
-                address: yup.object().shape({
-                  address_line_one: yup
-                    .string()
-                    .required('Endereço Obrigatório'),
-                  building_number: yup.string().required('Número Obrigatório'),
-                  zip_code: yup.string().required('CEP Obrigatório'),
-                  neighborhood: yup.string().required('Bairro Obrigatório'),
-                  city: yup.string().required('Cidade Obrigatória'),
-                  state: yup.string().required('Estado Obrigatório'),
-                }),
-              })
-            )
+                  .required('Endereço Obrigatório'),
+                building_number: yup.string().required('Número Obrigatório'),
+                zip_code: yup.string().required('CEP Obrigatório'),
+                neighborhood: yup.string().required('Bairro Obrigatório'),
+                city: yup.string().required('Cidade Obrigatória'),
+                state: yup.string().required('Estado Obrigatório'),
+              }),
+            })
+          )
           : yup.array().notRequired(),
     }),
     CompanyAddress: yup.object().shape({
@@ -266,7 +266,7 @@ export default function OnBoarding() {
         formData,
         token.replace(/["]/g, '')
       );
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async function SendInfo(data: ISchemaCredentials) {
@@ -278,7 +278,9 @@ export default function OnBoarding() {
     // const password = getValues('Password');
     // const documentInfo = getValues('Documents');
     // const hasMember = getValues('ComercialData.hasMember');
-    setValue('ComercialData.business_type_id', 1);
+    setValue('PersonalData.document_type', 'CPF');
+    setValue('PersonalData.member_type', 'OWNER');
+    setValue('ComercialData.legal_nature_id', Number(getValues('ComercialData.legal_nature_id')))
     setValue(
       'PersonalData.phone.number',
       '+55'.concat(getValues('PersonalData.phone.number'))
@@ -290,15 +292,15 @@ export default function OnBoarding() {
     );
     if (token && userIdentifier) {
       try {
-        // const responseComercialInfo = await postComercialInfo(
-        //   data.ComercialData,
-        //   token.replace(/["]/g, '')
-        // );
+        const responseComercialInfo = await postComercialInfo(
+          data.ComercialData,
+          token.replace(/["]/g, '')
+        );
         try {
-          // const responsePersonalInfo = await postPersonalInfo(
-          //   data.PersonalData,
-          //   token.replace(/["]/g, '')
-          // );
+          const responsePersonalInfo = await postPersonalInfo(
+            data.PersonalData,
+            token.replace(/["]/g, '')
+          );
 
           try {
             uploadDocuments({
@@ -322,27 +324,32 @@ export default function OnBoarding() {
               file_name: 'Selfie Document',
               side: 'front',
             });
+            if (data.ComercialData.hasMember !== undefined) {
+              try {
+                const responseHasMemberInfo = await postPersonalInfo(
+                  data.ComercialData.hasMember,
+                  token.replace(/["]/g, '')
+                );
+              } catch (err: any) {
+                console.log(err);
+              }
+            }
             try {
               const responsePersonalInfo = await postPassword(
                 data.Password.password,
                 token.replace(/["]/g, '')
               );
-              // redirectTo('/onboarding/underAnalysis');
             } catch (err: any) {
               console.log(err);
-              // redirectTo('/onboarding/expiredSession');
             }
           } catch (err: any) {
             console.log(err);
-            // redirectTo('/onboarding/expiredSession');
           }
         } catch (err: any) {
           console.log(err);
-          // redirectTo('/onboarding/expiredSession');
         }
       } catch (err: any) {
         console.log(err);
-        // redirectTo('/onboarding/expiredSession');
       }
 
       // const objectURL: string = window.URL.createObjectURL(
@@ -423,10 +430,10 @@ export default function OnBoarding() {
       }
     }
   }, []);
-  if (!getLocalStorage('clientToken') && !getLocalStorage('userIdentifier')) {
-    redirectTo('/login');
-    return {};
-  }
+  // if (!getLocalStorage('clientToken') && !getLocalStorage('userIdentifier')) {
+  //   redirectTo('/login');
+  //   return {};
+  // }
 
   return (
     <>
@@ -514,8 +521,8 @@ export default function OnBoarding() {
                             !permissionTab.includes(key)
                               ? '#ccc'
                               : currentTab === key
-                              ? '#2E4EFF'
-                              : '#21C6DE'
+                                ? '#2E4EFF'
+                                : '#21C6DE'
                           }
                           align="center"
                           justify="center"
