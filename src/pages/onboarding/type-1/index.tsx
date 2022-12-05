@@ -414,6 +414,14 @@ export default function OnBoarding() {
         setValue('CompanyAddress', CompanyAddressLocal);
       }
     }
+    if (getLocalStorage('DocumentsDataLocal')) {
+      const DocumentsDataLocal = JSON.parse(
+        getLocalStorage('DocumentsDataLocal') || ''
+      );
+      if (DocumentsDataLocal) {
+        setValue('Documents', DocumentsDataLocal);
+      }
+    }
   }, []);
   if (!getLocalStorage('clientToken') && !getLocalStorage('userIdentifier')) {
     redirectTo('/login');
