@@ -391,10 +391,10 @@ export function FormComercialData({
               ]);
               console.log(validation);
               if (validation) {
-                // setLocalStorage(
-                //   'ComercialDatalLocal',
-                //   getValues('ComercialData')
-                // );
+                setLocalStorage(
+                  'ComercialDatalLocal',
+                  getValues('ComercialData')
+                );
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 3]);
               }
