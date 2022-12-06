@@ -42,7 +42,7 @@ export function FormPersonalData({
   setCurrentTab,
   getValues,
   setPermissionTab,
-  setValueID
+  setValueID,
 }: IClientProps) {
   const dateRef = useRef<HTMLInputElement>(null);
   return (
@@ -210,7 +210,7 @@ export function FormPersonalData({
       </Flex>
       <Text>Documento de identificação:</Text>
       <Flex w="full" justify="space-between" my="20px">
-        <RadioGroup onChange={setValueID} >
+        <RadioGroup onChange={setValueID}>
           <Flex w="full">
             <Flex
               align="center"
@@ -219,17 +219,12 @@ export function FormPersonalData({
               borderRadius="4px"
               mr="10px"
             >
-              <Radio value="NATIONAL_ID" p="20px" >
+              <Radio value="NATIONAL_ID" p="20px">
                 RG
               </Radio>
             </Flex>
-            <Flex
-              align="center"
-              boxShadow="md"
-              h="50px"
-              borderRadius="4px"
-            >
-              <Radio value="NATIONAL_DRIVE_LICENSE" p="20px" >
+            <Flex align="center" boxShadow="md" h="50px" borderRadius="4px">
+              <Radio value="NATIONAL_DRIVE_LICENSE" p="20px">
                 CNH
               </Radio>
             </Flex>
@@ -345,7 +340,7 @@ export function FormPersonalData({
                 'PersonalData.birth_date',
                 'PersonalData.mother_name',
                 'PersonalData.email',
-                'PersonalData.phone.number'
+                'PersonalData.phone.number',
               ]);
               if (validation) {
                 setLocalStorage('PersonalDataLocal', getValues('PersonalData'));
@@ -353,11 +348,15 @@ export function FormPersonalData({
                 setPermissionTab((prev: any) => [...prev, 1]);
               }
             }}
+            // onClick={() => {
+            //   setCurrentTab((current: any) => current + 1);
+            //   setPermissionTab((prev: any) => [...prev, 2]);
+            // }}
           >
             SALVAR
           </Button>
         </Box>
-      </Flex >
-    </Box >
+      </Flex>
+    </Box>
   );
 }

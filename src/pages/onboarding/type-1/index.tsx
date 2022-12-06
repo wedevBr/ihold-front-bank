@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -93,96 +93,99 @@ type ErrorMessage = {
   error?: boolean;
 };
 
+const onboardingSchema = yup.object().shape({
+  PersonalData: yup.object().shape({
+    register_name: yup.string().required('Nome Obrigatório'),
+    nif_number: yup.string().required('CPF Obrigatório'),
+    birth_date: yup.string().required('Data de Nascimento Obrigatório'),
+    mother_name: yup.string().required('Nome Obrigatório'),
+    email: yup.string().required('Email Obrigatório'),
+    phone: yup.object().shape({
+      number: yup.string().required('Telefone Obrigatório'),
+    }),
+  }),
+  AddressPersonal: yup.object().shape({
+    address_line_one: yup.string().required('Endereço Obrigatório'),
+    building_number: yup.string().required('Número Obrigatório'),
+    zip_code: yup.string().required('CEP Obrigatório'),
+    neighborhood: yup.string().required('Bairro Obrigatório'),
+    city: yup.string().required('Cidade Obrigatória'),
+    state: yup.string().required('Estado Obrigatório'),
+  }),
+  ComercialData: yup.object().shape({
+    nif_number: yup.string().required('CNPJ Obrigatório'),
+    register_name: yup.string().required('Razão social Obrigatória'),
+    social_name: yup.string().required('Nome Fantasia Obrigatório'),
+    phone_number: yup.string().required('Telefone Obrigatório'),
+    email: yup.string().required('Email Obrigatório'),
+    size: yup.string().required('Porte da Empresa Obrigatório'),
+    // business_type_id: yup.string().required('Tipo Obrigatório'),
+    legal_nature_id: yup.string().required('Natureza Jurídica Obrigatória'),
+    site: yup.string().required('Site Obrigatório'),
+    cnae: yup.string().required('CNAE Obrigatório'),
+    annual_billing: yup.string().required('Faturamento Anual Obrigatório'),
+    hasMember: yup.array().of(
+      yup.object().shape({
+        register_name: yup.string().required('Nome Obrigatório'),
+        nif_number: yup.string().required('CPF Obrigatório'),
+        birth_date: yup.string().required('Data de Nascimento Obrigatório'),
+        mother_name: yup.string().required('Nome Obrigatório'),
+        email: yup.string().required('Email Obrigatório'),
+        phone: yup.object().shape({
+          number: yup.string().required('Telefone Obrigatório'),
+        }),
+        percentual: yup.string().required('Porcentagem Obrigatória'),
+        member_type: yup.string().required('Tipo de Membro Obrigatório'),
+        address: yup.object().shape({
+          address_line_one: yup.string().required('Endereço Obrigatório'),
+          building_number: yup.string().required('Número Obrigatório'),
+          zip_code: yup.string().required('CEP Obrigatório'),
+          neighborhood: yup.string().required('Bairro Obrigatório'),
+          city: yup.string().required('Cidade Obrigatória'),
+          state: yup.string().required('Estado Obrigatório'),
+        }),
+      })
+    ),
+  }),
+  CompanyAddress: yup.object().shape({
+    address_line_one: yup.string().required('Endereço Obrigatório'),
+    building_number: yup.string().required('Número Obrigatório'),
+    zip_code: yup.number().required('CEP Obrigatório'),
+    neighborhood: yup.string().required('Bairro Obrigatório'),
+    city: yup.string().required('Cidade Obrigatória'),
+    state: yup.string().required('Estado Obrigatório'),
+  }),
+  Password: yup.object().shape({
+    password: yup
+      .string()
+      .required('')
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/, ''),
+  }),
+});
+
 export default function OnBoarding() {
   const [currentTab, setCurrentTab] = useState(0);
   const [permissionTab, setPermissionTab] = useState([0]);
   const [code, setCode] = useState('');
   const [error, setError] = useState<ErrorMessage | null>(null);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [counter, setCounter] = useState(10);
   const [termsAndPolicy, setTermsAndPolicy] = useState(false);
   const [document, setDocument] = useState('');
   const [valueID, setValueID] = useState('NATIONAL_ID');
   const [valueIDSelected, setSelectedValueID] = React.useState('1');
   const dateRef = useRef<HTMLInputElement>(null);
-  const onboardingSchema = yup.object().shape({
-    PersonalData: yup.object().shape({
-      register_name: yup.string().required('Nome Obrigatório'),
-      nif_number: yup.string().required('CPF Obrigatório'),
-      birth_date: yup.string().required('Data de Nascimento Obrigatório'),
-      mother_name: yup.string().required('Nome Obrigatório'),
-      email: yup.string().required('Email Obrigatório'),
-      phone: yup.object().shape({
-        number: yup.string().required('Telefone Obrigatório'),
-      }),
-    }),
-    AddressPersonal: yup.object().shape({
-      address_line_one: yup.string().required('Endereço Obrigatório'),
-      building_number: yup.string().required('Número Obrigatório'),
-      zip_code: yup.string().required('CEP Obrigatório'),
-      neighborhood: yup.string().required('Bairro Obrigatório'),
-      city: yup.string().required('Cidade Obrigatória'),
-      state: yup.string().required('Estado Obrigatório'),
-    }),
-    ComercialData: yup.object().shape({
-      nif_number: yup.string().required('CNPJ Obrigatório'),
-      register_name: yup.string().required('Razão social Obrigatória'),
-      social_name: yup.string().required('Nome Fantasia Obrigatório'),
-      phone_number: yup.string().required('Telefone Obrigatório'),
-      email: yup.string().required('Email Obrigatório'),
-      size: yup.string().required('Porte da Empresa Obrigatório'),
-      // business_type_id: yup.string().required('Tipo Obrigatório'),
-      legal_nature_id: yup.string().required('Natureza Jurídica Obrigatória'),
-      site: yup.string().required('Site Obrigatório'),
-      cnae: yup.string().required('CNAE Obrigatório'),
-      annual_billing: yup.string().required('Faturamento Anual Obrigatório'),
-      hasMember:
-        valueIDSelected !== '1'
-          ? yup.array().of(
-              yup.object().shape({
-                register_name: yup.string().required('Nome Obrigatório'),
-                nif_number: yup.string().required('CPF Obrigatório'),
-                birth_date: yup
-                  .string()
-                  .required('Data de Nascimento Obrigatório'),
-                mother_name: yup.string().required('Nome Obrigatório'),
-                email: yup.string().required('Email Obrigatório'),
-                phone: yup.object().shape({
-                  number: yup.string().required('Telefone Obrigatório'),
-                }),
-                percentual: yup.string().required('Porcentagem Obrigatória'),
-                member_type: yup
-                  .string()
-                  .required('Tipo de Membro Obrigatório'),
-                address: yup.object().shape({
-                  address_line_one: yup
-                    .string()
-                    .required('Endereço Obrigatório'),
-                  building_number: yup.string().required('Número Obrigatório'),
-                  zip_code: yup.string().required('CEP Obrigatório'),
-                  neighborhood: yup.string().required('Bairro Obrigatório'),
-                  city: yup.string().required('Cidade Obrigatória'),
-                  state: yup.string().required('Estado Obrigatório'),
-                }),
-              })
-            )
-          : yup.array().notRequired(),
-    }),
-    CompanyAddress: yup.object().shape({
-      address_line_one: yup.string().required('Endereço Obrigatório'),
-      building_number: yup.string().required('Número Obrigatório'),
-      zip_code: yup.number().required('CEP Obrigatório'),
-      neighborhood: yup.string().required('Bairro Obrigatório'),
-      city: yup.string().required('Cidade Obrigatória'),
-      state: yup.string().required('Estado Obrigatório'),
-    }),
-    Password: yup.object().shape({
-      password: yup
-        .string()
-        .required('')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/, ''),
-    }),
-  });
+
+  function getInitValues() {
+    return valueIDSelected !== '1' ? [empatyData] : [];
+  }
+  const initialValues = useMemo(() => {
+    if (valueIDSelected !== '1') {
+      return [empatyData];
+    }
+    return [];
+  }, [valueIDSelected]);
+
   const {
     register,
     handleSubmit,
@@ -194,12 +197,12 @@ export default function OnBoarding() {
     getValues,
   } = useForm<ISchemaCredentials>({
     resolver: yupResolver(onboardingSchema),
-    defaultValues: {
-      ComercialData: {
-        hasMember: valueIDSelected !== '1' ? [empatyData] : [],
-      },
-    },
   });
+
+  useEffect(() => {
+    setValue('ComercialData.hasMember', initialValues);
+  }, [valueIDSelected]);
+  console.log({ initialValues });
 
   const steps = [
     {
@@ -385,7 +388,7 @@ export default function OnBoarding() {
     }
   }
   useEffect(() => {
-    setLoading(false);
+    // setLoading(false);
     if (getLocalStorage('PersonalDataLocal')) {
       const PersonalDataLocal = JSON.parse(
         getLocalStorage('PersonalDataLocal') || ''
@@ -415,11 +418,12 @@ export default function OnBoarding() {
       }
     }
   }, []);
-  if (!getLocalStorage('clientToken') && !getLocalStorage('userIdentifier')) {
-    redirectTo('/login');
-    return {};
-  }
-
+  // if (!getLocalStorage('clientToken') && !getLocalStorage('userIdentifier')) {
+  //   // redirectTo('/login');
+  //   return {};
+  // }
+  console.log(formState.errors);
+  let loading = false;
   return (
     <>
       {loading ? (
