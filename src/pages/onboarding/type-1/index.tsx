@@ -281,7 +281,12 @@ export default function OnBoarding() {
     // const password = getValues('Password');
     // const documentInfo = getValues('Documents');
     // const hasMember = getValues('ComercialData.hasMember');
-    setValue('ComercialData.business_type_id', 1);
+    setValue('PersonalData.document_type', 'CPF');
+    setValue('PersonalData.member_type', 'OWNER');
+    setValue(
+      'ComercialData.legal_nature_id',
+      Number(getValues('ComercialData.legal_nature_id'))
+    );
     setValue(
       'PersonalData.phone.number',
       '+55'.concat(getValues('PersonalData.phone.number'))
@@ -293,15 +298,15 @@ export default function OnBoarding() {
     );
     if (token && userIdentifier) {
       try {
-        // const responseComercialInfo = await postComercialInfo(
-        //   data.ComercialData,
-        //   token.replace(/["]/g, '')
-        // );
+        const responseComercialInfo = await postComercialInfo(
+          data.ComercialData,
+          token.replace(/["]/g, '')
+        );
         try {
-          // const responsePersonalInfo = await postPersonalInfo(
-          //   data.PersonalData,
-          //   token.replace(/["]/g, '')
-          // );
+          const responsePersonalInfo = await postPersonalInfo(
+            data.PersonalData,
+            token.replace(/["]/g, '')
+          );
 
           try {
             uploadDocuments({
@@ -325,66 +330,36 @@ export default function OnBoarding() {
               file_name: 'Selfie Document',
               side: 'front',
             });
+
+            if (data.ComercialData.hasMember && valueIDSelected !== '1') {
+              try {
+                data.ComercialData.hasMember?.map(async (member) => {
+                  const responseHasMemberInfo = await postPersonalInfo(
+                    member,
+                    token.replace(/["]/g, '')
+                  );
+                });
+              } catch (err: any) {
+                console.log(err);
+              }
+            }
             try {
               const responsePersonalInfo = await postPassword(
                 data.Password.password,
                 token.replace(/["]/g, '')
               );
-              // redirectTo('/onboarding/underAnalysis');
             } catch (err: any) {
               console.log(err);
-              // redirectTo('/onboarding/expiredSession');
             }
           } catch (err: any) {
             console.log(err);
-            // redirectTo('/onboarding/expiredSession');
           }
         } catch (err: any) {
           console.log(err);
-          // redirectTo('/onboarding/expiredSession');
         }
       } catch (err: any) {
         console.log(err);
-        // redirectTo('/onboarding/expiredSession');
       }
-
-      // const objectURL: string = window.URL.createObjectURL(
-      //   data.Documents.front_document.file[0]
-      // );
-      // let file = data.Documents.front_document.file[0];
-
-      // setValue('Documents.front_document.file', file);
-
-      // try {
-      //   const responseBackDocumentInfo = await postDocument({
-      //     DocumentData: {
-      //       description: documentInfo.back_documment.description,
-      //       document_type: valueID,
-      //       file: documentInfo.back_documment.file,
-      //       side: 'back',
-      //       file_name: 'Back Document'
-      //     },
-      //     token: token.replace(/["]/g, ''),
-      //   });
-      // }
-      // catch (err: any) {
-      //   console.log(err);
-      // }
-      // try {
-      //   const responseSelfieInfo = await postDocument({
-      //     DocumentData: {
-      //       description: documentInfo.selfie.description,
-      //       document_type: 'SELFIE',
-      //       file: documentInfo.selfie.file,
-      //       side: 'front',
-      //       file_name: 'Selfie document'
-      //     },
-      //     token: token.replace(/["]/g, ''),
-      //   });
-      // }
-      // catch (err: any) {
-      //   console.log(err);
-      // }
     }
   }
   useEffect(() => {
@@ -415,6 +390,14 @@ export default function OnBoarding() {
       );
       if (CompanyAddressLocal) {
         setValue('CompanyAddress', CompanyAddressLocal);
+      }
+    }
+    if (getLocalStorage('DocumentsDataLocal')) {
+      const DocumentsDataLocal = JSON.parse(
+        getLocalStorage('DocumentsDataLocal') || ''
+      );
+      if (DocumentsDataLocal) {
+        setValue('Documents', DocumentsDataLocal);
       }
     }
   }, []);

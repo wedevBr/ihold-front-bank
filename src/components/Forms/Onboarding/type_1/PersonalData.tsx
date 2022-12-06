@@ -210,7 +210,7 @@ export function FormPersonalData({
       </Flex>
       <Text>Documento de identificação:</Text>
       <Flex w="full" justify="space-between" my="20px">
-        <RadioGroup onChange={setValueID}>
+        <RadioGroup onChange={setValueID} defaultValue="NATIONAL_ID">
           <Flex w="full">
             <Flex
               align="center"
@@ -341,9 +341,13 @@ export function FormPersonalData({
                 'PersonalData.mother_name',
                 'PersonalData.email',
                 'PersonalData.phone.number',
+                'Documents.back_documment.file',
+                'Documents.front_document.file',
+                'Documents.selfie.file',
               ]);
               if (validation) {
                 setLocalStorage('PersonalDataLocal', getValues('PersonalData'));
+                setLocalStorage('DocumentsDataLocal', getValues('Documents'));
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 1]);
               }
