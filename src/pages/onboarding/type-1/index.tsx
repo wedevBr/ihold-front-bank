@@ -273,14 +273,10 @@ export default function OnBoarding() {
   }
 
   async function SendInfo(data: ISchemaCredentials) {
+    console.log('Entrou');
+
     const userIdentifier = getLocalStorage('userIdentifier');
-    // const comercialInfo = getValues('ComercialData');
-    // const comercialAddress = getValues('CompanyAddress');
-    // const personalInfo = getValues('PersonalData');
-    // const personalAddress = getValues('AddressPersonal');
-    // const password = getValues('Password');
-    // const documentInfo = getValues('Documents');
-    // const hasMember = getValues('ComercialData.hasMember');
+
     setValue('PersonalData.document_type', 'CPF');
     setValue('PersonalData.member_type', 'OWNER');
     setValue(
@@ -312,6 +308,9 @@ export default function OnBoarding() {
               //Add percentual input
               percentual: 50,
               //Add presumed_income input
+              proxy_date: moment(data.PersonalData.proxy_date).format(
+                'YYYY-MM-DD'
+              ),
               presumed_income: 1,
               phone: {
                 number: data.PersonalData.phone.number,
@@ -322,25 +321,27 @@ export default function OnBoarding() {
 
           try {
             uploadDocuments({
-              description: data.Documents.front_document.description,
-              document_type: valueID,
-              file: data.Documents.front_document.file[0],
-              file_name: 'Front Document',
-              side: 'front',
-            });
-            uploadDocuments({
-              description: data.Documents.back_documment.description,
-              document_type: valueID,
-              file: data.Documents.back_documment.file[0],
-              file_name: 'Back Document',
-              side: 'back',
-            });
-            uploadDocuments({
               description: data.Documents.selfie.description,
-              document_type: valueID,
+              document_type: 'SELFIE',
               file: data.Documents.selfie.file[0],
               file_name: 'Selfie Document',
               side: 'front',
+            }).finally(() => {
+              uploadDocuments({
+                description: data.Documents.front_document.description,
+                document_type: valueID,
+                file: data.Documents.front_document.file[0],
+                file_name: 'Front Document',
+                side: 'front',
+              }).finally(() => {
+                uploadDocuments({
+                  description: data.Documents.back_documment.description,
+                  document_type: valueID,
+                  file: data.Documents.back_documment.file[0],
+                  file_name: 'Back Document',
+                  side: 'back',
+                });
+              });
             });
 
             if (data.ComercialData.hasMember && valueIDSelected !== '1') {
@@ -350,6 +351,9 @@ export default function OnBoarding() {
                     {
                       ...member,
                       address: data.AddressPersonal,
+                      proxy_date: moment(data.PersonalData.proxy_date).format(
+                        'YYYY-MM-DD'
+                      ),
                     },
                     token.replace(/["]/g, '')
                   );
@@ -362,10 +366,13 @@ export default function OnBoarding() {
               const responsePersonalInfo = await postPassword(
                 {
                   ...data.Password,
-                  cell_phone: `+55${data.PersonalData.phone.number}`,
-                  email: data.PersonalData.email,
-                  name: data.PersonalData.register_name,
-                  nif_number: data.PersonalData.nif_number,
+                  cell_phone: `+55${data.ComercialData.phone_number}`,
+                  email: data.ComercialData.email,
+                  name: data.ComercialData.register_name,
+                  nif_number: +String(data.ComercialData.nif_number).replace(
+                    /\D/g,
+                    ''
+                  ),
                   user_identifier: userIdentifier,
                   password: data.Password.password,
                   password_confirmation: data.Password.password,
