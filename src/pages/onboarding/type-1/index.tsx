@@ -291,13 +291,13 @@ export default function OnBoarding() {
     setValue('Password.client_secret', process.env.NEXT_PUBLIC_CLIENT_SECRET);
     if (token && userIdentifier) {
       try {
-        // const responseComercialInfo = await postComercialInfo(
-        //   {
-        //     ...data.ComercialData,
-        //     address: data.CompanyAddress,
-        //   },
-        //   token.replace(/["]/g, '')
-        // );
+        const responseComercialInfo = await postComercialInfo(
+          {
+            ...data.ComercialData,
+            address: data.CompanyAddress,
+          },
+          token.replace(/["]/g, '')
+        );
         try {
           const responsePersonalInfo = await postPersonalInfo(
             {
