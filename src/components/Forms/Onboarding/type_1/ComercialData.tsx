@@ -246,7 +246,7 @@ export function FormComercialData({
               border="0px"
               borderBottom="1px solid #7F8B9F"
               defaultValue="1"
-              {...register('ComercialData.legal_nature_id', {
+              {...register('ComercialData.business_type_id', {
                 onChange: (e) => {
                   setSelectedValueID(e.target.value);
                   setSelected(e.target.value);
@@ -294,7 +294,7 @@ export function FormComercialData({
               border="0px"
               borderBottom="1px solid #7F8B9F"
               defaultValue="MEI"
-              {...register('ComercialData.size')}
+              {...register('ComercialData.legal_nature_id')}
             >
               {legalNature &&
                 legalNature.data.map((item: legalNatureProps, key: number) => (
