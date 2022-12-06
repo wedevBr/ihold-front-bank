@@ -8,7 +8,12 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormGetValues, UseFormRegister, UseFormTrigger } from 'react-hook-form';
+import {
+  FormState,
+  UseFormGetValues,
+  UseFormRegister,
+  UseFormTrigger,
+} from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
 import { setLocalStorage } from '~/utils/localStorageFormat';
@@ -250,11 +255,18 @@ export function FormPersonalAddress({
               ]);
               console.log(validation);
               if (validation) {
-                setLocalStorage('AddressPersonalLocal', getValues('AddressPersonal'));
+                setLocalStorage(
+                  'AddressPersonalLocal',
+                  getValues('AddressPersonal')
+                );
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 2]);
               }
             }}
+            // onClick={() => {
+            //   setCurrentTab((current: any) => current + 1);
+            //   setPermissionTab((prev: any) => [...prev, 2]);
+            // }}
           >
             SALVAR
           </Button>

@@ -68,6 +68,7 @@ export function AddMember({
   });
   return (
     <>
+      <Text onClick={() => append(empatyData)}>Add</Text>
       {fields &&
         fields.map((item, index) => (
           <Box key={index}>

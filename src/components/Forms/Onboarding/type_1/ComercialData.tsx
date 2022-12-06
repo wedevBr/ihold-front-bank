@@ -63,6 +63,7 @@ export function FormComercialData({
   valueIDSelected,
 }: IComercialDataProps) {
   const dateRef = useRef<HTMLInputElement>(null);
+  const [selected, setSelected] = useState('1');
 
   console.log(getValues('ComercialData.legal_nature_id'), 'valor');
   const { data: legalNature } = useQuery('legal-nature', GetLegalNature, {
@@ -246,8 +247,10 @@ export function FormComercialData({
               borderBottom="1px solid #7F8B9F"
               defaultValue="1"
               {...register('ComercialData.legal_nature_id', {
-                onChange: () =>
-                  setSelectedValueID('ComercialData.legal_nature_id'),
+                onChange: (e) => {
+                  setSelectedValueID(e.target.value);
+                  setSelected(e.target.value);
+                },
               })}
             >
               <option value="1">MEI</option>
@@ -341,7 +344,7 @@ export function FormComercialData({
           />
         </GridItem>
       </SimpleGrid>
-      {valueIDSelected !== '1' && (
+      {selected !== '1' && (
         <AddMember
           error={error}
           register={register}
@@ -384,13 +387,14 @@ export function FormComercialData({
                 'ComercialData.site',
                 'ComercialData.cnae',
                 'ComercialData.annual_billing',
+                'ComercialData.hasMember',
               ]);
               console.log(validation);
               if (validation) {
-                setLocalStorage(
-                  'ComercialDatalLocal',
-                  getValues('ComercialData')
-                );
+                // setLocalStorage(
+                //   'ComercialDatalLocal',
+                //   getValues('ComercialData')
+                // );
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 3]);
               }

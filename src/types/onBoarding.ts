@@ -18,7 +18,6 @@ export interface Client {
   };
 }
 
-
 export interface HasMember {
   document_type: string;
   nif_number: string;
