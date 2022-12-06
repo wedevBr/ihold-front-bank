@@ -179,7 +179,7 @@ export interface PersonalProps {
   email?: string;
   member_type?: string;
   member_qualification?: string;
-  proxy_date?: Date;
+  proxy_date?: string;
   percentual?: number;
   presumed_income?: number;
   pep?: boolean;
@@ -206,7 +206,7 @@ export type password = {
 
 export type passwordProps = {
   name: string;
-  nif_number: string;
+  nif_number: number;
   cell_phone: string;
   email: string;
   password: string;
