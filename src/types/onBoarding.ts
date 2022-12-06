@@ -129,7 +129,15 @@ export interface Documents {
 }
 
 export interface Password {
-  password: passwordProps;
+  name: string;
+  nif_number: string;
+  cell_phone: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  user_identifier?: string;
+  client_id?: string;
+  client_secret?: string;
 }
 
 export type FileProps = {

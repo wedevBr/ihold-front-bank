@@ -287,24 +287,36 @@ export default function OnBoarding() {
       'ComercialData.legal_nature_id',
       Number(getValues('ComercialData.legal_nature_id'))
     );
-    setValue(
-      'PersonalData.phone.number',
-      '+55'.concat(getValues('PersonalData.phone.number'))
-    );
-    setValue('Password.password.client_id', process.env.NEXT_PUBLIC_CLIENT_ID);
-    setValue(
-      'Password.password.client_secret',
-      process.env.NEXT_PUBLIC_CLIENT_SECRET
-    );
+    // setValue(
+    //   'PersonalData.phone.number',
+    //   '+55'.concat(getValues('PersonalData.phone.number'))
+    // );
+    setValue('Password.client_id', process.env.NEXT_PUBLIC_CLIENT_ID);
+    setValue('Password.client_secret', process.env.NEXT_PUBLIC_CLIENT_SECRET);
     if (token && userIdentifier) {
       try {
-        const responseComercialInfo = await postComercialInfo(
-          data.ComercialData,
-          token.replace(/["]/g, '')
-        );
+        // const responseComercialInfo = await postComercialInfo(
+        //   {
+        //     ...data.ComercialData,
+        //     address: data.CompanyAddress,
+        //   },
+        //   token.replace(/["]/g, '')
+        // );
         try {
           const responsePersonalInfo = await postPersonalInfo(
-            data.PersonalData,
+            {
+              ...data.PersonalData,
+              pep: true,
+              inform: true,
+              address: data.AddressPersonal,
+              //Add percentual input
+              percentual: 50,
+              //Add presumed_income input
+              presumed_income: 1,
+              phone: {
+                number: data.PersonalData.phone.number,
+              },
+            },
             token.replace(/["]/g, '')
           );
 
@@ -335,7 +347,10 @@ export default function OnBoarding() {
               try {
                 data.ComercialData.hasMember?.map(async (member) => {
                   const responseHasMemberInfo = await postPersonalInfo(
-                    member,
+                    {
+                      ...member,
+                      address: data.AddressPersonal,
+                    },
                     token.replace(/["]/g, '')
                   );
                 });
@@ -345,7 +360,16 @@ export default function OnBoarding() {
             }
             try {
               const responsePersonalInfo = await postPassword(
-                data.Password.password,
+                {
+                  ...data.Password,
+                  cell_phone: `+55${data.PersonalData.phone.number}`,
+                  email: data.PersonalData.email,
+                  name: data.PersonalData.register_name,
+                  nif_number: data.PersonalData.nif_number,
+                  user_identifier: userIdentifier,
+                  password: data.Password.password,
+                  password_confirmation: data.Password.password,
+                },
                 token.replace(/["]/g, '')
               );
             } catch (err: any) {

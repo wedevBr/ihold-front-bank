@@ -263,10 +263,6 @@ export function FormPersonalAddress({
                 setPermissionTab((prev: any) => [...prev, 2]);
               }
             }}
-            // onClick={() => {
-            //   setCurrentTab((current: any) => current + 1);
-            //   setPermissionTab((prev: any) => [...prev, 2]);
-            // }}
           >
             SALVAR
           </Button>
