@@ -264,7 +264,7 @@ export function AddMember({
                 </GridItem>
                 <GridItem colSpan={2}>
                   <Input
-                    label="Percentual da empresa"
+                    label="Participação da empresa"
                     labelColor="#7F8B9F"
                     size="sm"
                     w="full"

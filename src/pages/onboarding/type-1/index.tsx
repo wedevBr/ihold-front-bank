@@ -175,7 +175,7 @@ export default function OnBoarding() {
   const [valueID, setValueID] = useState('NATIONAL_ID');
   const [valueIDSelected, setSelectedValueID] = React.useState('1');
   const dateRef = useRef<HTMLInputElement>(null);
-
+  
   function getInitValues() {
     return valueIDSelected !== '1' ? [empatyData] : [];
   }
@@ -379,6 +379,7 @@ export default function OnBoarding() {
                 },
                 token.replace(/["]/g, '')
               );
+              redirectTo('/onboarding/underAnalysis');
             } catch (err: any) {
               console.log(err);
             }
@@ -436,7 +437,6 @@ export default function OnBoarding() {
   //   // redirectTo('/login');
   //   return {};
   // }
-  console.log(formState.errors);
   let loading = false;
   return (
     <>
@@ -602,6 +602,8 @@ export default function OnBoarding() {
                     setPermissionTab={setPermissionTab}
                     setSelectedValueID={setSelectedValueID}
                     valueIDSelected={valueIDSelected}
+                    setValues={setValue}
+                    token={token ? token.replace(/["]/g, '') : ''}
                   />
                 </TabPanel>
                 <TabPanel>
@@ -613,6 +615,7 @@ export default function OnBoarding() {
                     setCurrentTab={setCurrentTab}
                     setPermissionTab={setPermissionTab}
                     getValues={getValues}
+                    setValues={setValue}
                   />
                 </TabPanel>
                 {/* <TabPanel>
@@ -659,20 +662,20 @@ export default function OnBoarding() {
                     </Flex>
                     <Box pt="10px">
                       <SimpleGrid columns={2} gap={2}>
-                        <Text>Nome: {watch('PersonalData.register_name')}</Text>
-                        <Text>CPF: {watch('PersonalData.nif_number')}</Text>
+                        <Text>Nome: {getValues('PersonalData.register_name')}</Text>
+                        <Text>CPF: {getValues('PersonalData.nif_number')}</Text>
                         <Text>
                           Data de Nascimento:{' '}
-                          {moment(watch('PersonalData.birth_date'))
+                          {moment(getValues('PersonalData.birth_date'))
                             .locale('pt-br')
                             .format('L')}
                         </Text>
                         <Text>
-                          Nome da Mãe: {watch('PersonalData.mother_name')}
+                          Nome da Mãe: {getValues('PersonalData.mother_name')}
                         </Text>
-                        <Text>Email: {watch('PersonalData.email')}</Text>
+                        <Text>Email: {getValues('PersonalData.email')}</Text>
                         <Text>
-                          Telefone: {watch('PersonalData.phone.number')}
+                          Telefone: {getValues('PersonalData.phone.number')}
                         </Text>
                       </SimpleGrid>
                     </Box>
@@ -690,22 +693,22 @@ export default function OnBoarding() {
                     </Flex>
                     <Box pt="10px">
                       <SimpleGrid columns={2} gap={2}>
-                        <Text>CEP: {watch('AddressPersonal.zip_code')}</Text>
+                        <Text>CEP: {getValues('AddressPersonal.zip_code')}</Text>
                         <Text>
                           Logradouro:{' '}
-                          {watch('AddressPersonal.address_line_one')}
+                          {getValues('AddressPersonal.address_line_one')}
                         </Text>
                         <Text>
                           Bairro:{' '}
-                          {moment(watch('AddressPersonal.neighborhood'))
+                          {moment(getValues('AddressPersonal.neighborhood'))
                             .locale('pt-br')
                             .format('L')}
                         </Text>
                         <Text>
-                          Número: {watch('AddressPersonal.building_number')}
+                          Número: {getValues('AddressPersonal.building_number')}
                         </Text>
-                        <Text>Estado: {watch('AddressPersonal.state')}</Text>
-                        <Text>Cidade: {watch('AddressPersonal.city')}</Text>
+                        <Text>Estado: {getValues('AddressPersonal.state')}</Text>
+                        <Text>Cidade: {getValues('AddressPersonal.city')}</Text>
                       </SimpleGrid>
                     </Box>
                     <Flex
@@ -722,35 +725,35 @@ export default function OnBoarding() {
                     </Flex>
                     <Box pt="10px">
                       <SimpleGrid columns={2} gap={2}>
-                        <Text>CNPJ: {watch('ComercialData.nif_number')}</Text>
+                        <Text>CNPJ: {getValues('ComercialData.nif_number')}</Text>
                         <Text>
-                          Razão Social: {watch('ComercialData.register_name')}
+                          Razão Social: {getValues('ComercialData.register_name')}
                         </Text>
                         <Text>
-                          Nome Fantasia: {watch('ComercialData.social_name')}
+                          Nome Fantasia: {getValues('ComercialData.social_name')}
                         </Text>
-                        <Text>Email: {watch('ComercialData.email')}</Text>
+                        <Text>Email: {getValues('ComercialData.email')}</Text>
                         <Text>
-                          Telefone: {watch('ComercialData.phone_number')}
+                          Telefone: {getValues('ComercialData.phone_number')}
                         </Text>
-                        <Text>Site: {watch('ComercialData.site')}</Text>
+                        <Text>Site: {getValues('ComercialData.site')}</Text>
                         <Text>
                           Tipo de Empresa:{' '}
-                          {watch('ComercialData.business_type_id')}
+                          {getValues('ComercialData.business_type_id')}
                         </Text>
                         <Text>
-                          Porte da Empresa: {watch('ComercialData.size')}
+                          Porte da Empresa: {getValues('ComercialData.size')}
                         </Text>
                         <Text>
                           Natureza Jurídica:{' '}
-                          {watch('ComercialData.legal_nature_id')}
+                          {getValues('ComercialData.legal_nature_id')}
                         </Text>
                         <Text>
                           Faturamento Anual:{' '}
-                          {watch('ComercialData.annual_billing')}
+                          {getValues('ComercialData.annual_billing')}
                         </Text>
                         <Text>
-                          CNAE principal: {watch('ComercialData.cnae')}
+                          CNAE principal: {getValues('ComercialData.cnae')}
                         </Text>
                       </SimpleGrid>
                     </Box>
@@ -768,21 +771,21 @@ export default function OnBoarding() {
                     </Flex>
                     <Box pt="10px">
                       <SimpleGrid columns={2} gap={2}>
-                        <Text>CEP: {watch('CompanyAddress.zip_code')}</Text>
+                        <Text>CEP: {getValues('CompanyAddress.zip_code')}</Text>
                         <Text>
-                          Logradouro: {watch('CompanyAddress.address_line_one')}
+                          Logradouro: {getValues('CompanyAddress.address_line_one')}
                         </Text>
                         <Text>
                           Bairro:{' '}
-                          {moment(watch('CompanyAddress.neighborhood'))
+                          {moment(getValues('CompanyAddress.neighborhood'))
                             .locale('pt-br')
                             .format('L')}
                         </Text>
                         <Text>
-                          Número: {watch('CompanyAddress.building_number')}
+                          Número: {getValues('CompanyAddress.building_number')}
                         </Text>
-                        <Text>Estado: {watch('CompanyAddress.state')}</Text>
-                        <Text>Cidade: {watch('CompanyAddress.city')}</Text>
+                        <Text>Estado: {getValues('CompanyAddress.state')}</Text>
+                        <Text>Cidade: {getValues('CompanyAddress.city')}</Text>
                       </SimpleGrid>
                     </Box>
                     <Flex gap={2} pt="20px">

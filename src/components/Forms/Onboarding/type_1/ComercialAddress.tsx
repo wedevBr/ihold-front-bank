@@ -9,7 +9,7 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import { FormState, UseFormGetValues, UseFormRegister, UseFormTrigger } from 'react-hook-form';
+import { FormState, UseFormGetValues, UseFormRegister, UseFormSetValue, UseFormTrigger } from 'react-hook-form';
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
 import { setLocalStorage } from '~/utils/localStorageFormat';
@@ -22,6 +22,7 @@ interface ICompanyAddressProps {
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
+  setValues: UseFormSetValue<ISchemaCredentials>;
 }
 export function FormCompanyAddress({
   error,
@@ -31,6 +32,7 @@ export function FormCompanyAddress({
   getValues,
   setCurrentTab,
   setPermissionTab,
+  setValues,
 }: ICompanyAddressProps) {
   return (
     <Box
