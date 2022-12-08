@@ -21,6 +21,7 @@ interface IInputProps extends ChakraInputProps {
   bgPlaceholder?: string;
   label?: string;
   error?: any;
+  setSearchCnpj?: (search: boolean) => void;
 }
 
 const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
@@ -33,12 +34,18 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
     bgFocus,
     bgPlaceholder,
     label,
+    setSearchCnpj,
     error = null,
     ...rest
   },
   ref
 ) => {
   const [visible, setVisible] = useState(false);
+  const search = () => {
+    if (setSearchCnpj) {
+      setSearchCnpj(true)
+    }
+  }
   return (
     <Box pos="relative">
       <FormControl isInvalid={!!error}>
@@ -102,6 +109,24 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
               width="20px"
               color={iconColor || '#21C6DE'}
               icon={'fa6-solid:paperclip'}
+            />
+          </Flex>
+        )}
+        {rest.type === 'cnpj' && (
+          <Flex
+            position="absolute"
+            right="10px"
+            top={error ? '53%' : label ? '60%' : '35%'}
+            mb="25px"
+          >
+            <Icon
+              width="20px"
+              cursor="pointer"
+              color={iconColor || '#444'}
+              onClick={() => search()}
+              icon={
+                visible ? 'ant-design:eye-invisible-outlined' : 'akar-icons:eye'
+              }
             />
           </Flex>
         )}

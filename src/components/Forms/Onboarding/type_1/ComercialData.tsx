@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Control, useFieldArray } from 'react-hook-form';
+import { Control, useFieldArray, UseFormSetValue } from 'react-hook-form';
 import {
   Box,
   Button,
   Flex,
   GridItem,
-  Radio,
-  RadioGroup,
   Select,
   SimpleGrid,
   Text,
@@ -14,7 +12,6 @@ import {
 import {
   FormState,
   UseFormRegister,
-  FieldValues,
   UseFormTrigger,
   UseFormGetValues,
   UseFormWatch,
@@ -22,12 +19,12 @@ import {
 import { Input } from '~/components/input';
 import { ISchemaCredentials } from '~/pages/onboarding/type-1';
 import {
-  GetBusinessTypes,
   GetLegalNature,
 } from '~/services/hooks/useCreateAccount';
 import { useQuery } from 'react-query';
 import { setLocalStorage } from '~/utils/localStorageFormat';
 import { AddMember } from '~/components';
+import { api } from '~/services/api';
 
 interface legalNatureProps {
   id: number;
@@ -43,11 +40,14 @@ interface IComercialDataProps {
   trigger: UseFormTrigger<ISchemaCredentials>;
   watch: UseFormWatch<ISchemaCredentials>;
   getValues: UseFormGetValues<ISchemaCredentials>;
+  setValues: UseFormSetValue<ISchemaCredentials>;
   currentTab: number;
   setCurrentTab: (number: any) => void;
   setPermissionTab: (number: any) => void;
   setSelectedValueID: (id: string) => void;
   valueIDSelected: string;
+  token: string
+  // setIncomeCnpjData: (searchCnpj: searchCNPJ) => void
 }
 export function FormComercialData({
   control,
@@ -60,12 +60,13 @@ export function FormComercialData({
   setCurrentTab,
   setPermissionTab,
   setSelectedValueID,
+  setValues,
   valueIDSelected,
+  token,
 }: IComercialDataProps) {
   const dateRef = useRef<HTMLInputElement>(null);
   const [selected, setSelected] = useState('1');
-
-  console.log(getValues('ComercialData.legal_nature_id'), 'valor');
+  const [searchCnpj, setSearchCnpj] = useState(false);
   const { data: legalNature } = useQuery('legal-nature', GetLegalNature, {
     staleTime: 1000 * 60, // 1 minute
   });
@@ -73,6 +74,50 @@ export function FormComercialData({
     name: 'ComercialData.hasMember',
     control,
   });
+
+
+  async function search() {
+    if (searchCnpj === true) {
+      try {
+        const { data } = await api.get(
+          `/data_query/${getValues('ComercialData.nif_number')}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setValues('ComercialData.register_name', data?.nome?.conteudo?.nome)
+        setValues('ComercialData.social_name', data?.nome?.conteudo?.nome_fantasia)
+        setValues('ComercialData.email', data?.emails?.conteudo[0]?.email)
+        setValues('ComercialData.phone_number', data?.pesquisa_telefones?.conteudo?.outros[0]?.ddd.concat(data?.pesquisa_telefones?.conteudo?.outros[0]?.telefone))
+        setValues('ComercialData.birth_date', data?.nome?.conteudo?.data_nascimento)
+        setValues('ComercialData.cnae', data?.nome?.conteudo?.cnae_primaria.concat(' - ' + data?.nome?.conteudo?.descricao_cnae_primaria))
+        setValues('CompanyAddress.address_line_one', data?.pesquisa_enderecos?.conteudo[0]?.logradouro + ' ' + data?.pesquisa_enderecos?.conteudo[0]?.endereco)
+        setValues('CompanyAddress.zip_code', data?.pesquisa_enderecos?.conteudo[0]?.cep)
+        setValues('CompanyAddress.neighborhood', data?.pesquisa_enderecos?.conteudo[0]?.bairro)
+        setValues('CompanyAddress.building_number', data?.pesquisa_enderecos?.conteudo[0]?.numero)
+        setValues('CompanyAddress.state', data?.pesquisa_enderecos?.conteudo[0]?.uf)
+        setValues('CompanyAddress.city', data?.pesquisa_enderecos?.conteudo[0]?.cidade)
+      
+        
+        // setValues('CompanyAddress.address_line_one', data?.pesquisa_enderecos?.conteudo?.logradouro.concat(' ' + data?.pesquisa_enderecos?.conteudo?.endereco))
+        // setValues('CompanyAddress.zip_code', data?.pesquisa_enderecos?.conteudo[0]?.cep)
+        // setValues('CompanyAddress.neighborhood', data?.pesquisa_enderecos?.conteudo[0]?.bairro)
+        // setValues('CompanyAddress.building_number', data?.pesquisa_enderecos?.conteudo[0]?.numero)
+        // setValues('CompanyAddress.state', data?.pesquisa_enderecos?.conteudo[0]?.uf)
+        // setValues('CompanyAddress.city', data?.pesquisa_enderecos?.conteudo[0]?.cidade)
+      } catch (error) {
+      }
+      setSearchCnpj(false)
+
+    }
+  }
+
+  useEffect(() => {
+    search()
+  })
+
   return (
     <Box
       p="30px"
@@ -96,8 +141,10 @@ export function FormComercialData({
             size="sm"
             w="full"
             bg="transparent"
+            type="cnpj"
             fontSize="16px"
             border="0px"
+            setSearchCnpj={setSearchCnpj}
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
             placeholder="00000000000000/0000"
@@ -299,7 +346,7 @@ export function FormComercialData({
               {legalNature &&
                 legalNature.data.map((item: legalNatureProps, key: number) => (
                   <option value={item.id} key={key}>
-                    {item.name}
+                    {item.full_name}
                   </option>
                 ))}
             </Select>
@@ -395,6 +442,7 @@ export function FormComercialData({
                   'ComercialDatalLocal',
                   getValues('ComercialData')
                 );
+                setLocalStorage('CompanyAddressLocal', getValues('CompanyAddress'));
                 setCurrentTab((current: any) => current + 1);
                 setPermissionTab((prev: any) => [...prev, 3]);
               }

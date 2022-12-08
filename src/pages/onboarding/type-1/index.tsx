@@ -65,6 +65,7 @@ import {
   documentBody,
   Documents,
   Password,
+  searchCNPJ,
 } from '~/types/onBoarding';
 import { empatyData } from '~/components/Forms/Onboarding/type_1/AddMember';
 import { redirectTo } from '~/utils/redirectTo';
@@ -175,7 +176,7 @@ export default function OnBoarding() {
   const [valueID, setValueID] = useState('NATIONAL_ID');
   const [valueIDSelected, setSelectedValueID] = React.useState('1');
   const dateRef = useRef<HTMLInputElement>(null);
-
+  
   function getInitValues() {
     return valueIDSelected !== '1' ? [empatyData] : [];
   }
@@ -379,6 +380,7 @@ export default function OnBoarding() {
                 },
                 token.replace(/["]/g, '')
               );
+              redirectTo('/onboarding/underAnalysis');
             } catch (err: any) {
               console.log(err);
             }
@@ -436,7 +438,6 @@ export default function OnBoarding() {
   //   // redirectTo('/login');
   //   return {};
   // }
-  console.log(formState.errors);
   let loading = false;
   return (
     <>
@@ -602,6 +603,8 @@ export default function OnBoarding() {
                     setPermissionTab={setPermissionTab}
                     setSelectedValueID={setSelectedValueID}
                     valueIDSelected={valueIDSelected}
+                    setValues={setValue}
+                    token={token ? token.replace(/["]/g, '') : ''}
                   />
                 </TabPanel>
                 <TabPanel>
@@ -613,6 +616,7 @@ export default function OnBoarding() {
                     setCurrentTab={setCurrentTab}
                     setPermissionTab={setPermissionTab}
                     getValues={getValues}
+                    setValues={setValue}
                   />
                 </TabPanel>
                 {/* <TabPanel>
