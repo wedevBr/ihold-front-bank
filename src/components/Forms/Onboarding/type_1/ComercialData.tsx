@@ -67,6 +67,7 @@ export function FormComercialData({
   const dateRef = useRef<HTMLInputElement>(null);
   const [selected, setSelected] = useState('1');
   const [searchCnpj, setSearchCnpj] = useState(false);
+  const [loading, setLoading] = useState(true)
   const { data: legalNature } = useQuery('legal-nature', GetLegalNature, {
     staleTime: 1000 * 60, // 1 minute
   });
@@ -78,6 +79,7 @@ export function FormComercialData({
 
   async function search() {
     if (searchCnpj === true) {
+      setLoading(true)
       try {
         const { data } = await api.get(
           `/data_query/${getValues('ComercialData.nif_number')}`,
@@ -99,19 +101,11 @@ export function FormComercialData({
         setValues('CompanyAddress.building_number', data?.pesquisa_enderecos?.conteudo[0]?.numero)
         setValues('CompanyAddress.state', data?.pesquisa_enderecos?.conteudo[0]?.uf)
         setValues('CompanyAddress.city', data?.pesquisa_enderecos?.conteudo[0]?.cidade)
-      
-        
-        // setValues('CompanyAddress.address_line_one', data?.pesquisa_enderecos?.conteudo?.logradouro.concat(' ' + data?.pesquisa_enderecos?.conteudo?.endereco))
-        // setValues('CompanyAddress.zip_code', data?.pesquisa_enderecos?.conteudo[0]?.cep)
-        // setValues('CompanyAddress.neighborhood', data?.pesquisa_enderecos?.conteudo[0]?.bairro)
-        // setValues('CompanyAddress.building_number', data?.pesquisa_enderecos?.conteudo[0]?.numero)
-        // setValues('CompanyAddress.state', data?.pesquisa_enderecos?.conteudo[0]?.uf)
-        // setValues('CompanyAddress.city', data?.pesquisa_enderecos?.conteudo[0]?.cidade)
       } catch (error) {
       }
       setSearchCnpj(false)
-
     }
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -147,6 +141,7 @@ export function FormComercialData({
             setSearchCnpj={setSearchCnpj}
             borderBottom="1px solid #7F8B9F"
             borderRadius={0}
+            isLoading={loading}
             placeholder="00000000000000/0000"
             _focus={{
               borderBottom: '1px solid #2E4EFF',
