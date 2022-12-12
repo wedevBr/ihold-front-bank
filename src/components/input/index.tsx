@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { FieldError } from 'react-hook-form';
 import { Icon } from '@iconify/react';
+import { Loading } from '../Loading';
 // import { FieldError } from 'react-hook-form';
 
 interface IInputProps extends ChakraInputProps {
@@ -21,6 +22,8 @@ interface IInputProps extends ChakraInputProps {
   bgPlaceholder?: string;
   label?: string;
   error?: any;
+  isLoading?: boolean
+  setSearchCnpj?: (search: boolean) => void;
 }
 
 const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
@@ -33,12 +36,19 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
     bgFocus,
     bgPlaceholder,
     label,
+    setSearchCnpj,
+    isLoading,
     error = null,
     ...rest
   },
   ref
 ) => {
   const [visible, setVisible] = useState(false);
+  const search = () => {
+    if (setSearchCnpj) {
+      setSearchCnpj(true)
+    }
+  }
   return (
     <Box pos="relative">
       <FormControl isInvalid={!!error}>
@@ -50,6 +60,7 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
         <ChakraInput
           pr={rest.type === 'password' ? '35px' : ''}
           name={name}
+          cursor="pointer"
           id={name}
           fontSize="14px"
           variant="filled"
@@ -88,6 +99,39 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, IInputProps> = (
                 visible ? 'ant-design:eye-invisible-outlined' : 'akar-icons:eye'
               }
             />
+          </Flex>
+        )}
+        {rest.type === 'file' && (
+          <Flex
+            position="absolute"
+            right="10px"
+            top={error ? '53%' : label ? '60%' : '35%'}
+            mb="25px"
+          >
+            <Icon
+              width="20px"
+              color={iconColor || '#21C6DE'}
+              icon={'fa6-solid:paperclip'}
+            />
+          </Flex>
+        )}
+        {rest.type === 'cnpj' && (
+          <Flex
+            position="absolute"
+            right="10px"
+            top={error ? '53%' : label ? '60%' : '35%'}
+            mb="25px"
+          >
+            {isLoading ?
+              < Loading /> :
+              <Icon
+                width="20px"
+                cursor="pointer"
+                color={iconColor || '#444'}
+                onClick={() => search()}
+                icon={'material-symbols:search'}
+              />
+            }
           </Flex>
         )}
         {!!error && (
