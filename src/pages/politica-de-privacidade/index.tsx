@@ -1163,7 +1163,7 @@ export default function UnderAnalysis() {
             Política de Privacidade e/ou nas Leis de Proteção de Dados, ou
             resolver quaisquer dúvidas relacionadas ao Tratamento de seus Dados
             Pessoais, favor entrar em contato com nosso DPO:
-            dpo@iholdbank.digital{' '}
+            ajuda@iholdbank.digital{' '}
           </Text>
         </Box>
         <Center py="30px" px={['10px', '10px', '0px']}>
