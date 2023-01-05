@@ -14,6 +14,8 @@ export async function authPageProps({ Component, ctx }: any) {
     '/onboarding/underAnalysis',
     '/onboarding/expiredSession',
     '/share-pix-payment/[hash]',
+    '/politica-de-privacidade',
+    '/termos-de-uso'
   ];
 
   const {
