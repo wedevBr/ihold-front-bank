@@ -135,7 +135,12 @@ export function TabletTransaction({
                               )}
                             </Box>
                           </Td>
-                          <Td minW="200px" w="100px">
+                          <Td
+                            minW="400px"
+                            maxW="400px"
+                            whiteSpace="pre-wrap"
+                            w="100px"
+                          >
                             <Box>
                               <Text color="#070A0E" fontWeight={600}>
                                 {transaction?.description?.includes(
